@@ -5,7 +5,9 @@ const Home=()=>{
 
     return(
       <div className="flex items-center justify-center bg-slate-200 h-screen w-screen">
-        <SelectColourPage />
+        <div className="-mt-10">
+          <SelectColourPage />
+        </div>
       </div>
     )
 }

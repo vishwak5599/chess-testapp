@@ -47,18 +47,18 @@ const SelectColourPage=()=>{
     }
 
     return(
-        <div className="flex flex-col gap-10">
-            <div className="flex justify-center items-center gap-2 -mb-5 md:mb-0">
+        <div className="flex flex-col gap-10 -mt-10">
+            <div className="flex justify-center items-center gap-2 -mt-8">
                 <BiSolidChess size={34} className="bg-blue-500"/>
                 <div className="text-xl md:text-2xl lg:text-3xl text-blue-500 font-extrabold font-anticDidone">CHESS</div>
             </div>
-            <div className="flex justify-center font-bold text-lg md:text-xl font-anticDidone">CHOOSE YOUR SIDE</div>
-                <div className="flex justify-center gap-8 md:gap-10 -mt-5 -mb-5 md:mb-0">
+            <div className="flex justify-center font-bold text-lg md:text-xl font-anticDidone -mt-4">CHOOSE YOUR SIDE</div>
+                <div className="flex justify-center gap-8 md:gap-10 -mt-8">
                     <button className={`${pieceColour==1 ? " border-blue-500 shadow-lg shadow-blue-500" : "border-white"} p-1 md:p-2 border-4 bg-gray-700 rounded-lg hover:scale-105`} onClick={()=>setPieceColour(1)}><FaChessKing size={getSize()} color="white"/></button>
                     <button className={`${pieceColour==0 ? " border-blue-500 shadow-lg shadow-blue-500" : "border-white"} p-1 md:p-2 border-4 hover:scale-105 bg-gray-300 rounded-lg`} onClick={()=>setPieceColour(0)}><FaChessKing size={getSize()} color="black"/></button>
                 </div>
             <div>
-                <div className="flex flex-col md:flex-row justify-center items-center">
+                <div className="flex flex-col md:flex-row justify-center items-center -mt-5">
                     <div className={`flex justify-center text-xl font-bold font-anticDidone ${timeType===0 ? "bg-blue-500 hover:bg-blue-600 border-white" : "bg-white hover:bg-slate-200 border-blue-500"} transition-all duration-150 ease-in-out border-4 w-70 md:w-100 px-12 md:px-20 py-1 md:py-2 rounded-lg gap-1 md:gap-1.5`} onClick={()=>setTimeType(0)}>
                         <div>{preTime.t<=2 ? <GiBulletBill color="orange" size={26}/> : preTime.t<=5 ? <AiFillThunderbolt color="gold" size={26}/> : <LuAlarmClock color="green" size={26}/>}</div>
                         <div className={`flex justify-center text-base md:text-lg mt-0.5 md:mt-0 w-20 -ml-1 md:ml-1 ${timeType!==0 ? "text-blue-500" : "text-white"}`}>{preTime.i===0 ? `${preTime.t} min` : `${preTime.t} | ${preTime.i}`}</div>

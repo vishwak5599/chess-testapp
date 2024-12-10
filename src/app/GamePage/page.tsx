@@ -1877,7 +1877,7 @@ const HomePageContent=()=>{
                         <div className="w-5">{moves%2!==0 ? <FaStopwatch color={`${pieceColour===1 ? "white" : "black"}`} /> : ""}</div>
                     </div>
                 </div>
-                <div className="relative" style={{ border: "10px solid transparent",borderImage: "url('/images/woodenbg.jpg') 15 round"}}>
+                <div className="relative" style={{ border: "10px solid transparent"}}>
                     {pawnToLastSquarePosi.piece!==null ? 
                     <div className="absolute inset-0 flex bg-white justify-center items-center bg-opacity-60 z-80">
                         <div className="flex flex-col justify-center items-center gap-2 lg:gap-3">

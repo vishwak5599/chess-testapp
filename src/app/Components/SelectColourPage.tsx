@@ -47,7 +47,7 @@ const SelectColourPage=()=>{
     }
 
     return(
-        <div className="flex flex-col pt-5 gap-10">
+        <div className="flex flex-col gap-10">
             <div className="flex justify-center items-center gap-2 -mb-5 md:mb-0">
                 <BiSolidChess size={34} className="bg-blue-500"/>
                 <div className="text-xl md:text-2xl lg:text-3xl text-blue-500 font-extrabold font-anticDidone">CHESS</div>

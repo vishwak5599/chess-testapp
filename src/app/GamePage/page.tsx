@@ -1967,7 +1967,7 @@ const HomePageContent=()=>{
                             <div key={i} className="flex justify-center">
                                 {row.map((col,j)=>(
                                     <div key={i+""+j} className={`${(i+j)%2==0 ? "bg-gray-400" : "bg-blue-500"}`}>
-                                    <div key={i+""+j} className={`${(isSelected && selectedPiece.row===i && selectedPiece.col===j) ? "bg-blue-800" : (isSelected && possibleMovesForSelectedPiece.some(move => move.row===i && move.col===j)) ? `border-2 md:border-4 p-4 box-border rounded-full border-blue-800 ${(i+j)%2==0 ? "bg-gray-400" : "bg-blue-500"}` : (i+j)%2==0 ? "bg-gray-400" : "bg-blue-500"} flex h-9 w-9 pt-1.5 md:pt-2 lg:pt-2.5 sm:h-9 sm:w-9 md:h-10 md:w-10 lg:h-12 lg:w-12 xl:h-14 xl:w-14 xxl:h-16 xxl:w-16 justify-center`}
+                                    <div key={i+""+j} className={`${(isSelected && selectedPiece.row===i && selectedPiece.col===j) ? "bg-blue-800" : (isSelected && possibleMovesForSelectedPiece.some(move => move.row===i && move.col===j)) ? `border-2 md:border-4 p-4 box-border rounded-full border-blue-800 ${(i+j)%2==0 ? "bg-gray-400" : "bg-blue-500"}` : (i+j)%2==0 ? "bg-gray-400" : "bg-blue-500"} flex h-11 w-11 pt-1.5 md:pt-2 lg:pt-2.5 sm:h-9 sm:w-9 md:h-10 md:w-10 lg:h-12 lg:w-12 xl:h-14 xl:w-14 xxl:h-16 xxl:w-16 justify-center`}
                                         onClick={()=>handleSelectedPiece(col,i,j)}
                                     >
                                         <ChessPiece col={col} />

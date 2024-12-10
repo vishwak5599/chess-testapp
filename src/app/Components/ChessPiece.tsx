@@ -10,7 +10,7 @@ const ChessPiece:React.FC<ChessPieceType> = ({col}) => {
     const windowSize = useWindowSize()
 
     const getSize = () =>{
-        return windowSize<640 ? 24 : windowSize<768 ? 26 : windowSize<1024 ? 28 : windowSize<1128 ? 34 : windowSize<1440 ? 36 : windowSize<1800 ? 40 : 42
+        return windowSize<640 ? 28 : windowSize<768 ? 30 : windowSize<1024 ? 28 : windowSize<1128 ? 34 : windowSize<1440 ? 36 : windowSize<1800 ? 40 : 42
     }
 
     return(

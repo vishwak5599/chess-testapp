@@ -1912,8 +1912,8 @@ const HomePageContent=()=>{
             <audio ref={audioRefGameOverStaleMate} src="/sounds/gameoverstalemate.mp3" />
             <div className="flex flex-col justify-center items-center p-2">
                 <div className="flex justify-center items-center gap-3 ml-[48%] md:ml-[22%] mb-1">
-                    {JSON.stringify(previousBoardPosi[0])!==JSON.stringify([]) && JSON.stringify(previousBoardPosi[1])!==JSON.stringify([]) ? <div className="border-2 border-blue-500 rounded-md bg-white transform scale-y-[-1] scale-x-[-1]" onClick={()=>setTopPlayerChoosePrev(true)}><MdSkipPrevious color="#3b82f6" size={30} /></div> : <div className="w-8"></div>}
-                    <div key="sw-1" className={`${pieceColour===1 ? `${moves%2!==0 ? "bg-black" : "bg-gray-600"} text-white` : "bg-white text-black"} flex justify-center items-center border-2 border-blue-500 font-bold font-technology text-base md:text-xl p-1 rounded-md gap-2 transform scale-y-[-1] scale-x-[-1]`}>
+                    {JSON.stringify(previousBoardPosi[0])!==JSON.stringify([]) && JSON.stringify(previousBoardPosi[1])!==JSON.stringify([]) ? <div className="border-2 border-[#4A4A4A] rounded-md bg-white transform scale-y-[-1] scale-x-[-1]" onClick={()=>setTopPlayerChoosePrev(true)}><MdSkipPrevious color="#3b82f6" size={30} /></div> : <div className="w-8"></div>}
+                    <div key="sw-1" className={`${pieceColour===1 ? `${moves%2!==0 ? "bg-black" : "bg-gray-600"} text-white` : "bg-white text-black"} flex justify-center items-center border-2 border-[#4A4A4A] font-bold font-technology text-base md:text-xl p-1 rounded-md gap-2 transform scale-y-[-1] scale-x-[-1]`}>
                         {(pieceColour===1) ? (
                             <div>
                                 {blackPlayerTime < 60 ? (
@@ -1954,7 +1954,7 @@ const HomePageContent=()=>{
                     </div> : (topPlayerChoosePrev || botPlayerChoosePrev) ?
                     <div className={`absolute inset-0 flex flex-col font-anticDidone bg-white justify-center items-center bg-opacity-60 gap-4 z-80 ${botPlayerChoosePrev ? "transform scale-x-[-1] scale-y-[-1]" : ""}`}>
                         <div className="bg-white p-4 rounded-lg">
-                            <div className="text-blue-500 font-bold text-sm md:text-lg lg:text-xl">YOUR OPPONENT WANTS TO UNDO THE MOVE</div>
+                            <div className="text-[#4A4A4A] font-bold text-sm md:text-lg lg:text-xl">YOUR OPPONENT WANTS TO UNDO THE MOVE</div>
                             <div className="flex justify-center items-center gap-4">
                                 <button className="border-2 border-green-600 bg-white md:text-lg lg:text-xl rounded-md p-1" onClick={()=>handlePlayerChoosePrev(true,((pieceColour===1 && topPlayerChoosePrev) || (pieceColour===0 && botPlayerChoosePrev)) ? "b" : "w")}>YES</button>
                                 <button className="border-2 border-red-600 bg-white md:text-lg lg:text-xl rounded-md p-1" onClick={()=>handlePlayerChoosePrev(false,((pieceColour===1 && topPlayerChoosePrev) || (pieceColour===0 && botPlayerChoosePrev)) ? "b" : "w")}>NO</button>
@@ -1966,8 +1966,8 @@ const HomePageContent=()=>{
                         {board.map((row,i)=>(
                             <div key={i} className="flex justify-center">
                                 {row.map((col,j)=>(
-                                    <div key={i+""+j} className={`${(i+j)%2==0 ? "bg-gray-400" : "bg-blue-500"}`}>
-                                    <div key={i+""+j} className={`${(isSelected && selectedPiece.row===i && selectedPiece.col===j) ? "bg-blue-800" : (isSelected && possibleMovesForSelectedPiece.some(move => move.row===i && move.col===j)) ? `border-2 md:border-4 p-4 box-border rounded-full border-blue-800 ${(i+j)%2==0 ? "bg-gray-400" : "bg-blue-500"}` : (i+j)%2==0 ? "bg-gray-400" : "bg-blue-500"} flex h-12 w-12 pt-2 md:pt-2 lg:pt-2.5 sm:h-9 sm:w-9 md:h-11 md:w-11 lg:h-12 lg:w-12 xl:h-14 xl:w-14 xxl:h-16 xxl:w-16 justify-center`}
+                                    <div key={i+""+j} className={`${(i+j)%2==0 ? "bg-[#A3B18C]" : "bg-[#4A4A4A]"}`}>
+                                    <div key={i+""+j} className={`${(isSelected && selectedPiece.row===i && selectedPiece.col===j) ? "bg-[#1C1C1C]" : (isSelected && possibleMovesForSelectedPiece.some(move => move.row===i && move.col===j)) ? `border-2 md:border-4 p-4 box-border rounded-full border-[#1C1C1C] ${(i+j)%2===0 ? "bg-[#A3B18C]" : "bg-[#4A4A4A]"}` : (i+j)%2===0 ? "bg-[#A3B18C]" : "bg-[#4A4A4A]"} flex h-12 w-12 pt-2 md:pt-2 lg:pt-2.5 sm:h-9 sm:w-9 md:h-11 md:w-11 lg:h-12 lg:w-12 xl:h-14 xl:w-14 xxl:h-16 xxl:w-16 justify-center`}
                                         onClick={()=>handleSelectedPiece(col,i,j)}
                                     >
                                         <ChessPiece col={col} />
@@ -1979,8 +1979,8 @@ const HomePageContent=()=>{
                     </div>
                 </div>
                 <div className="flex justify-center items-center gap-3 ml-[48%] md:ml-[22%] mt-1">
-                    {(JSON.stringify(previousBoardPosi[0])!==JSON.stringify([]) && JSON.stringify(previousBoardPosi[1])!==JSON.stringify([])) ? <div className="border-2 border-blue-500 rounded-md bg-white"><MdSkipPrevious color="#3b82f6" size={30} onClick={()=>setBotPlayerChoosePrev(true)}/></div> : <div className="w-8"></div>}
-                    <div key="sw-2" className={`${pieceColour===1 ? `${moves%2===0 ? "bg-white" : "bg-slate-500"} text-black` : "bg-black text-white"} flex justify-center items-center border-2 border-blue-500 font-bold font-technology text-base md:text-xl p-1 rounded-md gap-2`}>
+                    {(JSON.stringify(previousBoardPosi[0])!==JSON.stringify([]) && JSON.stringify(previousBoardPosi[1])!==JSON.stringify([])) ? <div className="border-2 border-[#4A4A4A] rounded-md bg-white"><MdSkipPrevious color="#3b82f6" size={30} onClick={()=>setBotPlayerChoosePrev(true)}/></div> : <div className="w-8"></div>}
+                    <div key="sw-2" className={`${pieceColour===1 ? `${moves%2===0 ? "bg-white" : "bg-slate-500"} text-black` : "bg-black text-white"} flex justify-center items-center border-2 border-[#4A4A4A] font-bold font-technology text-base md:text-xl p-1 rounded-md gap-2`}>
                         <div className="w-5">{moves%2===0 ? <FaStopwatch color={`${pieceColour===1 ? "black" : "white"}`} /> : ""}</div>
                         {(pieceColour===1) ? (
                             <div>
@@ -2007,11 +2007,11 @@ const HomePageContent=()=>{
                 </div>
             </div>
             {(draw || whiteWon || blackWon || staleMateWhiteWon || staleMateBlackWon) &&
-                <div className="absolute top-[32.5%] left-[25%] md:top-[30%] md:left-[34%] lg:top-[28%] lg:left-[37.5%] inset-0 bg-white border-4 border-blue-500 justify-center items-center h-[35%] w-[50%] md:h-[40%] md:w-[32%] lg:h-[45%] lg:w-[25%] rounded-lg">
+                <div className="absolute top-[32.5%] left-[25%] md:top-[30%] md:left-[34%] lg:top-[28%] lg:left-[37.5%] inset-0 bg-white border-4 border-[#4A4A4A] justify-center items-center h-[35%] w-[50%] md:h-[40%] md:w-[32%] lg:h-[45%] lg:w-[25%] rounded-lg">
                     <div className="flex justify-end mt-2 mr-2 md:mt-3 md:mr-3 lg:mt-4 lg:mr-4"><button onClick={()=>handleCloseTheMatchOverDiv()}><FaWindowClose color="#3b82f6" size={iconSize}/></button></div>
                     <div className="flex flex-col gap-4 lg:gap-6 justify-center items-center mt-4 lg:mt-6">
-                        <div className="text-base md:text-lg lg:text-3xl font-extrabold text-center text-blue-500">{draw ? "DRAW!!" : (staleMateWhiteWon || staleMateBlackWon) ? "DRAW BY STALEMATE" : whiteWon ? <div className="flex flex-col"><div>VICTORY</div><div>WHITE WON</div></div> : blackWon ? <div className="flex flex-col"><div>VICTORY</div><div>BLACK WON</div></div> : ""}</div>
-                        <button onClick={()=>router.push("/")} className="text-sm md:text-base lg:text-xl font-extrabold text-black border-blue-500 p-1 md:p-2 border-4 rounded-lg hover:scale-105">GO BACK</button>
+                        <div className="text-base md:text-lg lg:text-3xl font-extrabold text-center text-[#4A4A4A]">{draw ? "DRAW!!" : (staleMateWhiteWon || staleMateBlackWon) ? "DRAW BY STALEMATE" : whiteWon ? <div className="flex flex-col"><div>VICTORY</div><div>WHITE WON</div></div> : blackWon ? <div className="flex flex-col"><div>VICTORY</div><div>BLACK WON</div></div> : ""}</div>
+                        <button onClick={()=>router.push("/")} className="text-sm md:text-base lg:text-xl font-extrabold text-black border-[#4A4A4A] p-1 md:p-2 border-4 rounded-lg hover:scale-105">GO BACK</button>
                     </div>
                 </div>
             }

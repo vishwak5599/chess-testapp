@@ -1,5 +1,5 @@
 "use client"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { FaChessKing } from "react-icons/fa"
 import { GiBulletBill } from "react-icons/gi"
 import { useRouter } from "next/navigation"

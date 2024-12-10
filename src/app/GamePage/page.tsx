@@ -1,7 +1,7 @@
 "use client"
 import ChessPiece from "../Components/ChessPiece"
 import { useRouter, useSearchParams } from "next/navigation"
-import { Suspense, useEffect, useState } from "react"
+import { Suspense, useEffect, useRef, useState } from "react"
 import { FaStopwatch } from "react-icons/fa6"
 import { MdSkipPrevious } from "react-icons/md"
 import { FaWindowClose } from "react-icons/fa"
@@ -86,6 +86,12 @@ const HomePageContent=()=>{
     const [whitePlayerTime, setWhitePlayerTime] = useState(time)
     const [blackPlayerTime, setBlackPlayerTime] = useState(time)
     const windowSize = useWindowSize()
+    const audioRefCastle = useRef<HTMLAudioElement>(null)
+    const audioRefCapture = useRef<HTMLAudioElement>(null)
+    const audioRefMove = useRef<HTMLAudioElement>(null)
+    const audioRefCheck = useRef<HTMLAudioElement>(null)
+    const audioRefGameOverCheckMate = useRef<HTMLAudioElement>(null)
+    const audioRefGameOverStaleMate = useRef<HTMLAudioElement>(null)
 
     const [board,setBoard] = useState(pieceColour===1 ? [
         ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'],
@@ -219,6 +225,10 @@ const HomePageContent=()=>{
         if((pieceColour===1 && moves%2===0) || (pieceColour===0 && moves%2!==0)){
             const ifWhiteKingInThreat = findThreatToWhiteKing(allPossibleMovesForBlack,board)
             if(ifWhiteKingInThreat){
+                if (audioRefCheck.current) {
+                    audioRefCheck.current.volume=1
+                    audioRefCheck.current.play()
+                }
                 const whiteKingPiece = allPossibleMovesForWhite.find((piece) => piece.piece === "K")
                 let flag = false
                 if (whiteKingPiece && whiteKingPiece.moves.length === 0) {
@@ -254,6 +264,10 @@ const HomePageContent=()=>{
                         }
                     }
                     if(flag===false){
+                        if (audioRefGameOverCheckMate.current) {
+                            audioRefGameOverCheckMate.current.volume=1
+                            audioRefGameOverCheckMate.current.play()
+                        }
                         setBlackWon(true)
                     }
                 }
@@ -268,13 +282,23 @@ const HomePageContent=()=>{
                             break outerLoop
                         }
                     }
-                    if(flag===false) setStaleMateWhiteWon(true)
+                    if(flag===false){
+                        if (audioRefGameOverStaleMate.current) {
+                            audioRefGameOverStaleMate.current.volume=1
+                            audioRefGameOverStaleMate.current.play()
+                        }
+                        setStaleMateWhiteWon(true)
+                    }
                 }
             }
         }
         else{
             const ifBlackKingInThreat = findThreatToBlackKing(allPossibleMovesForWhite,board)
             if(ifBlackKingInThreat){
+                if (audioRefCheck.current) {
+                    audioRefCheck.current.volume=1
+                    audioRefCheck.current.play()
+                }
                 const blackKingPiece = allPossibleMovesForBlack.find((piece) => piece.piece === "k")
                 let flag = false
                 if (blackKingPiece && blackKingPiece.moves.length === 0) {
@@ -310,6 +334,10 @@ const HomePageContent=()=>{
                         }
                     }
                     if(flag===false){
+                        if (audioRefGameOverCheckMate.current) {
+                            audioRefGameOverCheckMate.current.volume=1
+                            audioRefGameOverCheckMate.current.play()
+                        }
                         setWhiteWon(true)
                     }
                 }
@@ -324,7 +352,13 @@ const HomePageContent=()=>{
                             break outerLoop
                         }
                     }
-                    if(flag===false) setStaleMateBlackWon(true)
+                    if(flag===false){
+                        if (audioRefGameOverStaleMate.current) {
+                            audioRefGameOverStaleMate.current.volume=1
+                            audioRefGameOverStaleMate.current.play()
+                        }
+                        setStaleMateBlackWon(true)
+                    }
                 }
             }
         }
@@ -538,6 +572,10 @@ const HomePageContent=()=>{
             newBoard[row][col] = " "
             return newBoard
         })
+        if (audioRefCapture.current) {
+            audioRefCapture.current.volume=1
+            audioRefCapture.current.play()
+        }
     }
 
     //function to handle if a piece is selected i.e QRNP/qrnp if a pawn reaches last square
@@ -564,6 +602,10 @@ const HomePageContent=()=>{
             newBoard[row][newCol] = piece
             return newBoard
         })
+        if (audioRefCastle.current) {
+            audioRefCastle.current.volume=1
+            audioRefCastle.current.play()
+        }
     }
 
     const updateSelectedPiecePosition = (selPiece:string,selRow:number,selCol:number,newRow:number,newCol:number) => {
@@ -582,7 +624,7 @@ const HomePageContent=()=>{
             if(selPiece==="r" && selRow===0 && selCol===0 && blackRookCastlePossible.left) setBlackRookCastlePossible((prev)=>({...prev,left:false}))
             if(selPiece==="r" && selRow===0 && selCol===7 && blackRookCastlePossible.right) setBlackRookCastlePossible((prev)=>({...prev,right:false}))
 
-            //set that the castling is not possible if the king is moved                
+            //set that the rook posi after castling              
             if(selPiece==="K" && selRow===7 && selCol===4){
                 if(whiteKingCastlePossible && whiteRookCastlePossible.left && newRow===7 && newCol===2){
                     handleRookPosiAfterCastling(7,0,3)
@@ -634,6 +676,19 @@ const HomePageContent=()=>{
                     handleRookPosiAfterCastling(7,7,5)
                 }
                 setBlackKingCastlePossible(false)
+            }
+        }
+
+        if(board[newRow][newCol]===" "){
+            if (audioRefMove.current) {
+                audioRefMove.current.volume=1
+                audioRefMove.current.play()
+            }
+        }
+        else{
+            if (audioRefCapture.current) {
+                audioRefCapture.current.volume=1
+                audioRefCapture.current.play()
             }
         }
 
@@ -1849,6 +1904,12 @@ const HomePageContent=()=>{
 
     return(
         <main className="h-full w-full relative">
+            <audio ref={audioRefCastle} src="/sounds/castling.mp3" />
+            <audio ref={audioRefCapture} src="/sounds/capture.mp3" />
+            <audio ref={audioRefMove} src="/sounds/move.mp3" />
+            <audio ref={audioRefCheck} src="/sounds/check.mp3" />
+            <audio ref={audioRefGameOverCheckMate} src="/sounds/gameovercheckmate.mp3" />
+            <audio ref={audioRefGameOverStaleMate} src="/sounds/gameoverstalemate.mp3" />
             <div className="flex flex-col justify-center items-center p-2">
                 <div className="flex justify-center items-center gap-3 ml-[48%] md:ml-[22%] mb-1">
                     {JSON.stringify(previousBoardPosi[0])!==JSON.stringify([]) && JSON.stringify(previousBoardPosi[1])!==JSON.stringify([]) ? <div className="border-2 border-blue-500 rounded-md bg-white transform scale-y-[-1] scale-x-[-1]" onClick={()=>setTopPlayerChoosePrev(true)}><MdSkipPrevious color="#3b82f6" size={30} /></div> : <div className="w-8"></div>}

@@ -1938,7 +1938,7 @@ const HomePageContent=()=>{
                         <div className="w-5">{moves%2!==0 ? <FaStopwatch color={`${pieceColour===1 ? "white" : "black"}`} /> : ""}</div>
                     </div>
                 </div>
-                <div className="relative" style={{ border: "10px solid transparent"}}>
+                <div className="relative border-[6px] md:border-[12px] border-[#1C1C1C] rounded-md my-2 md:my-3">
                     {pawnToLastSquarePosi.piece!==null ? 
                     <div className="absolute inset-0 flex bg-white justify-center items-center bg-opacity-60 z-80">
                         <div className="flex flex-col justify-center items-center gap-2 lg:gap-3">

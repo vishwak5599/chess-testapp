@@ -55,11 +55,16 @@ type moveType = {
 
 const HomePageContent=()=>{
 
+    //hooks
+    const windowSize = useWindowSize()
     const router = useRouter()
     const searchParams = useSearchParams()
+
     const pieceColour = searchParams ? Number(searchParams.get('pieceColour')) : 1
     const time = searchParams ? Number(searchParams.get('time'))*60 : 30*60
     const increment = searchParams ? Number(searchParams.get('increment')) : 0
+
+    //states
     const [moves,setMoves] = useState(pieceColour===1 ? 0 : 1)
     const [isSelected, setIsSelected] = useState(false)
     const [selectedPiece, setSelectedPiece] = useState<selectedPieceType>({piece: null,row: null,col: null})
@@ -76,16 +81,22 @@ const HomePageContent=()=>{
     const [whiteRookCastlePossible,setWhiteRookCastlePossible] = useState({left:true,right:true})
     const [blackRookCastlePossible,setBlackRookCastlePossible] = useState({left:true,right:true})
     const [allMoves, setAllMoves] = useState<moveType[]>([])
+
+    //set game result
     const [whiteWon, setWhiteWon] = useState(false)
     const [blackWon, setBlackWon] = useState(false)
     const [staleMateWhiteWon, setStaleMateWhiteWon] = useState(false)
     const [staleMateBlackWon, setStaleMateBlackWon] = useState(false)
     const [draw, setDraw] = useState(false)
-    const [iconSize, setIconSize] = useState(20)
     const [pauseTheBoard, setPauseTheBoard] = useState(false)
+
+    //set time for each player
     const [whitePlayerTime, setWhitePlayerTime] = useState(time)
     const [blackPlayerTime, setBlackPlayerTime] = useState(time)
-    const windowSize = useWindowSize()
+
+    const [iconSize, setIconSize] = useState(20)
+
+    //set up ref for audios
     const audioRefCastle = useRef<HTMLAudioElement>(null)
     const audioRefCapture = useRef<HTMLAudioElement>(null)
     const audioRefMove = useRef<HTMLAudioElement>(null)
@@ -1915,7 +1926,7 @@ const HomePageContent=()=>{
                     {JSON.stringify(previousBoardPosi[0])!==JSON.stringify([]) && JSON.stringify(previousBoardPosi[1])!==JSON.stringify([]) ? <div className="border-2 border-[#4A4A4A] rounded-md bg-white transform scale-y-[-1] scale-x-[-1]" onClick={()=>setTopPlayerChoosePrev(true)}><MdSkipPrevious color="#3b82f6" size={30} /></div> : <div className="w-8"></div>}
                     <div key="sw-1" className={`${pieceColour===1 ? `${moves%2!==0 ? "bg-black" : "bg-gray-600"} text-white` : "bg-white text-black"} flex justify-center items-center border-2 border-[#4A4A4A] font-bold font-technology text-base md:text-xl p-1 rounded-md gap-2 transform scale-y-[-1] scale-x-[-1]`}>
                         {(pieceColour===1) ? (
-                            <div className="w-30 md:w-24">
+                            <div className="w-34 md:w-24">
                                 {blackPlayerTime < 60 ? (
                                     `00 : 00 : ${blackPlayerTime < 10 ? `0${blackPlayerTime}` : blackPlayerTime}`
                                 ) : blackPlayerTime < 3600 ? (
@@ -1925,7 +1936,7 @@ const HomePageContent=()=>{
                                 )}
                             </div>
                         ) : (
-                            <div className="w-30 md:w-24">
+                            <div className="w-34 md:w-24">
                                 {whitePlayerTime < 60 ? (
                                     `00 : 00 : ${whitePlayerTime < 10 ? `0${whitePlayerTime}` : whitePlayerTime}`
                                 ) : whitePlayerTime < 3600 ? (
@@ -1983,7 +1994,7 @@ const HomePageContent=()=>{
                     <div key="sw-2" className={`${pieceColour===1 ? `${moves%2===0 ? "bg-white" : "bg-slate-500"} text-black` : "bg-black text-white"} flex justify-center items-center border-2 border-[#4A4A4A] font-bold font-technology text-base md:text-xl p-1 rounded-md gap-2`}>
                         <div className="w-5">{moves%2===0 ? <FaStopwatch color={`${pieceColour===1 ? "black" : "white"}`} /> : ""}</div>
                         {(pieceColour===1) ? (
-                            <div className="w-30 md:w-24">
+                            <div className="w-34 md:w-24">
                                 {whitePlayerTime < 60 ? (
                                     `00 : 00 : ${whitePlayerTime < 10 ? `0${whitePlayerTime}` : whitePlayerTime}`
                                 ) : whitePlayerTime < 3600 ? (
@@ -1993,7 +2004,7 @@ const HomePageContent=()=>{
                                 )}
                             </div>
                         ) : (
-                            <div className="w-30 md:w-24">
+                            <div className="w-34 md:w-24">
                                 {blackPlayerTime < 60 ? (
                                     `00 : 00 : ${blackPlayerTime < 10 ? `0${blackPlayerTime}` : blackPlayerTime}`
                                 ) : blackPlayerTime < 3600 ? (
@@ -2007,8 +2018,8 @@ const HomePageContent=()=>{
                 </div>
             </div>
             {(draw || whiteWon || blackWon || staleMateWhiteWon || staleMateBlackWon) &&
-                <div className="absolute top-[32.5%] left-[25%] md:top-[30%] md:left-[34%] lg:top-[28%] lg:left-[37.5%] inset-0 bg-white border-4 border-[#4A4A4A] justify-center items-center h-[35%] w-[50%] md:h-[40%] md:w-[32%] lg:h-[45%] lg:w-[25%] rounded-lg">
-                    <div className="flex justify-end mt-2 mr-2 md:mt-3 md:mr-3 lg:mt-4 lg:mr-4"><button onClick={()=>handleCloseTheMatchOverDiv()}><FaWindowClose color="#3b82f6" size={iconSize}/></button></div>
+                <div className="absolute flex flex-col bg-white border-4 border-[#4A4A4A] h-[40%] w-[55%] md:h-[40%] md:w-[35%] lg:h-[45%] lg:w-[25%] rounded-lg">
+                    <div className="flex flex-col items-end mt-2 mr-2 md:mt-3 md:mr-3 lg:mt-4 lg:mr-4"><button onClick={()=>handleCloseTheMatchOverDiv()}><FaWindowClose color="#3b82f6" size={iconSize}/></button></div>
                     <div className="flex flex-col gap-4 lg:gap-6 justify-center items-center mt-4 lg:mt-6">
                         <div className="text-base md:text-lg lg:text-3xl font-extrabold text-center text-[#4A4A4A]">{draw ? "DRAW!!" : (staleMateWhiteWon || staleMateBlackWon) ? "DRAW BY STALEMATE" : whiteWon ? <div className="flex flex-col"><div>VICTORY</div><div>WHITE WON</div></div> : blackWon ? <div className="flex flex-col"><div>VICTORY</div><div>BLACK WON</div></div> : ""}</div>
                         <button onClick={()=>router.push("/")} className="text-sm md:text-base lg:text-xl font-extrabold text-black border-[#4A4A4A] p-1 md:p-2 border-4 rounded-lg hover:scale-105">GO BACK</button>

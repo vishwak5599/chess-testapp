@@ -18,6 +18,7 @@ const SelectColourPage=()=>{
     const [preTime,setPreTime] = useState({t:30,i:0})
     const [custTime, setCustTime] = useState({t:60,i:15})
     const [isDropdown, setIsDropdown] = useState(false)
+    const [selectRandomPieceColour, setSelectRandomPieceColour] = useState(false)
     const router = useRouter()
     const handleClick=()=>{
         const time = timeType===0 ? preTime.t : custTime.t
@@ -46,6 +47,17 @@ const SelectColourPage=()=>{
         setTimeType(0)
     }
 
+    const handleSelectPieceColour = (n:number) =>{
+        if(n===1 || n===0){
+            setPieceColour(n)
+            setSelectRandomPieceColour(false)
+        }
+        else{
+            setPieceColour(Math.floor(Math.random()*2))
+            setSelectRandomPieceColour(true)
+        }
+    }
+
     return(
         <div className="flex flex-col gap-10 -mt-10">
             <div className="flex justify-center items-center gap-2 -mt-8">
@@ -54,8 +66,9 @@ const SelectColourPage=()=>{
             </div>
             <div className="flex justify-center font-bold text-lg md:text-xl font-anticDidone -mt-4">CHOOSE YOUR SIDE</div>
                 <div className="flex justify-center gap-8 md:gap-10 -mt-8">
-                    <button className={`${pieceColour==1 ? " border-blue-500 shadow-lg shadow-blue-500" : "border-white"} p-1 md:p-2 border-4 bg-gray-700 rounded-lg hover:scale-105`} onClick={()=>setPieceColour(1)}><FaChessKing size={getSize()} color="white"/></button>
-                    <button className={`${pieceColour==0 ? " border-blue-500 shadow-lg shadow-blue-500" : "border-white"} p-1 md:p-2 border-4 hover:scale-105 bg-gray-300 rounded-lg`} onClick={()=>setPieceColour(0)}><FaChessKing size={getSize()} color="black"/></button>
+                    <button className={`${!selectRandomPieceColour && pieceColour==1 ? " border-blue-500 shadow-lg shadow-blue-500" : "border-white"} p-1 md:p-2 border-4 bg-gray-700 rounded-lg hover:scale-105`} onClick={()=>handleSelectPieceColour(1)}><FaChessKing size={getSize()} color="white"/></button>
+                    <button className={`${selectRandomPieceColour ? " border-blue-500 shadow-lg shadow-blue-500" : "border-white"} p-1 md:p-2 border-4 hover:scale-105 bg-gray-300 rounded-lg flex`} onClick={()=>handleSelectPieceColour(2)}><FaChessKing size={getSize()} color="white" style={{clipPath: "polygon(0 0, 50% 0, 50% 100%, 0 100%)"}}/><FaChessKing size={getSize()} color="black" className="absolute" style={{clipPath: "polygon(50% 0, 100% 0, 100% 100%, 50% 100%)"}}/></button>
+                    <button className={`${!selectRandomPieceColour && pieceColour==0 ? " border-blue-500 shadow-lg shadow-blue-500" : "border-white"} p-1 md:p-2 border-4 bg-gray-300 rounded-lg hover:scale-105`} onClick={()=>handleSelectPieceColour(0)}><FaChessKing size={getSize()} color="black"/></button>
                 </div>
             <div>
                 <div className="flex flex-col md:flex-row justify-center items-center -mt-5">

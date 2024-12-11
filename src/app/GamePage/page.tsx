@@ -1903,19 +1903,19 @@ const HomePageContent=()=>{
 
 
     return(
-        <main className="h-full w-full relative">
+        <main className="h-screen w-screen relative flex justify-center items-center overflow-hidden">
             <audio ref={audioRefCastle} src="/sounds/castling.mp3" />
             <audio ref={audioRefCapture} src="/sounds/capture.mp3" />
             <audio ref={audioRefMove} src="/sounds/move.mp3" />
             <audio ref={audioRefCheck} src="/sounds/check.mp3" />
             <audio ref={audioRefGameOverCheckMate} src="/sounds/gameovercheckmate.mp3" />
             <audio ref={audioRefGameOverStaleMate} src="/sounds/gameoverstalemate.mp3" />
-            <div className="flex flex-col justify-center items-center p-2">
-                <div className="flex justify-center items-center gap-3 ml-[48%] md:ml-[22%] mb-1">
+            <div className="flex flex-col justify-center items-end p-2">
+                <div className="flex justify-center items-center gap-3 mb-1">
                     {JSON.stringify(previousBoardPosi[0])!==JSON.stringify([]) && JSON.stringify(previousBoardPosi[1])!==JSON.stringify([]) ? <div className="border-2 border-[#4A4A4A] rounded-md bg-white transform scale-y-[-1] scale-x-[-1]" onClick={()=>setTopPlayerChoosePrev(true)}><MdSkipPrevious color="#3b82f6" size={30} /></div> : <div className="w-8"></div>}
                     <div key="sw-1" className={`${pieceColour===1 ? `${moves%2!==0 ? "bg-black" : "bg-gray-600"} text-white` : "bg-white text-black"} flex justify-center items-center border-2 border-[#4A4A4A] font-bold font-technology text-base md:text-xl p-1 rounded-md gap-2 transform scale-y-[-1] scale-x-[-1]`}>
                         {(pieceColour===1) ? (
-                            <div>
+                            <div className="w-20 md:w-24">
                                 {blackPlayerTime < 60 ? (
                                     `00 : 00 : ${blackPlayerTime < 10 ? `0${blackPlayerTime}` : blackPlayerTime}`
                                 ) : blackPlayerTime < 3600 ? (
@@ -1925,7 +1925,7 @@ const HomePageContent=()=>{
                                 )}
                             </div>
                         ) : (
-                            <div>
+                            <div className="w-20 md:w-24">
                                 {whitePlayerTime < 60 ? (
                                     `00 : 00 : ${whitePlayerTime < 10 ? `0${whitePlayerTime}` : whitePlayerTime}`
                                 ) : whitePlayerTime < 3600 ? (
@@ -1978,12 +1978,12 @@ const HomePageContent=()=>{
                         ))}
                     </div>
                 </div>
-                <div className="flex justify-center items-center gap-3 ml-[48%] md:ml-[22%] mt-1">
+                <div className="flex justify-center items-center gap-3 mt-1">
                     {(JSON.stringify(previousBoardPosi[0])!==JSON.stringify([]) && JSON.stringify(previousBoardPosi[1])!==JSON.stringify([])) ? <div className="border-2 border-[#4A4A4A] rounded-md bg-white"><MdSkipPrevious color="#3b82f6" size={30} onClick={()=>setBotPlayerChoosePrev(true)}/></div> : <div className="w-8"></div>}
                     <div key="sw-2" className={`${pieceColour===1 ? `${moves%2===0 ? "bg-white" : "bg-slate-500"} text-black` : "bg-black text-white"} flex justify-center items-center border-2 border-[#4A4A4A] font-bold font-technology text-base md:text-xl p-1 rounded-md gap-2`}>
                         <div className="w-5">{moves%2===0 ? <FaStopwatch color={`${pieceColour===1 ? "black" : "white"}`} /> : ""}</div>
                         {(pieceColour===1) ? (
-                            <div>
+                            <div className="w-20 md:w-24">
                                 {whitePlayerTime < 60 ? (
                                     `00 : 00 : ${whitePlayerTime < 10 ? `0${whitePlayerTime}` : whitePlayerTime}`
                                 ) : whitePlayerTime < 3600 ? (
@@ -1993,7 +1993,7 @@ const HomePageContent=()=>{
                                 )}
                             </div>
                         ) : (
-                            <div>
+                            <div className="w-20 md:w-24">
                                 {blackPlayerTime < 60 ? (
                                     `00 : 00 : ${blackPlayerTime < 10 ? `0${blackPlayerTime}` : blackPlayerTime}`
                                 ) : blackPlayerTime < 3600 ? (

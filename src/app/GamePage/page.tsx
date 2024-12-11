@@ -1926,7 +1926,7 @@ const HomePageContent=()=>{
                     {JSON.stringify(previousBoardPosi[0])!==JSON.stringify([]) && JSON.stringify(previousBoardPosi[1])!==JSON.stringify([]) ? <div className="border-2 border-[#4A4A4A] rounded-md bg-white transform scale-y-[-1] scale-x-[-1]" onClick={()=>setTopPlayerChoosePrev(true)}><MdSkipPrevious color="#3b82f6" size={30} /></div> : <div className="w-8"></div>}
                     <div key="sw-1" className={`${pieceColour===1 ? `${moves%2!==0 ? "bg-black" : "bg-gray-600"} text-white` : "bg-white text-black"} flex justify-center items-center border-2 border-[#4A4A4A] font-bold font-technology text-base md:text-xl p-1 rounded-md gap-2 transform scale-y-[-1] scale-x-[-1]`}>
                         {(pieceColour===1) ? (
-                            <div className="w-32 md:w-24">
+                            <div className="w-20 md:w-24">
                                 {blackPlayerTime < 60 ? (
                                     `00 : 00 : ${blackPlayerTime < 10 ? `0${blackPlayerTime}` : blackPlayerTime}`
                                 ) : blackPlayerTime < 3600 ? (
@@ -1936,7 +1936,7 @@ const HomePageContent=()=>{
                                 )}
                             </div>
                         ) : (
-                            <div className="w-32 md:w-24">
+                            <div className="w-20 md:w-24">
                                 {whitePlayerTime < 60 ? (
                                     `00 : 00 : ${whitePlayerTime < 10 ? `0${whitePlayerTime}` : whitePlayerTime}`
                                 ) : whitePlayerTime < 3600 ? (
@@ -1991,10 +1991,10 @@ const HomePageContent=()=>{
                 </div>
                 <div className="flex justify-center items-center gap-3 mt-1">
                     {(JSON.stringify(previousBoardPosi[0])!==JSON.stringify([]) && JSON.stringify(previousBoardPosi[1])!==JSON.stringify([])) ? <div className="border-2 border-[#4A4A4A] rounded-md bg-white"><MdSkipPrevious color="#3b82f6" size={30} onClick={()=>setBotPlayerChoosePrev(true)}/></div> : <div className="w-8"></div>}
-                    <div key="sw-2" className={`${pieceColour===1 ? `${moves%2===0 ? "bg-white" : "bg-slate-500"} text-black` : "bg-black text-white"} flex justify-center items-center border-2 border-[#4A4A4A] font-bold font-technology text-base md:text-xl p-1 rounded-md gap-2`}>
+                    <div key="sw-2" className={`${pieceColour===1 ? `${moves%2===0 ? "bg-white" : "bg-slate-500"} text-black` : "bg-black text-white"} flex justify-end items-center border-2 border-[#4A4A4A] font-bold font-technology text-base md:text-xl p-1 rounded-md gap-2`}>
                         <div className="w-5">{moves%2===0 ? <FaStopwatch color={`${pieceColour===1 ? "black" : "white"}`} /> : ""}</div>
                         {(pieceColour===1) ? (
-                            <div className="w-32 md:w-24">
+                            <div className="w-20 md:w-24">
                                 {whitePlayerTime < 60 ? (
                                     `00 : 00 : ${whitePlayerTime < 10 ? `0${whitePlayerTime}` : whitePlayerTime}`
                                 ) : whitePlayerTime < 3600 ? (
@@ -2004,7 +2004,7 @@ const HomePageContent=()=>{
                                 )}
                             </div>
                         ) : (
-                            <div className="w-32 md:w-24">
+                            <div className="w-20 md:w-24">
                                 {blackPlayerTime < 60 ? (
                                     `00 : 00 : ${blackPlayerTime < 10 ? `0${blackPlayerTime}` : blackPlayerTime}`
                                 ) : blackPlayerTime < 3600 ? (

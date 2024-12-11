@@ -1978,7 +1978,7 @@ const HomePageContent=()=>{
                             <div key={i} className="flex justify-center">
                                 {row.map((col,j)=>(
                                     <div key={i+""+j} className={`${(i+j)%2==0 ? "bg-[#A3B18C]" : "bg-[#4A4A4A]"}`}>
-                                    <div key={i+""+j} className={`${(isSelected && selectedPiece.row===i && selectedPiece.col===j) ? "bg-[#1C1C1C]" : (isSelected && possibleMovesForSelectedPiece.some(move => move.row===i && move.col===j)) ? `border-2 md:border-4 p-4 box-border rounded-full border-[#1C1C1C] ${(i+j)%2===0 ? "bg-[#A3B18C]" : "bg-[#4A4A4A]"}` : (i+j)%2===0 ? "bg-[#A3B18C]" : "bg-[#4A4A4A]"} flex h-12 w-12 pt-2 md:pt-2 lg:pt-2.5 sm:h-9 sm:w-9 md:h-11 md:w-11 lg:h-12 lg:w-12 xl:h-14 xl:w-14 xxl:h-16 xxl:w-16 justify-center`}
+                                    <div key={i+""+j} className={`${(isSelected && selectedPiece.row===i && selectedPiece.col===j) ? "bg-[#1C1C1C]" : (isSelected && possibleMovesForSelectedPiece.some(move => move.row===i && move.col===j)) ? `border-2 md:border-4 p-4 box-border rounded-full border-[#1C1C1C] ${(i+j)%2===0 ? "bg-[#A3B18C]" : "bg-[#4A4A4A]"}` : (allMoves.length>0 && ((i===allMoves[allMoves.length-1].fromRow && j===allMoves[allMoves.length-1].fromCol) || (i===allMoves[allMoves.length-1].toRow && j===allMoves[allMoves.length-1].toCol))) ? "bg-amber-200" : (i+j)%2===0 ? "bg-[#A3B18C]" : "bg-[#4A4A4A]"} flex h-12 w-12 pt-2 md:pt-2 lg:pt-2.5 sm:h-9 sm:w-9 md:h-11 md:w-11 lg:h-12 lg:w-12 xl:h-14 xl:w-14 xxl:h-16 xxl:w-16 justify-center`}
                                         onClick={()=>handleSelectedPiece(col,i,j)}
                                     >
                                         <ChessPiece col={col} />

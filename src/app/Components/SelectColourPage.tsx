@@ -1,6 +1,5 @@
 "use client"
-import { useState } from "react"
-import { FaChessKing } from "react-icons/fa"
+import { useEffect, useState } from "react"
 import { GiBulletBill } from "react-icons/gi"
 import { useRouter } from "next/navigation"
 import { BiSolidChess } from "react-icons/bi"
@@ -9,6 +8,9 @@ import { IoMdArrowDropupCircle, IoMdArrowDropdownCircle } from "react-icons/io"
 import { AiFillThunderbolt } from "react-icons/ai"
 import { RiArrowDropRightLine, RiArrowDropUpLine, RiArrowDropDownLine } from "react-icons/ri"
 import useWindowSize from './UseWindowSize'
+import { FaChessRook, FaChessKnight, FaChessBishop, FaChessQueen, FaChessKing, FaChessPawn, FaWindowClose } from "react-icons/fa"
+import { themeAtom } from "../Atoms/ThemeAtom"
+import { useAtom } from "jotai"
 
 
 const SelectColourPage=()=>{
@@ -19,7 +21,11 @@ const SelectColourPage=()=>{
     const [custTime, setCustTime] = useState({t:60,i:15})
     const [isDropdown, setIsDropdown] = useState(false)
     const [selectRandomPieceColour, setSelectRandomPieceColour] = useState(false)
+    const [iconSize, setIconSize] = useState(20)
+    const [theme, setTheme] = useAtom(themeAtom)
+    const [chooseTheme, setChooseTheme] = useState(false)
     const router = useRouter()
+    
     const handleClick=()=>{
         const time = timeType===0 ? preTime.t : custTime.t
         const increment = timeType===0 ? preTime.i : custTime.i
@@ -29,6 +35,27 @@ const SelectColourPage=()=>{
     const getSize = () =>{
         return windowSize<640 ? 30 : windowSize<768 ? 34 : windowSize<1024 ? 40 : windowSize<1128 ? 46 : windowSize<1440 ? 48 : windowSize<1800 ? 52 : 52
     }
+
+    const getSize1 = () =>{
+        return windowSize<640 ? 26 : windowSize<768 ? 28 : windowSize<1024 ? 30 : windowSize<1128 ? 32 : windowSize<1440 ? 34 : windowSize<1800 ? 34 : 36
+    }
+
+    //update width
+    useEffect(() => {
+        const updateSize = () => {
+            if (windowSize<640) {
+                setIconSize(20)
+            } else if (windowSize<768) {
+                setIconSize(24)
+            } else if (windowSize<1024) {
+                setIconSize(26)
+            }
+            else {
+                setIconSize(28)
+            }
+        }
+        updateSize()
+    }, [windowSize])
 
     const handleDropdown = () => {
         if(!isDropdown){
@@ -58,8 +85,21 @@ const SelectColourPage=()=>{
         }
     }
 
+    const themeArray = [
+        { l: "#A3B18C", d: "#4A4A4A", s: "#1C1C1C"},   // My Choice
+        { l: "#E1B6F4", d: "#8A2BE2", s: "#9C4A94" },  // Light Lavender and Deep Purple
+        { l: "#E0C09F", d: "#7A5C47", s: "#A8D1E7" },  // Classic Wood Style
+        { l: "#A9C8D8", d: "#2A3E59", s: "#6EC1E4" },  // Elegant Blue Theme
+        { l: "#D1D1D1", d: "#4B4B4B", s: "#F8C470" },  // Classic Black and White
+        { l: "#A1D3A1", d: "#4C6B2F", s: "#B2E8B3" },  // Natural Green Theme
+        { l: "#F5A7B8", d: "#E63946", s: "#FF6F61" },  // Soft Pink and Red with Coral
+    ]
+
+    let squareStyle = "h-11 w-11 sm:h-11 sm:w-11 md:h-11 md:w-11 lg:h-12 lg:w-12 xl:h-14 xl:w-14 xxl:h-16 xxl:w-16 flex justify-center items-center"
+
+
     return(
-        <div className="flex flex-col gap-10 -mt-10">
+        <div className="flex flex-col justify-center items-center gap-10 mt-12 md:mt-0">
             <div className="flex justify-center items-center gap-2 -mt-8">
                 <BiSolidChess size={34} className="bg-blue-500"/>
                 <div className="text-xl md:text-2xl lg:text-3xl text-blue-500 font-extrabold font-anticDidone">CHESS</div>
@@ -140,7 +180,54 @@ const SelectColourPage=()=>{
                 <div className="flex justify-center mt-4">
                     <button className="text-lg md:text-xl font-bold text-white font-anticDidone bg-blue-500 border-4 px-5 py-2 rounded-lg hover:bg-blue-600 transition-all duration-150 ease-in-out border-white shadow-lg shadow-blue-500" onClick={()=>handleClick()}>START GAME</button>
                 </div>
+                <div className="flex justify-center mt-4">
+                    <button className="text-sm md:text-base font-bold text-white font-anticDidone bg-blue-500 border-4 px-3 py-1 rounded-lg hover:bg-blue-600 transition-all duration-150 ease-in-out border-white shadow-lg shadow-blue-500" onClick={()=>setChooseTheme(true)}>CHANGE THEME</button>
+                </div>
             </div>
+            {chooseTheme &&
+                <div className="absolute flex flex-col bg-white filter brightness-110 border-4 p-2 md:p-3 lg:p-4 border-black rounded-md w-[90%] h-[60%] md:w-[60%] md:h-[65%] lg:w-[50%] lg:h-[75%] animate-expand">
+                    <div className="flex flex-col items-end mb-4 lg:mb-10"><button onClick={()=>setChooseTheme(false)}><FaWindowClose color="#3b82f6" size={iconSize}/></button></div>
+                    <div className="flex flex-col mb-6 md:mb-10">
+                        <div className="flex flex-col justify-center items-center">
+                            <div className="border-4 border-black rounded-md">
+                            <div className="flex">
+                                <div className={`${squareStyle}`} style={{background:themeArray[theme].l}}><FaChessRook color="black" size={getSize1()}/></div>
+                                <div className={`${squareStyle}`} style={{background:themeArray[theme].d}}><FaChessKnight color="black" size={getSize1()}/></div>
+                                <div className={`${squareStyle}`} style={{background:themeArray[theme].l}}><FaChessBishop color="black" size={getSize1()}/></div>
+                                <div className={`${squareStyle}`} style={{background:themeArray[theme].d}}><FaChessQueen color="black" size={getSize1()}/></div>
+                                <div className={`${squareStyle}`} style={{background:themeArray[theme].l}}><FaChessKing color="black" size={getSize1()}/></div>
+                                <div className={`${squareStyle}`} style={{background:themeArray[theme].d}}><FaChessPawn color="black" size={getSize1()}/></div>
+                            </div>
+                            <div className="flex">
+                                <div className={`${squareStyle}`} style={{background:themeArray[theme].d}}><FaChessRook color="white" size={getSize1()}/></div>
+                                <div className={`${squareStyle}`} style={{background:themeArray[theme].l}}><FaChessKnight color="white" size={getSize1()}/></div>
+                                <div className={`${squareStyle}`} style={{background:themeArray[theme].d}}><FaChessBishop color="white" size={getSize1()}/></div>
+                                <div className={`${squareStyle}`} style={{background:themeArray[theme].l}}><FaChessQueen color="white" size={getSize1()}/></div>
+                                <div className={`${squareStyle}`} style={{background:themeArray[theme].d}}><FaChessKing color="white" size={getSize1()}/></div>
+                                <div className={`${squareStyle}`} style={{background:themeArray[theme].l}}><FaChessPawn color="white" size={getSize1()}/></div>
+                            </div>
+                            <div className="flex">
+                                <div className={`${squareStyle}`} style={{background:themeArray[theme].l}}></div>
+                                <div className={`${squareStyle}`} style={{background:themeArray[theme].d}}></div>
+                                <div className={`${squareStyle}`} style={{background:themeArray[theme].l}}></div>
+                                <div className={`${squareStyle}`} style={{background:themeArray[theme].d}}></div>
+                                <div className={`${squareStyle}`} style={{background:themeArray[theme].l}}></div>
+                                <div className={`${squareStyle}`} style={{background:themeArray[theme].d}}></div>
+                            </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="flex justify-center gap-5 w-full flex-wrap mb-6 lg:mb-0">
+                        {themeArray.map((key,index)=>(
+                            <div key={index} className="flex border-2 border-black rounded-lg" onClick={()=>setTheme(index)}>
+                                <div className="w-5 h-5 md:w-8 md:h-8 lg:w-10 lg:h-10" style={{background:themeArray[index].l}}></div>
+                                <div className="w-5 h-5 md:w-8 md:h-8 lg:w-10 lg:h-10" style={{background:themeArray[index].d}}></div>
+                                <div className="w-5 h-5 md:w-8 md:h-8 lg:w-10 lg:h-10" style={{background:themeArray[index].s}}></div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            }
         </div>
     )
 }

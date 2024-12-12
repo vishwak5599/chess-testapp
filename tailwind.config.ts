@@ -29,7 +29,23 @@ export default {
         xxxl: { min: "1800px" },
         xxxxl: { min: "2560px" },
       },
+      animation: {
+        expand: 'expand 0.2s ease-in-out'
+      },
+      keyframes: {
+        expand: {
+          '0%': {
+            transform: 'scale(0)',
+            opacity: "0",
+          },
+          '100%': {
+            transform: 'scale(1)',
+            opacity: "1",
+          },
+        },
+      },
     },
   },
   plugins: [],
 } satisfies Config;
+

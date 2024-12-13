@@ -53,6 +53,8 @@ type moveType = {
     fromCol : number
     toRow : number
     toCol : number
+    enpass? : boolean
+    lastSquare?: string
 }
 
 const HomePageContent=()=>{
@@ -678,7 +680,7 @@ const HomePageContent=()=>{
             if(selPiece==="r" && selRow===7 && selCol===0 && blackRookCastlePossible.left) setBlackRookCastlePossible((prev)=>({...prev,left:false}))
             if(selPiece==="r" && selRow===7 && selCol===7 && blackRookCastlePossible.right) setBlackRookCastlePossible((prev)=>({...prev,right:false}))
 
-            //set that the castling is not possible if the king is moved
+            //set the rook posi after castling
             if(selPiece==="K" && selRow===0 && selCol===4){
                 if(whiteKingCastlePossible && whiteRookCastlePossible.left && newRow===0 && newCol===2){
                     handleRookPosiAfterCastling(0,0,3)
@@ -713,7 +715,18 @@ const HomePageContent=()=>{
         }
 
         //**set all the previous moves**
-        setAllMoves((prev)=>{return [...prev,{piece:selPiece,fromRow:selRow,fromCol:selCol,toRow:newRow,toCol:newCol}]})
+        if((pieceColour===1 && selPiece==="P" && selRow===3 && allMoves[allMoves.length-1].piece==="p" && newRow===2 && newCol===allMoves[allMoves.length-1].toCol && allMoves[allMoves.length-1].toRow===3) || 
+        (pieceColour===1 && selPiece==="p" && selRow===4 && allMoves[allMoves.length-1].piece==="P" && newRow===5 && newCol===allMoves[allMoves.length-1].toCol && allMoves[allMoves.length-1].toRow===4) ||
+        (pieceColour===0 && selPiece==="P" && selRow===4 && allMoves[allMoves.length-1].piece==="p" && newRow===5 && newCol===allMoves[allMoves.length-1].toCol && allMoves[allMoves.length-1].toRow===4) ||
+        (pieceColour===0 && selPiece==="p" && selRow===3 && allMoves[allMoves.length-1].piece==="P" && newRow===2 && newCol===allMoves[allMoves.length-1].toCol && allMoves[allMoves.length-1].toRow===3)){
+            setAllMoves((prev)=>{return [...prev,{piece:selPiece,fromRow:selRow,fromCol:selCol,toRow:newRow,toCol:newCol,enpass:true}]})
+        }
+        else if((pieceColour===1 && selPiece==="P" && newRow===0) ||(pieceColour===1 && selPiece==="p" && newRow===7) || (pieceColour===0 && selPiece==="P" && newRow===7) || (pieceColour===0 && selPiece==="p" && newRow===0)){
+            setAllMoves((prev)=>{return [...prev,{piece:selPiece,fromRow:selRow,fromCol:selCol,toRow:newRow,toCol:newCol,lastSquare:board[newRow][newCol]}]})
+        }
+        else{
+            setAllMoves((prev)=>{return [...prev,{piece:selPiece,fromRow:selRow,fromCol:selCol,toRow:newRow,toCol:newCol}]})
+        }
 
         //update the selected piece position
         setBoard((prevBoard)=>{

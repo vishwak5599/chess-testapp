@@ -1923,7 +1923,7 @@ const HomePageContent=()=>{
         { l: "#E0C09F", d: "#7A5C47", s: "#A8D1E7" },  // Classic Wood Style
         { l: "#A9C8D8", d: "#2A3E59", s: "#6EC1E4" },  // Elegant Blue Theme
         { l: "#D1D1D1", d: "#4B4B4B", s: "#F8C470" },  // Classic Black and White
-        { l: "#A1D3A1", d: "#4C6B2F", s: "#B2E8B3" },  // Natural Green Theme
+        { l: "#A1D3A1", d: "#4C6B2F", s: "#2A4D31" },  // Natural Green Theme
         { l: "#F5A7B8", d: "#E63946", s: "#FF6F61" },  // Soft Pink and Red with Coral
     ]
 
@@ -1938,8 +1938,8 @@ const HomePageContent=()=>{
             <audio ref={audioRefGameOverStaleMate} src="/sounds/gameoverstalemate.mp3" />
             <div className="flex flex-col justify-center items-end p-2">
                 <div className="flex justify-center items-center gap-3 mb-1">
-                    {JSON.stringify(previousBoardPosi[0])!==JSON.stringify([]) && JSON.stringify(previousBoardPosi[1])!==JSON.stringify([]) ? <div className="border-2 border-blackSquare rounded-md bg-white transform scale-y-[-1] scale-x-[-1]" onClick={()=>setTopPlayerChoosePrev(true)}><MdSkipPrevious color="#3b82f6" size={30} /></div> : <div className="w-8"></div>}
-                    <div key="sw-1" className={`${pieceColour===1 ? `${moves%2!==0 ? "bg-black" : "bg-gray-600"} text-white` : "bg-white text-black"} flex justify-center items-center border-2 border-blackSquare font-bold font-technology text-base md:text-xl p-1 rounded-md gap-2 transform scale-y-[-1] scale-x-[-1]`}>
+                    {JSON.stringify(previousBoardPosi[0])!==JSON.stringify([]) && JSON.stringify(previousBoardPosi[1])!==JSON.stringify([]) ? <div className="rounded-md bg-white transform scale-y-[-1] scale-x-[-1]" style={{border: `2px solid ${themeArray[theme].s}`}} onClick={()=>setTopPlayerChoosePrev(true)}><MdSkipPrevious color={`${themeArray[theme].s}`} size={30} /></div> : <div className="w-8"></div>}
+                    <div key="sw-1" className={`${pieceColour===1 ? `${moves%2!==0 ? "bg-black" : "bg-gray-600"} text-white` : "bg-white text-black"} flex justify-center items-center font-bold font-technology text-base md:text-xl p-1 rounded-md gap-2 transform scale-y-[-1] scale-x-[-1]`} style={{border: `2px solid ${themeArray[theme].s}`}}>
                         {(pieceColour===1) ? (
                             <div className="w-30 md:w-24">
                                 {blackPlayerTime < 60 ? (
@@ -1980,7 +1980,7 @@ const HomePageContent=()=>{
                     </div> : (topPlayerChoosePrev || botPlayerChoosePrev) ?
                     <div className={`absolute inset-0 flex flex-col font-anticDidone bg-white justify-center items-center bg-opacity-60 gap-4 z-80 ${botPlayerChoosePrev ? "transform scale-x-[-1] scale-y-[-1]" : ""}`}>
                         <div className="bg-white p-4 rounded-lg">
-                            <div className="text-blackSquare font-bold text-sm md:text-lg lg:text-xl">YOUR OPPONENT WANTS TO UNDO THE MOVE</div>
+                            <div className="text-black font-bold text-sm md:text-lg lg:text-xl">YOUR OPPONENT WANTS TO UNDO THE MOVE</div>
                             <div className="flex justify-center items-center gap-4">
                                 <button className="border-2 border-green-600 bg-white md:text-lg lg:text-xl rounded-md p-1" onClick={()=>handlePlayerChoosePrev(true,((pieceColour===1 && topPlayerChoosePrev) || (pieceColour===0 && botPlayerChoosePrev)) ? "b" : "w")}>YES</button>
                                 <button className="border-2 border-red-600 bg-white md:text-lg lg:text-xl rounded-md p-1" onClick={()=>handlePlayerChoosePrev(false,((pieceColour===1 && topPlayerChoosePrev) || (pieceColour===0 && botPlayerChoosePrev)) ? "b" : "w")}>NO</button>
@@ -2042,8 +2042,8 @@ const HomePageContent=()=>{
                     </div>
                 </div>
                 <div className="flex justify-center items-center gap-3 mt-1">
-                    {(JSON.stringify(previousBoardPosi[0])!==JSON.stringify([]) && JSON.stringify(previousBoardPosi[1])!==JSON.stringify([])) ? <div className="border-2 border-blackSquare rounded-md bg-white"><MdSkipPrevious color="#3b82f6" size={30} onClick={()=>setBotPlayerChoosePrev(true)}/></div> : <div className="w-8"></div>}
-                    <div key="sw-2" className={`${pieceColour===1 ? `${moves%2===0 ? "bg-white" : "bg-slate-500"} text-black` : "bg-black text-white"} flex justify-end items-center border-2 border-blackSquare font-bold font-technology text-base md:text-xl p-1 rounded-md gap-2`}>
+                    {(JSON.stringify(previousBoardPosi[0])!==JSON.stringify([]) && JSON.stringify(previousBoardPosi[1])!==JSON.stringify([])) ? <div className="rounded-md bg-white" style={{border: `2px solid ${themeArray[theme].s}`}}><MdSkipPrevious color={`${themeArray[theme].s}`} size={30} onClick={()=>setBotPlayerChoosePrev(true)}/></div> : <div className="w-8"></div>}
+                    <div key="sw-2" className={`${pieceColour===1 ? `${moves%2===0 ? "bg-white" : "bg-slate-500"} text-black` : "bg-black text-white"} flex justify-end items-center font-bold font-technology text-base md:text-xl p-1 rounded-md gap-2`} style={{border: `2px solid ${themeArray[theme].s}`}}>
                         <div className="w-5">{moves%2===0 ? <FaStopwatch color={`${pieceColour===1 ? "black" : "white"}`} /> : ""}</div>
                         {(pieceColour===1) ? (
                             <div className="w-30 md:w-24">
@@ -2070,11 +2070,11 @@ const HomePageContent=()=>{
                 </div>
             </div>
             {(draw || whiteWon || blackWon || staleMateWhiteWon || staleMateBlackWon) &&
-                <div className="absolute flex flex-col bg-white border-4 border-blackSquare h-[30%] w-[55%] md:h-[40%] md:w-[35%] lg:h-[45%] lg:w-[25%] rounded-lg">
+                <div className="absolute flex flex-col bg-white h-[30%] w-[55%] md:h-[40%] md:w-[35%] lg:h-[45%] lg:w-[25%] rounded-lg" style={{border: `4px solid ${themeArray[theme].s}`}}>
                     <div className="flex flex-col items-end mt-2 mr-2 md:mt-3 md:mr-3 lg:mt-4 lg:mr-4"><button onClick={()=>handleCloseTheMatchOverDiv()}><FaWindowClose color="#3b82f6" size={iconSize}/></button></div>
                     <div className="flex flex-col gap-4 lg:gap-6 justify-center items-center mt-4 lg:mt-6">
-                        <div className="text-base md:text-lg lg:text-3xl font-extrabold text-center text-blackSquare">{draw ? "DRAW!!" : (staleMateWhiteWon || staleMateBlackWon) ? "DRAW BY STALEMATE" : whiteWon ? <div className="flex flex-col"><div>VICTORY</div><div>WHITE WON</div></div> : blackWon ? <div className="flex flex-col"><div>VICTORY</div><div>BLACK WON</div></div> : ""}</div>
-                        <button onClick={()=>router.push("/")} className="text-sm md:text-base lg:text-xl font-extrabold text-black border-blackSquare p-1 md:p-2 border-4 rounded-lg hover:scale-105">GO BACK</button>
+                        <div className="text-base md:text-lg lg:text-3xl font-extrabold text-center" style={{color: themeArray[theme].s}}>{draw ? "DRAW!!" : (staleMateWhiteWon || staleMateBlackWon) ? "DRAW BY STALEMATE" : whiteWon ? <div className="flex flex-col"><div>VICTORY</div><div>WHITE WON</div></div> : blackWon ? <div className="flex flex-col"><div>VICTORY</div><div>BLACK WON</div></div> : ""}</div>
+                        <button onClick={()=>router.push("/")} className="text-sm md:text-base lg:text-xl font-extrabold text-black p-1 md:p-2 rounded-lg hover:scale-105" style={{border: `4px solid ${themeArray[theme].s}`}}>GO BACK</button>
                     </div>
                 </div>
             }

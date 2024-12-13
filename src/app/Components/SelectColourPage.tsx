@@ -14,7 +14,14 @@ import { useAtom } from "jotai"
 
 
 const SelectColourPage=()=>{
+
+    //atoms
+    const [theme, setTheme] = useAtom(themeAtom)
+
+    //hooks
     const windowSize = useWindowSize()
+    const router = useRouter()
+
     const [pieceColour, setPieceColour] = useState(1)
     const [timeType, setTimeType] = useState(0)
     const [preTime,setPreTime] = useState({t:30,i:0})
@@ -22,9 +29,8 @@ const SelectColourPage=()=>{
     const [isDropdown, setIsDropdown] = useState(false)
     const [selectRandomPieceColour, setSelectRandomPieceColour] = useState(false)
     const [iconSize, setIconSize] = useState(20)
-    const [theme, setTheme] = useAtom(themeAtom)
     const [chooseTheme, setChooseTheme] = useState(false)
-    const router = useRouter()
+    const [selected, setSelected] = useState<{row:number|null,col:number|null}>({row:null,col:null})
     
     const handleClick=()=>{
         const time = timeType===0 ? preTime.t : custTime.t
@@ -91,7 +97,7 @@ const SelectColourPage=()=>{
         { l: "#E0C09F", d: "#7A5C47", s: "#A8D1E7" },  // Classic Wood Style
         { l: "#A9C8D8", d: "#2A3E59", s: "#6EC1E4" },  // Elegant Blue Theme
         { l: "#D1D1D1", d: "#4B4B4B", s: "#F8C470" },  // Classic Black and White
-        { l: "#A1D3A1", d: "#4C6B2F", s: "#B2E8B3" },  // Natural Green Theme
+        { l: "#A1D3A1", d: "#4C6B2F", s: "#2A4D31" },  // Natural Green Theme
         { l: "#F5A7B8", d: "#E63946", s: "#FF6F61" },  // Soft Pink and Red with Coral
     ]
 
@@ -185,34 +191,34 @@ const SelectColourPage=()=>{
                 </div>
             </div>
             {chooseTheme &&
-                <div className="absolute flex flex-col bg-white filter brightness-110 border-4 p-2 md:p-3 lg:p-4 border-black rounded-md w-[90%] h-[60%] md:w-[60%] md:h-[65%] lg:w-[50%] lg:h-[75%] animate-expand">
+                <div className="absolute flex flex-col bg-white filter brightness-110 border-4 p-2 md:p-3 lg:p-4 border-black rounded-md w-[90%] h-[55%] md:w-[60%] md:h-[65%] lg:w-[50%] lg:h-[75%] animate-expand">
                     <div className="flex flex-col items-end mb-4 lg:mb-10"><button onClick={()=>setChooseTheme(false)}><FaWindowClose color="#3b82f6" size={iconSize}/></button></div>
                     <div className="flex flex-col mb-6 md:mb-10">
                         <div className="flex flex-col justify-center items-center">
                             <div className="border-4 border-black rounded-md">
                             <div className="flex">
-                                <div className={`${squareStyle}`} style={{background:themeArray[theme].l}}><FaChessRook color="black" size={getSize1()}/></div>
-                                <div className={`${squareStyle}`} style={{background:themeArray[theme].d}}><FaChessKnight color="black" size={getSize1()}/></div>
-                                <div className={`${squareStyle}`} style={{background:themeArray[theme].l}}><FaChessBishop color="black" size={getSize1()}/></div>
-                                <div className={`${squareStyle}`} style={{background:themeArray[theme].d}}><FaChessQueen color="black" size={getSize1()}/></div>
-                                <div className={`${squareStyle}`} style={{background:themeArray[theme].l}}><FaChessKing color="black" size={getSize1()}/></div>
-                                <div className={`${squareStyle}`} style={{background:themeArray[theme].d}}><FaChessPawn color="black" size={getSize1()}/></div>
+                                <div className={`${squareStyle}`} style={{background: (selected!==null && selected.row===0 && selected.col===0) ? themeArray[theme].s : themeArray[theme].l}} onClick={()=>setSelected({row:0,col:0})}><FaChessRook color="black" size={getSize1()}/></div>
+                                <div className={`${squareStyle}`} style={{background: (selected!==null && selected.row===0 && selected.col===1) ? themeArray[theme].s : themeArray[theme].d}} onClick={()=>setSelected({row:0,col:1})}><FaChessKnight color="black" size={getSize1()}/></div>
+                                <div className={`${squareStyle}`} style={{background: (selected!==null && selected.row===0 && selected.col===2) ? themeArray[theme].s : themeArray[theme].l}} onClick={()=>setSelected({row:0,col:2})}><FaChessBishop color="black" size={getSize1()}/></div>
+                                <div className={`${squareStyle}`} style={{background: (selected!==null && selected.row===0 && selected.col===3) ? themeArray[theme].s : themeArray[theme].d}} onClick={()=>setSelected({row:0,col:3})}><FaChessQueen color="black" size={getSize1()}/></div>
+                                <div className={`${squareStyle}`} style={{background: (selected!==null && selected.row===0 && selected.col===4) ? themeArray[theme].s : themeArray[theme].l}} onClick={()=>setSelected({row:0,col:4})}><FaChessKing color="black" size={getSize1()}/></div>
+                                <div className={`${squareStyle}`} style={{background: (selected!==null && selected.row===0 && selected.col===5) ? themeArray[theme].s : themeArray[theme].d}} onClick={()=>setSelected({row:0,col:5})}><FaChessPawn color="black" size={getSize1()}/></div>
                             </div>
                             <div className="flex">
-                                <div className={`${squareStyle}`} style={{background:themeArray[theme].d}}><FaChessRook color="white" size={getSize1()}/></div>
-                                <div className={`${squareStyle}`} style={{background:themeArray[theme].l}}><FaChessKnight color="white" size={getSize1()}/></div>
-                                <div className={`${squareStyle}`} style={{background:themeArray[theme].d}}><FaChessBishop color="white" size={getSize1()}/></div>
-                                <div className={`${squareStyle}`} style={{background:themeArray[theme].l}}><FaChessQueen color="white" size={getSize1()}/></div>
-                                <div className={`${squareStyle}`} style={{background:themeArray[theme].d}}><FaChessKing color="white" size={getSize1()}/></div>
-                                <div className={`${squareStyle}`} style={{background:themeArray[theme].l}}><FaChessPawn color="white" size={getSize1()}/></div>
+                                <div className={`${squareStyle}`} style={{background: (selected!==null && selected.row===1 && selected.col===0) ? themeArray[theme].s : themeArray[theme].d}} onClick={()=>setSelected({row:1,col:0})}><FaChessRook color="white" size={getSize1()}/></div>
+                                <div className={`${squareStyle}`} style={{background: (selected!==null && selected.row===1 && selected.col===1) ? themeArray[theme].s : themeArray[theme].l}} onClick={()=>setSelected({row:1,col:1})}><FaChessKnight color="white" size={getSize1()}/></div>
+                                <div className={`${squareStyle}`} style={{background: (selected!==null && selected.row===1 && selected.col===2) ? themeArray[theme].s : themeArray[theme].d}} onClick={()=>setSelected({row:1,col:2})}><FaChessBishop color="white" size={getSize1()}/></div>
+                                <div className={`${squareStyle}`} style={{background: (selected!==null && selected.row===1 && selected.col===3) ? themeArray[theme].s : themeArray[theme].l}} onClick={()=>setSelected({row:1,col:3})}><FaChessQueen color="white" size={getSize1()}/></div>
+                                <div className={`${squareStyle}`} style={{background: (selected!==null && selected.row===1 && selected.col===4) ? themeArray[theme].s : themeArray[theme].d}} onClick={()=>setSelected({row:1,col:4})}><FaChessKing color="white" size={getSize1()}/></div>
+                                <div className={`${squareStyle}`} style={{background: (selected!==null && selected.row===1 && selected.col===5) ? themeArray[theme].s : themeArray[theme].l}} onClick={()=>setSelected({row:1,col:5})}><FaChessPawn color="white" size={getSize1()}/></div>
                             </div>
                             <div className="flex">
-                                <div className={`${squareStyle}`} style={{background:themeArray[theme].l}}></div>
-                                <div className={`${squareStyle}`} style={{background:themeArray[theme].d}}></div>
-                                <div className={`${squareStyle}`} style={{background:themeArray[theme].l}}></div>
-                                <div className={`${squareStyle}`} style={{background:themeArray[theme].d}}></div>
-                                <div className={`${squareStyle}`} style={{background:themeArray[theme].l}}></div>
-                                <div className={`${squareStyle}`} style={{background:themeArray[theme].d}}></div>
+                                <div className={`${squareStyle}`} style={{background: themeArray[theme].l}}></div>
+                                <div className={`${squareStyle}`} style={{background: themeArray[theme].d}}></div>
+                                <div className={`${squareStyle}`} style={{background: themeArray[theme].l}}></div>
+                                <div className={`${squareStyle}`} style={{background: themeArray[theme].d}}></div>
+                                <div className={`${squareStyle}`} style={{background: themeArray[theme].l}}></div>
+                                <div className={`${squareStyle}`} style={{background: themeArray[theme].d}}></div>
                             </div>
                             </div>
                         </div>

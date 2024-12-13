@@ -80,8 +80,6 @@ const HomePageContent=()=>{
     const [allPossibleMovesForBlack, setAllPossibleMovesForBlack] = useState<allPossibleMovesType[]>([])
     const [curWhite,setCurWhite] = useState<piecePositionType[]>([])
     const [curBlack,setCurBlack] = useState<piecePositionType[]>([])
-    const [topPlayerChoosePrev, setTopPlayerChoosePrev] = useState(false)
-    const [botPlayerChoosePrev, setBotPlayerChoosePrev] = useState(false)
     const [pawnToLastSquarePosi, setPawnToLastSquarePosi] = useState<pawnToLastSquarePosiType>({piece:null,selRow:null,selCol:null,newRow:null,newCol:null})
     const [whiteKingCastlePossible,setWhiteKingCastlePossible] = useState(true)
     const [blackKingCastlePossible,setBlackKingCastlePossible] = useState(true)
@@ -132,7 +130,6 @@ const HomePageContent=()=>{
         ['r', 'n', 'b', 'k', 'q', 'b', 'n', 'r']
     ]
     )
-    const [previousBoardPosi, setPreviousBoardPosi] = useState<[string[][],string[][]]>([[],board])
     const whitePieces = ["R","N","B","Q","K","P"]
     const blackPieces = ["r","n","b","q","k","p"]
 
@@ -193,18 +190,8 @@ const HomePageContent=()=>{
 
     //if the match is ended and player wants to undo the move and continue
     const handleCloseTheMatchOverDiv = () => {
-        if(draw) setDraw(false)
-        else if(staleMateWhiteWon) setStaleMateWhiteWon(false)
-        else if(staleMateBlackWon) setStaleMateBlackWon(false)
-        else if(whiteWon) setWhiteWon(false)
-        else if(blackWon) setBlackWon(false)
-
         setPauseTheBoard(true)
     }
-
-    useEffect(()=>{
-        if(pauseTheBoard) setPauseTheBoard(false)
-    },[board])
 
     //ways of draw
 
@@ -521,71 +508,6 @@ const HomePageContent=()=>{
         }
     }
 
-    //function to go to previous move if player approves
-    const handlePlayerChoosePrev = (ifApproves:boolean,whoChoose:string) => {
-        if(ifApproves){
-            if((pieceColour===1 && whoChoose==="w" && botPlayerChoosePrev && moves%2!==0) || (pieceColour===1 && whoChoose==="b" && topPlayerChoosePrev && moves%2===0) || (pieceColour===0 && whoChoose==="w" && topPlayerChoosePrev && moves%2===0) || (pieceColour===0 && whoChoose==="b" && botPlayerChoosePrev && moves%2!==0)){
-                setBoard(previousBoardPosi[1])
-                setPreviousBoardPosi([[],previousBoardPosi[0]])
-
-                //check if the king is moved in previous move and it is the first time king moved set that the castling is possible if move is taken back
-                if(allMoves[allMoves.length-1].piece==="K" && !allMoves.slice(0,allMoves.length-1).some((move)=>move.piece==="K")) setWhiteKingCastlePossible(true)
-                if(allMoves[allMoves.length-1].piece==="k" && !allMoves.slice(0,allMoves.length-1).some((move)=>move.piece==="k")) setBlackKingCastlePossible(true)
-                    
-                //check if the rook is moved in previous move and it is the first time rook moved set that the castling is possible if move is taken back
-                if(pieceColour===1 && allMoves[allMoves.length-1].piece==="R" && allMoves[allMoves.length-1].fromRow===7 && allMoves[allMoves.length-1].fromCol===0 && !allMoves.slice(0,allMoves.length-1).some((move)=>move.piece==="R" && move.fromRow===7 && move.fromCol===0)) setWhiteRookCastlePossible((prev)=>({...prev,left:true}))
-                if(pieceColour===1 && allMoves[allMoves.length-1].piece==="R" && allMoves[allMoves.length-1].fromRow===7 && allMoves[allMoves.length-1].fromCol===7 && !allMoves.slice(0,allMoves.length-1).some((move)=>move.piece==="R" && move.fromRow===7 && move.fromCol===7)) setWhiteRookCastlePossible((prev)=>({...prev,right:true}))
-                if(pieceColour===0 && allMoves[allMoves.length-1].piece==="R" && allMoves[allMoves.length-1].fromRow===0 && allMoves[allMoves.length-1].fromCol===0 && !allMoves.slice(0,allMoves.length-1).some((move)=>move.piece==="R" && move.fromRow===0 && move.fromCol===0)) setWhiteRookCastlePossible((prev)=>({...prev,left:true}))
-                if(pieceColour===0 && allMoves[allMoves.length-1].piece==="R" && allMoves[allMoves.length-1].fromRow===0 && allMoves[allMoves.length-1].fromCol===7 && !allMoves.slice(0,allMoves.length-1).some((move)=>move.piece==="R" && move.fromRow===0 && move.fromCol===7)) setWhiteRookCastlePossible((prev)=>({...prev,right:true}))
-
-                if(pieceColour===1 && allMoves[allMoves.length-1].piece==="r" && allMoves[allMoves.length-1].fromRow===0 && allMoves[allMoves.length-1].fromCol===0 && !allMoves.slice(0,allMoves.length-1).some((move)=>move.piece==="r" && move.fromRow===7 && move.fromCol===0)) setBlackRookCastlePossible((prev)=>({...prev,left:true}))
-                if(pieceColour===1 && allMoves[allMoves.length-1].piece==="r" && allMoves[allMoves.length-1].fromRow===0 && allMoves[allMoves.length-1].fromCol===7 && !allMoves.slice(0,allMoves.length-1).some((move)=>move.piece==="r" && move.fromRow===7 && move.fromCol===7)) setBlackRookCastlePossible((prev)=>({...prev,right:true}))
-                if(pieceColour===0 && allMoves[allMoves.length-1].piece==="r" && allMoves[allMoves.length-1].fromRow===7 && allMoves[allMoves.length-1].fromCol===0 && !allMoves.slice(0,allMoves.length-1).some((move)=>move.piece==="r" && move.fromRow===0 && move.fromCol===0)) setBlackRookCastlePossible((prev)=>({...prev,left:true}))
-                if(pieceColour===0 && allMoves[allMoves.length-1].piece==="r" && allMoves[allMoves.length-1].fromRow===7 && allMoves[allMoves.length-1].fromCol===7 && !allMoves.slice(0,allMoves.length-1).some((move)=>move.piece==="r" && move.fromRow===0 && move.fromCol===7)) setBlackRookCastlePossible((prev)=>({...prev,right:true}))
-
-                if(allMoves.length>0) setAllMoves((prev)=>prev.slice(0,allMoves.length-1))
-                setMoves((prev)=>prev-1)
-            }
-            else{
-                setBoard(previousBoardPosi[0])
-                setPreviousBoardPosi([[],[]])
-
-                //check if the king is moved in previous move and it is the first time king moved set that the castling is possible if move is taken back
-                if(allMoves[allMoves.length-2].piece==="K" && !allMoves.slice(0,allMoves.length-2).some((move)=>move.piece==="K")) setWhiteKingCastlePossible(true)
-                if(allMoves[allMoves.length-2].piece==="k" && !allMoves.slice(0,allMoves.length-2).some((move)=>move.piece==="k")) setBlackKingCastlePossible(true)
-                
-                if(allMoves[allMoves.length-1].piece==="K" && !allMoves.slice(0,allMoves.length-1).some((move)=>move.piece==="K")) setWhiteKingCastlePossible(true)
-                if(allMoves[allMoves.length-1].piece==="k" && !allMoves.slice(0,allMoves.length-1).some((move)=>move.piece==="k")) setBlackKingCastlePossible(true)
-                    
-                //check if the rook is moved in previous move and it is the first time rook moved set that the castling is possible if move is taken back
-                if(pieceColour===1 && allMoves[allMoves.length-1].piece==="R" && allMoves[allMoves.length-1].fromRow===7 && allMoves[allMoves.length-1].fromCol===0 && !allMoves.slice(0,allMoves.length-1).some((move)=>move.piece==="R" && move.fromRow===7 && move.fromCol===0)) setWhiteRookCastlePossible((prev)=>({...prev,left:true}))
-                if(pieceColour===1 && allMoves[allMoves.length-1].piece==="R" && allMoves[allMoves.length-1].fromRow===7 && allMoves[allMoves.length-1].fromCol===7 && !allMoves.slice(0,allMoves.length-1).some((move)=>move.piece==="R" && move.fromRow===7 && move.fromCol===7)) setWhiteRookCastlePossible((prev)=>({...prev,right:true}))
-                if(pieceColour===0 && allMoves[allMoves.length-1].piece==="R" && allMoves[allMoves.length-1].fromRow===0 && allMoves[allMoves.length-1].fromCol===0 && !allMoves.slice(0,allMoves.length-1).some((move)=>move.piece==="R" && move.fromRow===0 && move.fromCol===0)) setWhiteRookCastlePossible((prev)=>({...prev,left:true}))
-                if(pieceColour===0 && allMoves[allMoves.length-1].piece==="R" && allMoves[allMoves.length-1].fromRow===0 && allMoves[allMoves.length-1].fromCol===7 && !allMoves.slice(0,allMoves.length-1).some((move)=>move.piece==="R" && move.fromRow===0 && move.fromCol===7)) setWhiteRookCastlePossible((prev)=>({...prev,right:true}))
-
-                if(pieceColour===1 && allMoves[allMoves.length-1].piece==="r" && allMoves[allMoves.length-1].fromRow===0 && allMoves[allMoves.length-1].fromCol===0 && !allMoves.slice(0,allMoves.length-1).some((move)=>move.piece==="r" && move.fromRow===7 && move.fromCol===0)) setBlackRookCastlePossible((prev)=>({...prev,left:true}))
-                if(pieceColour===1 && allMoves[allMoves.length-1].piece==="r" && allMoves[allMoves.length-1].fromRow===0 && allMoves[allMoves.length-1].fromCol===7 && !allMoves.slice(0,allMoves.length-1).some((move)=>move.piece==="r" && move.fromRow===7 && move.fromCol===7)) setBlackRookCastlePossible((prev)=>({...prev,right:true}))
-                if(pieceColour===0 && allMoves[allMoves.length-1].piece==="r" && allMoves[allMoves.length-1].fromRow===7 && allMoves[allMoves.length-1].fromCol===0 && !allMoves.slice(0,allMoves.length-1).some((move)=>move.piece==="r" && move.fromRow===0 && move.fromCol===0)) setBlackRookCastlePossible((prev)=>({...prev,left:true}))
-                if(pieceColour===0 && allMoves[allMoves.length-1].piece==="r" && allMoves[allMoves.length-1].fromRow===7 && allMoves[allMoves.length-1].fromCol===7 && !allMoves.slice(0,allMoves.length-1).some((move)=>move.piece==="r" && move.fromRow===0 && move.fromCol===7)) setBlackRookCastlePossible((prev)=>({...prev,right:true}))
-
-                if(pieceColour===1 && allMoves[allMoves.length-2].piece==="R" && allMoves[allMoves.length-2].fromRow===7 && allMoves[allMoves.length-2].fromCol===0 && !allMoves.slice(0,allMoves.length-2).some((move)=>move.piece==="R" && move.fromRow===7 && move.fromCol===0)) setWhiteRookCastlePossible((prev)=>({...prev,left:true}))
-                if(pieceColour===1 && allMoves[allMoves.length-2].piece==="R" && allMoves[allMoves.length-2].fromRow===7 && allMoves[allMoves.length-2].fromCol===7 && !allMoves.slice(0,allMoves.length-2).some((move)=>move.piece==="R" && move.fromRow===7 && move.fromCol===7)) setWhiteRookCastlePossible((prev)=>({...prev,right:true}))
-                if(pieceColour===0 && allMoves[allMoves.length-2].piece==="R" && allMoves[allMoves.length-2].fromRow===0 && allMoves[allMoves.length-2].fromCol===0 && !allMoves.slice(0,allMoves.length-2).some((move)=>move.piece==="R" && move.fromRow===0 && move.fromCol===0)) setWhiteRookCastlePossible((prev)=>({...prev,left:true}))
-                if(pieceColour===0 && allMoves[allMoves.length-2].piece==="R" && allMoves[allMoves.length-2].fromRow===0 && allMoves[allMoves.length-2].fromCol===7 && !allMoves.slice(0,allMoves.length-2).some((move)=>move.piece==="R" && move.fromRow===0 && move.fromCol===7)) setWhiteRookCastlePossible((prev)=>({...prev,right:true}))
-
-                if(pieceColour===1 && allMoves[allMoves.length-2].piece==="r" && allMoves[allMoves.length-2].fromRow===0 && allMoves[allMoves.length-2].fromCol===0 && !allMoves.slice(0,allMoves.length-2).some((move)=>move.piece==="r" && move.fromRow===7 && move.fromCol===0)) setBlackRookCastlePossible((prev)=>({...prev,left:true}))
-                if(pieceColour===1 && allMoves[allMoves.length-2].piece==="r" && allMoves[allMoves.length-2].fromRow===0 && allMoves[allMoves.length-2].fromCol===7 && !allMoves.slice(0,allMoves.length-2).some((move)=>move.piece==="r" && move.fromRow===7 && move.fromCol===7)) setBlackRookCastlePossible((prev)=>({...prev,right:true}))
-                if(pieceColour===0 && allMoves[allMoves.length-2].piece==="r" && allMoves[allMoves.length-2].fromRow===7 && allMoves[allMoves.length-2].fromCol===0 && !allMoves.slice(0,allMoves.length-2).some((move)=>move.piece==="r" && move.fromRow===0 && move.fromCol===0)) setBlackRookCastlePossible((prev)=>({...prev,left:true}))
-                if(pieceColour===0 && allMoves[allMoves.length-2].piece==="r" && allMoves[allMoves.length-2].fromRow===7 && allMoves[allMoves.length-2].fromCol===7 && !allMoves.slice(0,allMoves.length-2).some((move)=>move.piece==="r" && move.fromRow===0 && move.fromCol===7)) setBlackRookCastlePossible((prev)=>({...prev,right:true}))
-
-                if(allMoves.length>1) setAllMoves((prev)=>prev.slice(0,allMoves.length-2))
-                setMoves((prev)=>prev-2)
-            }
-        }
-        setTopPlayerChoosePrev(false)
-        setBotPlayerChoosePrev(false)
-    }
-
     //function to remove enpassed pawns if enpassant move happens
     const removeEnpassedPawns = (piece:string,row:number,col:number) => {
         setBoard((prevBoard)=>{
@@ -765,8 +687,6 @@ const HomePageContent=()=>{
         }
         //4. update
         else if (isSelected && selectedPiece.piece!==null && selectedPiece.row!==null && selectedPiece.col!==null && possibleMovesForSelectedPiece.some((m)=>m.row===i && m.col===j)) {
-            if(JSON.stringify(previousBoardPosi[0]) === JSON.stringify([]) && JSON.stringify(previousBoardPosi[1]) === JSON.stringify([])) setPreviousBoardPosi([[],board])
-            else setPreviousBoardPosi([previousBoardPosi[1],board])
 
             //create a temporary array to update the board position and check the if the king is in threat after a move is made
             let updatedBoard:string[][] = [...board]
@@ -1955,7 +1875,6 @@ const HomePageContent=()=>{
             <audio ref={audioRefGameOverStaleMate} src="/sounds/gameoverstalemate.mp3" />
             <div className="flex flex-col justify-center items-end p-2">
                 <div className="flex justify-center items-center gap-3 mb-1">
-                    {JSON.stringify(previousBoardPosi[0])!==JSON.stringify([]) && JSON.stringify(previousBoardPosi[1])!==JSON.stringify([]) ? <div className="rounded-md bg-white transform scale-y-[-1] scale-x-[-1]" style={{border: `2px solid ${themeArray[theme].s}`}} onClick={()=>setTopPlayerChoosePrev(true)}><MdSkipPrevious color={`${themeArray[theme].s}`} size={30} /></div> : <div className="w-8"></div>}
                     {whitePlayerTime!==null && blackPlayerTime!==null && increment!==null && <div key="sw-1" className={`${pieceColour===1 ? `${moves%2!==0 ? "bg-black" : "bg-gray-600"} text-white` : "bg-white text-black"} flex justify-center items-center font-bold font-technology text-base md:text-xl p-1 rounded-md gap-2 transform scale-y-[-1] scale-x-[-1]`} style={{border: `2px solid ${themeArray[theme].s}`}}>
                         {(pieceColour===1) ? (
                             <div className="w-30 md:w-24">
@@ -1992,15 +1911,6 @@ const HomePageContent=()=>{
                                 <div className={`border-2 ${pawnToLastSquarePosi.piece==="P" ? "border-white bg-gray-700" : "border-black bg-slate-400"} p-2 lg:p-3 rounded-md`} onClick={()=>{pawnToLastSquarePosi.piece==="P" ? handlePawnToLastSquare("R") : handlePawnToLastSquare("r")}}>{pawnToLastSquarePosi.piece==="P" ? <ChessPiece col="R"/> : <ChessPiece col="r"/>}</div>
                                 <div className={`border-2 ${pawnToLastSquarePosi.piece==="P" ? "border-white bg-gray-700" : "border-black bg-slate-400"} p-2 lg:p-3 rounded-md`} onClick={()=>{pawnToLastSquarePosi.piece==="P" ? handlePawnToLastSquare("N") : handlePawnToLastSquare("n")}}>{pawnToLastSquarePosi.piece==="P" ? <ChessPiece col="N"/> : <ChessPiece col="n"/>}</div>
                                 <div className={`border-2 ${pawnToLastSquarePosi.piece==="P" ? "border-white bg-gray-700" : "border-black bg-slate-400"} p-2 lg:p-3 rounded-md`} onClick={()=>{pawnToLastSquarePosi.piece==="P" ? handlePawnToLastSquare("B") : handlePawnToLastSquare("b")}}>{pawnToLastSquarePosi.piece==="P" ? <ChessPiece col="B"/> : <ChessPiece col="b"/>}</div>
-                            </div>
-                        </div>
-                    </div> : (topPlayerChoosePrev || botPlayerChoosePrev) ?
-                    <div className={`absolute inset-0 flex flex-col font-anticDidone bg-white justify-center items-center bg-opacity-60 gap-4 z-80 ${botPlayerChoosePrev ? "transform scale-x-[-1] scale-y-[-1]" : ""}`}>
-                        <div className="bg-white p-4 rounded-lg">
-                            <div className="text-black font-bold text-sm md:text-lg lg:text-xl">YOUR OPPONENT WANTS TO UNDO THE MOVE</div>
-                            <div className="flex justify-center items-center gap-4">
-                                <button className="border-2 border-green-600 bg-white md:text-lg lg:text-xl rounded-md p-1" onClick={()=>handlePlayerChoosePrev(true,((pieceColour===1 && topPlayerChoosePrev) || (pieceColour===0 && botPlayerChoosePrev)) ? "b" : "w")}>YES</button>
-                                <button className="border-2 border-red-600 bg-white md:text-lg lg:text-xl rounded-md p-1" onClick={()=>handlePlayerChoosePrev(false,((pieceColour===1 && topPlayerChoosePrev) || (pieceColour===0 && botPlayerChoosePrev)) ? "b" : "w")}>NO</button>
                             </div>
                         </div>
                     </div> : ""
@@ -2059,7 +1969,6 @@ const HomePageContent=()=>{
                     </div>
                 </div>
                 <div className="flex justify-center items-center gap-3 mt-1">
-                    {(JSON.stringify(previousBoardPosi[0])!==JSON.stringify([]) && JSON.stringify(previousBoardPosi[1])!==JSON.stringify([])) ? <div className="rounded-md bg-white" style={{border: `2px solid ${themeArray[theme].s}`}}><MdSkipPrevious color={`${themeArray[theme].s}`} size={30} onClick={()=>setBotPlayerChoosePrev(true)}/></div> : <div className="w-8"></div>}
                     {whitePlayerTime!==null && blackPlayerTime!==null && increment!==null && <div key="sw-2" className={`${pieceColour===1 ? `${moves%2===0 ? "bg-white" : "bg-slate-500"} text-black` : "bg-black text-white"} flex justify-end items-center font-bold font-technology text-base md:text-xl p-1 rounded-md gap-2`} style={{border: `2px solid ${themeArray[theme].s}`}}>
                         <div className="w-5">{moves%2===0 ? <FaStopwatch color={`${pieceColour===1 ? "black" : "white"}`} /> : ""}</div>
                         {(pieceColour===1) ? (

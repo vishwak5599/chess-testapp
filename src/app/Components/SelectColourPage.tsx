@@ -8,7 +8,7 @@ import { IoMdArrowDropupCircle, IoMdArrowDropdownCircle } from "react-icons/io"
 import { AiFillThunderbolt } from "react-icons/ai"
 import { RiArrowDropRightLine, RiArrowDropUpLine, RiArrowDropDownLine } from "react-icons/ri"
 import useWindowSize from './UseWindowSize'
-import { FaChessRook, FaChessKnight, FaChessBishop, FaChessQueen, FaChessKing, FaChessPawn, FaWindowClose } from "react-icons/fa"
+import { FaChessRook, FaChessKnight, FaChessBishop, FaChessQueen, FaChessKing, FaChessPawn, FaWindowClose, FaPeopleArrows} from "react-icons/fa"
 import { themeAtom } from "../Atoms/ThemeAtom"
 import { useAtom } from "jotai"
 
@@ -32,10 +32,14 @@ const SelectColourPage=()=>{
     const [chooseTheme, setChooseTheme] = useState(false)
     const [selected, setSelected] = useState<{row:number|null,col:number|null}>({row:null,col:null})
     
-    const handleClick=()=>{
+    const handleStartGame=()=>{
         const time = timeType===0 ? preTime.t : custTime.t
         const increment = timeType===0 ? preTime.i : custTime.i
         router.push(`/GamePage?pieceColour=${pieceColour}&time=${time}&increment=${increment}`)
+    }
+
+    const handlePasssNPlayGame=()=>{
+        router.push(`/GamePage?pieceColour=${pieceColour}&time=inf&increment=inf`)
     }
 
     const getSize = () =>{
@@ -116,7 +120,7 @@ const SelectColourPage=()=>{
                     <button className={`${selectRandomPieceColour ? " border-blue-500 shadow-lg shadow-blue-500" : "border-white"} p-1 md:p-2 border-4 hover:scale-105 bg-gray-300 rounded-lg flex`} onClick={()=>handleSelectPieceColour(2)}><FaChessKing size={getSize()} color="white" style={{clipPath: "polygon(0 0, 50% 0, 50% 100%, 0 100%)"}}/><FaChessKing size={getSize()} color="black" className="absolute" style={{clipPath: "polygon(50% 0, 100% 0, 100% 100%, 50% 100%)"}}/></button>
                     <button className={`${!selectRandomPieceColour && pieceColour==0 ? " border-blue-500 shadow-lg shadow-blue-500" : "border-white"} p-1 md:p-2 border-4 bg-gray-300 rounded-lg hover:scale-105`} onClick={()=>handleSelectPieceColour(0)}><FaChessKing size={getSize()} color="black"/></button>
                 </div>
-            <div>
+            <div className="flex flex-col justify-center">
                 <div className="flex flex-col md:flex-row justify-center items-center -mt-5">
                     <div className={`flex justify-center text-xl font-bold font-anticDidone ${timeType===0 ? "bg-blue-500 hover:bg-blue-600 border-white" : "bg-white hover:bg-slate-200 border-blue-500"} transition-all duration-150 ease-in-out border-4 w-70 md:w-100 px-12 md:px-20 py-1 md:py-2 rounded-lg gap-1 md:gap-1.5`} onClick={()=>setTimeType(0)}>
                         <div>{preTime.t<=2 ? <GiBulletBill color="orange" size={26}/> : preTime.t<=5 ? <AiFillThunderbolt color="gold" size={26}/> : <LuAlarmClock color="green" size={26}/>}</div>
@@ -183,10 +187,14 @@ const SelectColourPage=()=>{
                         </div>
                     </div>
                 </div>
-                <div className="flex justify-center mt-4">
-                    <button className="text-lg md:text-xl font-bold text-white font-anticDidone bg-blue-500 border-4 px-5 py-2 rounded-lg hover:bg-blue-600 transition-all duration-150 ease-in-out border-white shadow-lg shadow-blue-500" onClick={()=>handleClick()}>START GAME</button>
+                <div className="flex justify-center mt-2 md:mt-4">
+                    <button className="text-lg md:text-xl font-bold text-white font-anticDidone bg-blue-500 border-4 px-5 py-2 rounded-lg hover:bg-blue-600 transition-all duration-150 ease-in-out border-white shadow-lg shadow-blue-500" onClick={()=>handleStartGame()}>START GAME</button>
                 </div>
-                <div className="flex justify-center mt-4">
+                <div className="flex justify-center items-center"><div className="w-[60%] md:w-[40%] my-3 border-2 border-blue-500 rounded-2xl"></div></div>
+                <div className="flex justify-center">
+                    <button className="text-base md:text-lg font-bold text-white font-anticDidone bg-blue-500 border-4 px-4 py-2 rounded-lg hover:bg-blue-600 transition-all duration-150 ease-in-out border-white shadow-lg shadow-blue-500" onClick={()=>handlePasssNPlayGame()}><div className="flex justify-center items-center gap-2">PASS N PLAY<div><FaPeopleArrows color="white" size={26}/></div></div></button>
+                </div>
+                <div className="flex justify-center mt-2 md:mt-4">
                     <button className="text-sm md:text-base font-bold text-white font-anticDidone bg-blue-500 border-4 px-3 py-1 rounded-lg hover:bg-blue-600 transition-all duration-150 ease-in-out border-white shadow-lg shadow-blue-500" onClick={()=>setChooseTheme(true)}>CHANGE THEME</button>
                 </div>
             </div>

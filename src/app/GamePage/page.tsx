@@ -66,8 +66,8 @@ const HomePageContent=()=>{
     const searchParams = useSearchParams()
 
     const pieceColour = searchParams ? Number(searchParams.get('pieceColour')) : 1
-    const time = searchParams ? Number(searchParams.get('time'))*60 : 30*60
-    const increment = searchParams ? Number(searchParams.get('increment')) : 0
+    const time = searchParams ? searchParams.get('time')!=="inf" ? Number(searchParams.get('time'))*60 : null : 30*60
+    const increment = searchParams ? searchParams.get('time')!=="inf" ? Number(searchParams.get('increment')) : null : 0
 
     //states
     const [moves,setMoves] = useState(pieceColour===1 ? 0 : 1)
@@ -136,35 +136,39 @@ const HomePageContent=()=>{
 
     //decrease the timer for players for each move
     useEffect(() => {
-        let intervalId:NodeJS.Timeout
-        if (((pieceColour===1 && moves%2===0) || (pieceColour===0 && moves%2!==0)) && !(draw || staleMateWhiteWon || staleMateBlackWon || whiteWon || blackWon)) {
-            if(whitePlayerTime>0){
-                intervalId = setInterval(()=>{
-                    setWhitePlayerTime((prev)=>prev-1)
-                }, 1000)
-                //increement
-                if(moves>1) setBlackPlayerTime((prev)=>prev+increment);
-                
+        if(whitePlayerTime!==null && blackPlayerTime!==null && increment!==null){
+            let intervalId:NodeJS.Timeout
+            if (((pieceColour===1 && moves%2===0) || (pieceColour===0 && moves%2!==0)) && !(draw || staleMateWhiteWon || staleMateBlackWon || whiteWon || blackWon)) {
+                if(whitePlayerTime>0){
+                    intervalId = setInterval(()=>{
+                        setWhitePlayerTime((prev)=>prev!==null ? prev-1 : 0)
+                    }, 1000)
+                    //increement
+                    if(moves>1) setBlackPlayerTime((prev)=>prev!==null ? prev+increment : 0);
+                    
+                }
+            } else if(((pieceColour===1 && moves%2!==0) || (pieceColour===0 && moves%2===0)) && !(draw || staleMateWhiteWon || staleMateBlackWon || whiteWon || blackWon)) {
+                if(blackPlayerTime>0){
+                    intervalId = setInterval(()=>{
+                        setBlackPlayerTime((prev)=>prev!==null ? prev-1 : 0)
+                    }, 1000)
+                    //increment
+                    if(moves>0) setWhitePlayerTime((prev)=>prev!==null ? prev+increment : 0);
+                }
             }
-        } else if(((pieceColour===1 && moves%2!==0) || (pieceColour===0 && moves%2===0)) && !(draw || staleMateWhiteWon || staleMateBlackWon || whiteWon || blackWon)) {
-            if(blackPlayerTime>0){
-                intervalId = setInterval(()=>{
-                    setBlackPlayerTime((prev)=>prev-1)
-                }, 1000)
-                //increment
-                if(moves>0) setWhitePlayerTime((prev)=>prev+increment);
-            }
+        
+            return ()=>clearInterval(intervalId)
         }
-    
-        return ()=>clearInterval(intervalId)
     }, [pieceColour,moves,draw,staleMateBlackWon,staleMateWhiteWon,whiteWon,blackWon])
 
     useEffect(()=>{
-        if(whitePlayerTime===0 && blackPlayerTime>0){
-            setBlackWon(true)
-        }
-        else if(blackPlayerTime===0 && whitePlayerTime>0){
-            setWhiteWon(true)
+        if(whitePlayerTime!==null && blackPlayerTime!==null){
+            if(whitePlayerTime===0 && blackPlayerTime>0){
+                setBlackWon(true)
+            }
+            else if(blackPlayerTime===0 && whitePlayerTime>0){
+                setWhiteWon(true)
+            }
         }
     },[whitePlayerTime,blackPlayerTime])
 
@@ -1939,7 +1943,7 @@ const HomePageContent=()=>{
             <div className="flex flex-col justify-center items-end p-2">
                 <div className="flex justify-center items-center gap-3 mb-1">
                     {JSON.stringify(previousBoardPosi[0])!==JSON.stringify([]) && JSON.stringify(previousBoardPosi[1])!==JSON.stringify([]) ? <div className="rounded-md bg-white transform scale-y-[-1] scale-x-[-1]" style={{border: `2px solid ${themeArray[theme].s}`}} onClick={()=>setTopPlayerChoosePrev(true)}><MdSkipPrevious color={`${themeArray[theme].s}`} size={30} /></div> : <div className="w-8"></div>}
-                    <div key="sw-1" className={`${pieceColour===1 ? `${moves%2!==0 ? "bg-black" : "bg-gray-600"} text-white` : "bg-white text-black"} flex justify-center items-center font-bold font-technology text-base md:text-xl p-1 rounded-md gap-2 transform scale-y-[-1] scale-x-[-1]`} style={{border: `2px solid ${themeArray[theme].s}`}}>
+                    {whitePlayerTime!==null && blackPlayerTime!==null && increment!==null && <div key="sw-1" className={`${pieceColour===1 ? `${moves%2!==0 ? "bg-black" : "bg-gray-600"} text-white` : "bg-white text-black"} flex justify-center items-center font-bold font-technology text-base md:text-xl p-1 rounded-md gap-2 transform scale-y-[-1] scale-x-[-1]`} style={{border: `2px solid ${themeArray[theme].s}`}}>
                         {(pieceColour===1) ? (
                             <div className="w-30 md:w-24">
                                 {blackPlayerTime < 60 ? (
@@ -1962,7 +1966,7 @@ const HomePageContent=()=>{
                             </div>
                         )}
                         <div className="w-5">{moves%2!==0 ? <FaStopwatch color={`${pieceColour===1 ? "white" : "black"}`} /> : ""}</div>
-                    </div>
+                    </div>}
                 </div>
                 <div className="relative rounded-md my-2 md:my-3" style={{border:`${windowSize >= 768 ? "12px" : "6px"} solid ${themeArray[theme].s}`}}>
                     {pawnToLastSquarePosi.piece!==null ? 
@@ -2043,7 +2047,7 @@ const HomePageContent=()=>{
                 </div>
                 <div className="flex justify-center items-center gap-3 mt-1">
                     {(JSON.stringify(previousBoardPosi[0])!==JSON.stringify([]) && JSON.stringify(previousBoardPosi[1])!==JSON.stringify([])) ? <div className="rounded-md bg-white" style={{border: `2px solid ${themeArray[theme].s}`}}><MdSkipPrevious color={`${themeArray[theme].s}`} size={30} onClick={()=>setBotPlayerChoosePrev(true)}/></div> : <div className="w-8"></div>}
-                    <div key="sw-2" className={`${pieceColour===1 ? `${moves%2===0 ? "bg-white" : "bg-slate-500"} text-black` : "bg-black text-white"} flex justify-end items-center font-bold font-technology text-base md:text-xl p-1 rounded-md gap-2`} style={{border: `2px solid ${themeArray[theme].s}`}}>
+                    {whitePlayerTime!==null && blackPlayerTime!==null && increment!==null && <div key="sw-2" className={`${pieceColour===1 ? `${moves%2===0 ? "bg-white" : "bg-slate-500"} text-black` : "bg-black text-white"} flex justify-end items-center font-bold font-technology text-base md:text-xl p-1 rounded-md gap-2`} style={{border: `2px solid ${themeArray[theme].s}`}}>
                         <div className="w-5">{moves%2===0 ? <FaStopwatch color={`${pieceColour===1 ? "black" : "white"}`} /> : ""}</div>
                         {(pieceColour===1) ? (
                             <div className="w-30 md:w-24">
@@ -2066,7 +2070,7 @@ const HomePageContent=()=>{
                                 )}
                             </div>
                         )}
-                    </div>
+                    </div>}
                 </div>
             </div>
             {(draw || whiteWon || blackWon || staleMateWhiteWon || staleMateBlackWon) &&

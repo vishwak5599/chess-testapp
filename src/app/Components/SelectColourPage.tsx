@@ -194,8 +194,13 @@ const SelectColourPage=()=>{
                 <div className="flex justify-center">
                     <button className="text-base md:text-lg font-bold text-white font-anticDidone bg-blue-500 border-4 px-4 py-2 rounded-lg hover:bg-blue-600 transition-all duration-150 ease-in-out border-white shadow-lg shadow-blue-500" onClick={()=>handlePasssNPlayGame()}><div className="flex justify-center items-center gap-2">PASS N PLAY<div><FaPeopleArrows color="white" size={26}/></div></div></button>
                 </div>
-                <div className="flex justify-center mt-2 md:mt-4">
-                    <button className="text-sm md:text-base font-bold text-white font-anticDidone bg-blue-500 border-4 px-3 py-1 rounded-lg hover:bg-blue-600 transition-all duration-150 ease-in-out border-white shadow-lg shadow-blue-500" onClick={()=>setChooseTheme(true)}>CHANGE THEME</button>
+                <div className="flex justify-center gap-2">
+                    <div className="flex justify-center mt-2 md:mt-4">
+                        <button className="text-sm md:text-base font-bold text-white font-anticDidone bg-blue-500 border-4 px-3 py-1 rounded-lg hover:bg-blue-600 transition-all duration-150 ease-in-out border-white shadow-lg shadow-blue-500" onClick={()=>setChooseTheme(true)}>CHANGE THEME</button>
+                    </div>
+                    <div className="flex justify-center mt-2 md:mt-4">
+                        <button className="text-sm md:text-base font-bold text-white font-anticDidone bg-blue-500 border-4 px-8 py-1 rounded-lg hover:bg-blue-600 transition-all duration-150 ease-in-out border-white shadow-lg shadow-blue-500" onClick={()=>router.push("/AnalysisPage")}>ANALYSIS</button>
+                    </div>
                 </div>
             </div>
             {chooseTheme &&

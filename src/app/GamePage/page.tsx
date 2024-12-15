@@ -54,7 +54,8 @@ type moveType = {
     toRow : number
     toCol : number
     enpass? : boolean
-    lastSquare?: string
+    lastSquareUpdatedPiece?: string
+    lastSquarePreviousPiece?: string
 }
 
 const HomePageContent=()=>{
@@ -133,6 +134,23 @@ const HomePageContent=()=>{
     const whitePieces = ["R","N","B","Q","K","P"]
     const blackPieces = ["r","n","b","q","k","p"]
 
+    //update width
+    useEffect(() => {
+        const updateSize = () => {
+            if (windowSize<640) {
+                setIconSize(20)
+            } else if (windowSize<768) {
+                setIconSize(24)
+            } else if (windowSize<1024) {
+                setIconSize(26)
+            }
+            else {
+                setIconSize(28)
+            }
+        }
+        updateSize()
+    }, [windowSize])
+
     //decrease the timer for players for each move
     useEffect(() => {
         if(whitePlayerTime!==null && blackPlayerTime!==null && increment!==null){
@@ -171,28 +189,6 @@ const HomePageContent=()=>{
         }
     },[whitePlayerTime,blackPlayerTime])
 
-    //update width
-    useEffect(() => {
-        const updateSize = () => {
-            if (windowSize<640) {
-                setIconSize(20)
-            } else if (windowSize<768) {
-                setIconSize(24)
-            } else if (windowSize<1024) {
-                setIconSize(26)
-            }
-            else {
-                setIconSize(28)
-            }
-        }
-        updateSize()
-    }, [windowSize])
-
-    //if the match is ended and player wants to undo the move and continue
-    const handleCloseTheMatchOverDiv = () => {
-        setPauseTheBoard(true)
-    }
-
     //ways of draw
 
     //if there is no pieces on board other than kings
@@ -226,6 +222,13 @@ const HomePageContent=()=>{
             }
         }
     },[moves, allMoves])
+
+    //add to local storage
+    useEffect(()=>{
+        if(draw || staleMateWhiteWon || staleMateBlackWon || whiteWon || blackWon){
+            localStorage.setItem(`game-${localStorage.length-24}`, JSON.stringify({allMoves:allMoves,lastBoard:board,pieceColour:pieceColour,result:(whiteWon ? "white" : blackWon ? "black" : "draw")}));
+        }
+    },[draw,staleMateWhiteWon,staleMateBlackWon,whiteWon,blackWon])
 
     //need to create a button if player wants to draw or agrees a draw
 
@@ -525,13 +528,25 @@ const HomePageContent=()=>{
     //function to handle if a piece is selected i.e QRNP/qrnp if a pawn reaches last square
     const handlePawnToLastSquare = (updatedPiece:string) => {
         if(pawnToLastSquarePosi.piece!==null && pawnToLastSquarePosi.selRow!==null && pawnToLastSquarePosi.selCol!==null && pawnToLastSquarePosi.newRow!==null && pawnToLastSquarePosi.newCol!==null){
-            const row = pawnToLastSquarePosi.newRow
-            const col = pawnToLastSquarePosi.newCol
+            const selRow = pawnToLastSquarePosi.selRow
+            const selCol = pawnToLastSquarePosi.selCol
+            const newRow = pawnToLastSquarePosi.newRow
+            const newCol = pawnToLastSquarePosi.newCol
+            const lastSquarePreviousPiece = board[newRow][newCol]
             setBoard((prevBoard)=>{
                 const newBoard = [...prevBoard]
-                newBoard[row] = [...prevBoard[row]]
-                newBoard[row][col] = updatedPiece
+                newBoard[selRow] = [...prevBoard[selRow]]
+                newBoard[newRow] = [...prevBoard[newRow]]
+                newBoard[selRow][selCol] = " "
+                newBoard[newRow][newCol] = updatedPiece
                 return newBoard
+            })
+            //set the allMoves i.e previousPiece and updatedPiece if pawn moves to lastsquare
+            setAllMoves((prev) => {
+                if(prev.length>0) {
+                    return [...prev.slice(0,allMoves.length-1),{...prev[prev.length - 1],lastSquareUpdatedPiece: updatedPiece,lastSquarePreviousPiece: lastSquarePreviousPiece}]
+                }
+                return [{...prev[prev.length - 1],lastSquareUpdatedPiece: updatedPiece,lastSquarePreviousPiece: lastSquarePreviousPiece}]
             })
         }
         setPawnToLastSquarePosi({piece:null,selRow:null,selCol:null,newRow:null,newCol:null})
@@ -637,28 +652,34 @@ const HomePageContent=()=>{
         }
 
         //**set all the previous moves**
+        //enpass move
         if((pieceColour===1 && selPiece==="P" && selRow===3 && allMoves[allMoves.length-1].piece==="p" && newRow===2 && newCol===allMoves[allMoves.length-1].toCol && allMoves[allMoves.length-1].toRow===3) || 
         (pieceColour===1 && selPiece==="p" && selRow===4 && allMoves[allMoves.length-1].piece==="P" && newRow===5 && newCol===allMoves[allMoves.length-1].toCol && allMoves[allMoves.length-1].toRow===4) ||
         (pieceColour===0 && selPiece==="P" && selRow===4 && allMoves[allMoves.length-1].piece==="p" && newRow===5 && newCol===allMoves[allMoves.length-1].toCol && allMoves[allMoves.length-1].toRow===4) ||
         (pieceColour===0 && selPiece==="p" && selRow===3 && allMoves[allMoves.length-1].piece==="P" && newRow===2 && newCol===allMoves[allMoves.length-1].toCol && allMoves[allMoves.length-1].toRow===3)){
             setAllMoves((prev)=>{return [...prev,{piece:selPiece,fromRow:selRow,fromCol:selCol,toRow:newRow,toCol:newCol,enpass:true}]})
         }
-        else if((pieceColour===1 && selPiece==="P" && newRow===0) ||(pieceColour===1 && selPiece==="p" && newRow===7) || (pieceColour===0 && selPiece==="P" && newRow===7) || (pieceColour===0 && selPiece==="p" && newRow===0)){
-            setAllMoves((prev)=>{return [...prev,{piece:selPiece,fromRow:selRow,fromCol:selCol,toRow:newRow,toCol:newCol,lastSquare:board[newRow][newCol]}]})
-        }
+        //lastSquare move is set in handlePawnToLastSquare func
+
+        //normal move
         else{
             setAllMoves((prev)=>{return [...prev,{piece:selPiece,fromRow:selRow,fromCol:selCol,toRow:newRow,toCol:newCol}]})
         }
 
-        //update the selected piece position
-        setBoard((prevBoard)=>{
-            const newBoard = [...prevBoard]
-            newBoard[selRow] = [...prevBoard[selRow]]
-            newBoard[newRow] = [...prevBoard[newRow]]
-            newBoard[selRow][selCol] = " "
-            newBoard[newRow][newCol] = selPiece
-            return newBoard
-        })
+        //update the selected piece position only when it is not pawn to last square
+        if(!((pieceColour===1 && selPiece==="P" && newRow===0) ||
+        (pieceColour===1 && selPiece==="p" && newRow===7) ||
+        (pieceColour===0 && selPiece==="P" && newRow===7) ||
+        (pieceColour===0 && selPiece==="p" && newRow===0))){
+            setBoard((prevBoard)=>{
+                const newBoard = [...prevBoard]
+                newBoard[selRow] = [...prevBoard[selRow]]
+                newBoard[newRow] = [...prevBoard[newRow]]
+                newBoard[selRow][selCol] = " "
+                newBoard[newRow][newCol] = selPiece
+                return newBoard
+            })
+        }
         
         //increase the count of moves
         setMoves((prev)=>prev+1)
@@ -1996,8 +2017,8 @@ const HomePageContent=()=>{
                 </div>
             </div>
             {(draw || whiteWon || blackWon || staleMateWhiteWon || staleMateBlackWon) &&
-                <div className="absolute flex flex-col bg-white h-[30%] w-[55%] md:h-[40%] md:w-[35%] lg:h-[45%] lg:w-[25%] rounded-lg" style={{border: `4px solid ${themeArray[theme].s}`}}>
-                    <div className="flex flex-col items-end mt-2 mr-2 md:mt-3 md:mr-3 lg:mt-4 lg:mr-4"><button onClick={()=>handleCloseTheMatchOverDiv()}><FaWindowClose color="#3b82f6" size={iconSize}/></button></div>
+                <div className="absolute flex flex-col bg-white h-[35%] w-[55%] md:h-[40%] md:w-[35%] lg:h-[45%] lg:w-[25%] rounded-lg" style={{border: `4px solid ${themeArray[theme].s}`}}>
+                    <div className="flex flex-col items-end mt-2 mr-2 md:mt-3 md:mr-3 lg:mt-4 lg:mr-4"><button onClick={()=>setPauseTheBoard(true)}><FaWindowClose color="#3b82f6" size={iconSize}/></button></div>
                     <div className="flex flex-col gap-4 lg:gap-6 justify-center items-center mt-4 lg:mt-6">
                         <div className="text-base md:text-lg lg:text-3xl font-extrabold text-center" style={{color: themeArray[theme].s}}>{draw ? "DRAW!!" : (staleMateWhiteWon || staleMateBlackWon) ? "DRAW BY STALEMATE" : whiteWon ? <div className="flex flex-col"><div>VICTORY</div><div>WHITE WON</div></div> : blackWon ? <div className="flex flex-col"><div>VICTORY</div><div>BLACK WON</div></div> : ""}</div>
                         <button onClick={()=>router.push("/")} className="text-sm md:text-base lg:text-xl font-extrabold text-black p-1 md:p-2 rounded-lg hover:scale-105" style={{border: `4px solid ${themeArray[theme].s}`}}>GO BACK</button>

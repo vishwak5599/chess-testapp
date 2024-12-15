@@ -85,9 +85,9 @@ const AnalysisPage = () => {
             <div className="text-black font-extrabold text-xl md:text-3xl font-anticDidone flex justify-center mb-2 md:mb-4">ANALYSIS</div>
             <div className="flex flex-wrap justify-center items-center px-3 gap-3">
                 {boardData && boardData.map((item,index)=>(
-                    <div key={index} className="flex flex-col justify-center items-center w-[45%] md:w-[32%] rounded-md cursor-pointer" onClick={()=>router.push(`/AnalysisPage/${item.gameId}`)}>
+                    <div key={index} className="flex flex-col justify-center items-center w-[45%] md:w-[32%] rounded-md">
                         <div className={`absolute flex justify-center items-center text-lg md:text-xl font-bold ${item.result==="white" ? "text-white" : "text-black"}`}>{item.result==="white" ? "WHITE WON" : item.result==="black" ? "BLACK WON" : "DRAW"}</div>
-                        <div className="border-2 md:border-4 border-black rounded-md">
+                        <div className="border-2 md:border-4 border-black rounded-md cursor-pointer" onClick={()=>router.push(`/AnalysisPage/${item.gameId}`)}>
                             {item && item.lastBoard && item.lastBoard.map((row,rindex)=>(
                                 <div key={rindex} className="flex w-full">
                                     {row.map((col,cindex)=>(

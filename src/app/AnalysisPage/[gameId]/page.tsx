@@ -63,47 +63,47 @@ const GameDetails = () => {
 
     useEffect(()=>{
         if (typeof window !== 'undefined') {
-        if(typeof(gameId)==="string"){
-            const itemValue = localStorage.getItem(gameId)
-            if(itemValue){
-                try{
-                    if(itemValue.startsWith("{")){
-                        const parsedItem = JSON.parse(itemValue)
-                        if(parsedItem.allGames!==null && parsedItem.lastBoard){
-                            setBoardData(parsedItem.allMoves)
-                            setPieceColour(parsedItem.pieceColour)
-                            setLastBoard(parsedItem.lastBoard)
-                            setBoard(
-                                parsedItem.pieceColour === 1
-                                    ? [
-                                        ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'],
-                                        ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],
-                                        [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-                                        [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-                                        [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-                                        [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-                                        ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'],
-                                        ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'],
-                                    ]
-                                    : [
-                                        ['R', 'N', 'B', 'K', 'Q', 'B', 'N', 'R'],
-                                        ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'],
-                                        [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-                                        [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-                                        [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-                                        [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-                                        ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],
-                                        ['r', 'n', 'b', 'k', 'q', 'b', 'n', 'r'],
-                                    ]
-                                )
+            if(typeof(gameId)==="string"){
+                const itemValue = localStorage.getItem(gameId)
+                if(itemValue){
+                    try{
+                        if(itemValue.startsWith("{")){
+                            const parsedItem = JSON.parse(itemValue)
+                            if(parsedItem.allGames!==null && parsedItem.lastBoard){
+                                setBoardData(parsedItem.allMoves)
+                                setPieceColour(parsedItem.pieceColour)
+                                setLastBoard(parsedItem.lastBoard)
+                                setBoard(
+                                    parsedItem.pieceColour === 1
+                                        ? [
+                                            ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'],
+                                            ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],
+                                            [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+                                            [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+                                            [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+                                            [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+                                            ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'],
+                                            ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'],
+                                        ]
+                                        : [
+                                            ['R', 'N', 'B', 'K', 'Q', 'B', 'N', 'R'],
+                                            ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'],
+                                            [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+                                            [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+                                            [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+                                            [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+                                            ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],
+                                            ['r', 'n', 'b', 'k', 'q', 'b', 'n', 'r'],
+                                        ]
+                                    )
+                            }
                         }
+                    } catch(error){
+                        console.error(`Error parsing item with key ${gameId}:`, error)
                     }
-                } catch(error){
-                    console.error(`Error parsing item with key ${gameId}:`, error)
                 }
             }
         }
-    }
     },[gameId])
 
     const forwardMove = () => {
@@ -397,49 +397,49 @@ const GameDetails = () => {
     ]
 
     return(
-        <div className="flex flex-col justify-center items-center overflow-hidden h-screen w-screen">
+        <div className="flex flex-col overflow-hidden h-screen w-screen">
             <audio ref={audioRefCastle} src="/sounds/castling.mp3" />
             <audio ref={audioRefCapture} src="/sounds/capture.mp3" />
             <audio ref={audioRefMove} src="/sounds/move.mp3" />
-            <div className="flex justify-start items-center w-screen pb-2 md:py-0 md:px-4">
-                <button onClick={()=>router.push('/AnalysisPage')} className="flex justify-center items-center"><div className=""><IoMdArrowRoundBack size={getSizeArrow()}/></div></button>
-            </div>
             <audio ref={audioRefGameOverCheckMate} src="/sounds/gameovercheckmate.mp3" />
-            <div className="rounded-md" style={{border:`${windowSize >= 768 ? "12px" : "6px"} solid ${themeArray[theme].s}`}}>
-                {board.map((row,i)=>(
-                    <div key={i} className="flex justify-center items-center">
-                        {row.map((col,j)=>(
-                            <div key={i+""+j} style={{background:(i+j)%2==0 ? themeArray[theme].l : themeArray[theme].d}}>
-                            <div key={i+""+j} className="flex h-12 w-12 sm:h-9 sm:w-9 md:h-11 md:w-11 lg:h-12 lg:w-12 xl:h-14 xl:w-14 xxl:h-16 xxl:w-16 justify-center items-center" 
-                            style={{
-                                backgroundColor:
-                                (moveNumber>0 && boardData && ((i===boardData[moveNumber-1].fromRow && j===boardData[moveNumber-1].fromCol) ||
-                                (i===boardData[moveNumber-1].toRow && j===boardData[moveNumber-1].toCol))) ?
-                                "#fcd34d" :
-                                (i + j) % 2 === 0
-                                    ? themeArray[theme].l
-                                    : themeArray[theme].d,
-                                border:"none",
-                                borderRadius: "0px",
-                                boxSizing: "border-box",
-                                display: "flex",
-                                justifyContent: "center",
-                                alignItems: "center",
-                            }}
-                            >
-                                <ChessPiece col={col} />
-                            </div>
-                            </div>
-                        ))}
-                    </div>
-                ))}
-            </div>
-            <div className="flex gap-4 mt-2">
-                <div><MdOutlineSkipPrevious size={getSize()} color={`${themeArray[theme].s}`} className="border-2 border-black rounded-md" onClick={()=>handleStartingBoard()} /></div>
-                <div><IoCaretBackOutline size={getSize()} color={`${themeArray[theme].s}`} className="border-2 border-black rounded-md" onClick={()=>previousMove()}/></div>
-                {isMovesPlaying ? <IoPause size={getSize()} color={`${themeArray[theme].s}`} className="border-2 border-black rounded-md" onClick={()=>setIsMovesPlaying(false)}/> : <IoPlay size={getSize()} color={`${themeArray[theme].s}`} className="border-2 border-black rounded-md" onClick={()=>setIsMovesPlaying(true)}/>}
-                <div><IoCaretForwardOutline size={getSize()} color={`${themeArray[theme].s}`} className="border-2 border-black rounded-md" onClick={()=>forwardMove()} /></div>
-                <div><MdOutlineSkipNext size={getSize()} color={`${themeArray[theme].s}`} className="border-2 border-black rounded-md" onClick={()=>handleLastBoard()} /></div>
+            <button onClick={()=>router.push('/AnalysisPage')} className="flex items-center w-screen m-2 md:m-4"><IoMdArrowRoundBack size={getSizeArrow()}/></button>
+            <div className="flex flex-col items-center">
+                <div className="rounded-md" style={{border:`${windowSize >= 768 ? "12px" : "6px"} solid ${themeArray[theme].s}`}}>
+                    {board.map((row,i)=>(
+                        <div key={i} className="flex justify-center items-center">
+                            {row.map((col,j)=>(
+                                <div key={i+""+j} style={{background:(i+j)%2==0 ? themeArray[theme].l : themeArray[theme].d}}>
+                                <div key={i+""+j} className="flex h-12 w-12 sm:h-9 sm:w-9 md:h-11 md:w-11 lg:h-12 lg:w-12 xl:h-14 xl:w-14 xxl:h-16 xxl:w-16 justify-center items-center" 
+                                style={{
+                                    backgroundColor:
+                                    (moveNumber>0 && boardData && ((i===boardData[moveNumber-1].fromRow && j===boardData[moveNumber-1].fromCol) ||
+                                    (i===boardData[moveNumber-1].toRow && j===boardData[moveNumber-1].toCol))) ?
+                                    "#fcd34d" :
+                                    (i + j) % 2 === 0
+                                        ? themeArray[theme].l
+                                        : themeArray[theme].d,
+                                    border:"none",
+                                    borderRadius: "0px",
+                                    boxSizing: "border-box",
+                                    display: "flex",
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                }}
+                                >
+                                    <ChessPiece col={col} />
+                                </div>
+                                </div>
+                            ))}
+                        </div>
+                    ))}
+                </div>
+                <div className="flex gap-1 md:gap-2 mt-2">
+                    <div><MdOutlineSkipPrevious size={getSize()} color={`${themeArray[theme].s}`} className="border-2 border-black rounded-md" onClick={()=>handleStartingBoard()} /></div>
+                    <div><IoCaretBackOutline size={getSize()} color={`${themeArray[theme].s}`} className="border-2 border-black rounded-md" onClick={()=>previousMove()}/></div>
+                    {isMovesPlaying ? <IoPause size={getSize()} color={`${themeArray[theme].s}`} className="border-2 border-black rounded-md" onClick={()=>setIsMovesPlaying(false)}/> : <IoPlay size={getSize()} color={`${themeArray[theme].s}`} className="border-2 border-black rounded-md" onClick={()=>setIsMovesPlaying(true)}/>}
+                    <div><IoCaretForwardOutline size={getSize()} color={`${themeArray[theme].s}`} className="border-2 border-black rounded-md" onClick={()=>forwardMove()} /></div>
+                    <div><MdOutlineSkipNext size={getSize()} color={`${themeArray[theme].s}`} className="border-2 border-black rounded-md" onClick={()=>handleLastBoard()} /></div>
+                </div>
             </div>
         </div>
     )

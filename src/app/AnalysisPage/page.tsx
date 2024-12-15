@@ -41,33 +41,32 @@ const AnalysisPage = () => {
 
         for (let i=0;i<localStorage.length;i++){
             if (typeof window !== 'undefined') {
-            const itemKey = localStorage.key(i)
-            if(itemKey){
-                const itemValue = localStorage.getItem(itemKey)
-                if(itemValue){
-                    try{
-                        if(itemValue.startsWith("{")){
-                            const parsedItem = JSON.parse(itemValue)
-                            if(parsedItem.allGames!==null && parsedItem.lastBoard){
-                                const gameId = itemKey
-                                prevGames.push({
-                                gameId,
-                                allMoves: parsedItem.allMoves,
-                                lastBoard: parsedItem.lastBoard,
-                                pieceColour: parsedItem.pieceColour,
-                                result: parsedItem.result,
-                            })
+                const itemKey = localStorage.key(i)
+                if(itemKey){
+                    const itemValue = localStorage.getItem(itemKey)
+                    if(itemValue){
+                        try{
+                            if(itemValue.startsWith("{")){
+                                const parsedItem = JSON.parse(itemValue)
+                                if(parsedItem.allGames!==null && parsedItem.lastBoard){
+                                    const gameId = itemKey
+                                    prevGames.push({
+                                    gameId,
+                                    allMoves: parsedItem.allMoves,
+                                    lastBoard: parsedItem.lastBoard,
+                                    pieceColour: parsedItem.pieceColour,
+                                    result: parsedItem.result,
+                                })
+                                }
                             }
+                        } catch(error){
+                            console.error(`Error parsing item with key ${itemKey}:`, error)
                         }
-                    } catch(error){
-                        console.error(`Error parsing item with key ${itemKey}:`, error)
                     }
                 }
             }
-        }
         setBoardData(prevGames)
     }
-
     },[])
 
     const themeArray = [
@@ -82,10 +81,8 @@ const AnalysisPage = () => {
 
     return(
         <div className="flex flex-col mb-2 md:mb-4">
-            <div className="flex justify-between items-center m-2 md:m-4">
-                <button onClick={()=>router.push('/')} className="flex items-center"><div className=""><IoMdArrowRoundBack size={getSizeArrow()}/></div></button>
-                <div className="flex justify-center flex-grow"><div className="text-black font-extrabold text-xl md:text-3xl font-anticDidone justify-center -ml-6 md:-ml-8">ANALYSIS</div></div>
-            </div>
+            <button onClick={()=>router.push('/')} className="flex items-center m-2 md:m-4"><IoMdArrowRoundBack size={getSizeArrow()}/></button>
+            <div className="text-black font-extrabold text-xl md:text-3xl font-anticDidone flex justify-center mb-2 md:mb-4">ANALYSIS</div>
             <div className="flex flex-wrap justify-center items-center px-3 gap-3">
                 {boardData && boardData.map((item,index)=>(
                     <div key={index} className="flex flex-col justify-center items-center w-[45%] md:w-[32%] rounded-md cursor-pointer" onClick={()=>router.push(`/AnalysisPage/${item.gameId}`)}>

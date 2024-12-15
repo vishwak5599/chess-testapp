@@ -62,6 +62,7 @@ const GameDetails = () => {
     }
 
     useEffect(()=>{
+        if (typeof window !== 'undefined') {
         if(typeof(gameId)==="string"){
             const itemValue = localStorage.getItem(gameId)
             if(itemValue){
@@ -102,7 +103,8 @@ const GameDetails = () => {
                 }
             }
         }
-    },[localStorage])
+    }
+    },[gameId])
 
     const forwardMove = () => {
         if(boardData && moveNumber<boardData.length){

@@ -40,6 +40,7 @@ const AnalysisPage = () => {
         let prevGames: { gameId:string, allMoves:moveType[], lastBoard:string[][], pieceColour:number, result:string }[] = []
 
         for (let i=0;i<localStorage.length;i++){
+            if (typeof window !== 'undefined') {
             const itemKey = localStorage.key(i)
             if(itemKey){
                 const itemValue = localStorage.getItem(itemKey)
@@ -65,8 +66,9 @@ const AnalysisPage = () => {
             }
         }
         setBoardData(prevGames)
+    }
 
-    },[localStorage])
+    },[])
 
     const themeArray = [
         { l: "#A3B18C", d: "#4A4A4A", s: "#1C1C1C"},   // My Choice

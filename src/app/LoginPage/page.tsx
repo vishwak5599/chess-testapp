@@ -10,6 +10,7 @@ const LoginPage=()=>{
             <div className="flex justify-center items-center">
               <button className="text-lg md:text-xl font-bold text-black bg-white border-4 px-5 py-1 md:py-2 rounded-lg hover:bg-gray-300 transition-all duration-150 ease-in-out border-black shadow-lg shadow-gray-300" onClick={()=>login()}>LOG IN</button>
             </div>
+            
           } 
         </div>
       )

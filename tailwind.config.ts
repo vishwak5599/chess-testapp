@@ -30,7 +30,8 @@ export default {
         xxxxl: { min: "2560px" },
       },
       animation: {
-        expand: 'expand 0.2s ease-in-out'
+        expand: 'expand 0.2s ease-in-out',
+        slideLeft: 'slideLeft 0.2s ease-in-out',
       },
       keyframes: {
         expand: {
@@ -41,6 +42,14 @@ export default {
           '100%': {
             transform: 'scale(1)',
             opacity: "1",
+          },
+        },
+        slideLeft: {
+          '0%': {
+            transform: 'translateX(100%)',
+          },
+          '100%': {
+            transform: 'translateX(0)'
           },
         },
       },

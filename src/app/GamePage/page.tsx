@@ -550,6 +550,11 @@ const HomePageContent=()=>{
             })
         }
         setPawnToLastSquarePosi({piece:null,selRow:null,selCol:null,newRow:null,newCol:null})
+        setMoves((prev)=>prev+1)
+        if (audioRefMove.current) {
+            audioRefMove.current.volume=1
+            audioRefMove.current.play()
+        }
     }
 
     const handleRookPosiAfterCastling = (row:number, prevCol:number, newCol:number) => {
@@ -679,10 +684,10 @@ const HomePageContent=()=>{
                 newBoard[newRow][newCol] = selPiece
                 return newBoard
             })
+
+            //increase the count of moves when pawn does not reach last square and when it reaches moves are updated in handlePawnToLastSquare func
+            setMoves((prev)=>prev+1)
         }
-        
-        //increase the count of moves
-        setMoves((prev)=>prev+1)
 
     }
 
@@ -1923,7 +1928,7 @@ const HomePageContent=()=>{
                 </div>
                 <div className="relative rounded-md my-2 md:my-3" style={{border:`${windowSize >= 768 ? "12px" : "6px"} solid ${themeArray[theme].s}`}}>
                     {pawnToLastSquarePosi.piece!==null ? 
-                    <div className="absolute inset-0 flex bg-white justify-center items-center bg-opacity-60 z-80">
+                    <div className="absolute inset-0 flex bg-white justify-center items-center bg-opacity-60 z-20">
                         <div className="flex flex-col justify-center items-center gap-2 lg:gap-3">
                             <div>
                                 <div className={`border-2 ${pawnToLastSquarePosi.piece==="P" ? "border-white bg-gray-700" : "border-black bg-slate-400"} p-2 lg:p-3 rounded-md`} onClick={()=>{pawnToLastSquarePosi.piece==="P" ? handlePawnToLastSquare("Q") : handlePawnToLastSquare("q")}}>{pawnToLastSquarePosi.piece==="P" ? <ChessPiece col="Q"/> : <ChessPiece col="q"/>}</div>
@@ -1936,12 +1941,12 @@ const HomePageContent=()=>{
                         </div>
                     </div> : ""
                     }
-                    <div className={`${pauseTheBoard ? "pointer-events-none" : ""}`}>
+                    <div className={`${pauseTheBoard ? "pointer-events-none" : ""} z-10`}>
                         {board.map((row,i)=>(
                             <div key={i} className="flex justify-center">
                                 {row.map((col,j)=>(
                                     <div key={i+""+j} style={{background:(i+j)%2==0 ? themeArray[theme].l : themeArray[theme].d}}>
-                                    <div key={i+""+j} className="flex h-12 w-12 sm:h-9 sm:w-9 md:h-11 md:w-11 lg:h-12 lg:w-12 xl:h-14 xl:w-14 xxl:h-16 xxl:w-16 justify-center items-center" 
+                                    <div key={i+""+j} className="relative flex h-12 w-12 sm:h-9 sm:w-9 md:h-12 md:w-12 lg:h-12 lg:w-12 xl:h-14 xl:w-14 xxl:h-16 xxl:w-16 justify-center items-center" 
                                     style={{
                                         backgroundColor:
                                         isSelected && selectedPiece.row === i && selectedPiece.col === j
@@ -1981,7 +1986,13 @@ const HomePageContent=()=>{
                                     }}
                                         onClick={()=>handleSelectedPiece(col,i,j)}
                                     >
+                                        {j === 0 && (
+                                            <div className="absolute top-0 left-0.5 lg:left-1 text-xxs lg:text-xs" style={{color:(i+j)%2===0 ? `${themeArray[theme].d}` : `${themeArray[theme].l}`}}>{pieceColour===1 ? 8 - i : i + 1}</div>
+                                        )}
                                         <ChessPiece col={col} />
+                                        {i === 7 && (
+                                            <div className="absolute bottom-0 right-0.5 lg:right-1 text-xxs lg:text-xs" style={{color:(i+j)%2===0 ? `${themeArray[theme].d}` : `${themeArray[theme].l}`}}>{pieceColour===1 ? String.fromCharCode(97 + j) : String.fromCharCode(104 - j)}</div>
+                                        )}
                                     </div>
                                     </div>
                                 ))}
@@ -2021,7 +2032,7 @@ const HomePageContent=()=>{
                     <div className="flex flex-col items-end mt-2 mr-2 md:mt-3 md:mr-3 lg:mt-4 lg:mr-4"><button onClick={()=>setPauseTheBoard(true)}><FaWindowClose color="#3b82f6" size={iconSize}/></button></div>
                     <div className="flex flex-col gap-4 lg:gap-6 justify-center items-center mt-4 lg:mt-6">
                         <div className="text-base md:text-lg lg:text-3xl font-extrabold text-center" style={{color: themeArray[theme].s}}>{draw ? "DRAW!!" : (staleMateWhiteWon || staleMateBlackWon) ? "DRAW BY STALEMATE" : whiteWon ? <div className="flex flex-col"><div>VICTORY</div><div>WHITE WON</div></div> : blackWon ? <div className="flex flex-col"><div>VICTORY</div><div>BLACK WON</div></div> : ""}</div>
-                        <button onClick={()=>router.push("/")} className="text-sm md:text-base lg:text-xl font-extrabold text-black p-1 md:p-2 rounded-lg hover:scale-105" style={{border: `4px solid ${themeArray[theme].s}`}}>GO BACK</button>
+                        <button onClick={()=>router.push("/HomePage")} className="text-sm md:text-base lg:text-xl font-extrabold text-black p-1 md:p-2 rounded-lg hover:scale-105" style={{border: `4px solid ${themeArray[theme].s}`}}>GO BACK</button>
                     </div>
                 </div>
             }

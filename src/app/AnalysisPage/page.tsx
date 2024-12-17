@@ -84,7 +84,7 @@ const AnalysisPage = () => {
             <button onClick={()=>router.push('/HomePage')} className="flex items-center m-2 md:m-4"><IoMdArrowRoundBack size={getSizeArrow()}/></button>
             <div className="text-black font-extrabold text-xl md:text-3xl font-anticDidone flex justify-center mb-2 md:mb-4">ANALYSIS</div>
             <div className="flex flex-wrap justify-center items-center px-3 gap-3">
-                {boardData && boardData.map((item,index)=>(
+                {boardData && boardData.length>0 && boardData.map((item,index)=>(
                     <div key={index} className="flex flex-col justify-center items-center w-[45%] md:w-[32%] rounded-md">
                         <div className={`absolute flex justify-center items-center text-lg md:text-xl font-bold ${item.result==="white" ? "text-white" : "text-black"}`}>{item.result==="white" ? "WHITE WON" : item.result==="black" ? "BLACK WON" : "DRAW"}</div>
                         <div className="border-2 md:border-4 border-black rounded-md cursor-pointer" onClick={()=>router.push(`/AnalysisPage/${item.gameId}`)}>
@@ -109,9 +109,14 @@ const AnalysisPage = () => {
                                     ))}
                                 </div>
                             ))}
-                            </div>
                         </div>
-                    ))}
+                    </div>
+                ))}
+                {boardData && boardData.length===0 && 
+                    <div className="flex justify-center items-center text-center text-sm md:text-base lg:text-lg font-anticDidone font-bold text-">
+                        Games that ended with a result (WIN, LOSS, or DRAW) will be visible here.
+                    </div>
+                }
             </div>
         </div>
     )

@@ -126,9 +126,9 @@ const HomePage=()=>{
 
 
     return(
-        <div className={`${!isProfileOpen ? "pt-6 md:pt-12" : ""}`}>
+        <div className={`${!isProfileOpen ? "pt-6 md:pt-12" : "overflow-hidden"}`}>
             {isProfileOpen ? 
-            <div className="flex flex-col mb-2 md:mb-4">
+            <div className="flex flex-col mb-2 md:mb-4 animate-slideLeft">
                 <button onClick={()=>setIsProfileOpen(false)} className="flex items-center m-2 md:m-4"><IoMdArrowRoundBack size={getSizeArrow()}/></button>
                 <div className="flex flex-col justify-center items-center">
                     <div>

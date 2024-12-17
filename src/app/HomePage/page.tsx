@@ -126,7 +126,7 @@ const HomePage=()=>{
 
 
     return(
-        <div className={`${!isProfileOpen ? "md:mt-12" : ""}`}>
+        <div className={`${!isProfileOpen ? "mt-12" : ""}`}>
             {isProfileOpen ? 
             <div className="flex flex-col mb-2 md:mb-4">
                 <button onClick={()=>setIsProfileOpen(false)} className="flex items-center m-2 md:m-4"><IoMdArrowRoundBack size={getSizeArrow()}/></button>

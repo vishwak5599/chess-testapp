@@ -409,7 +409,7 @@ const GameDetails = () => {
                         <div key={i} className="flex justify-center items-center">
                             {row.map((col,j)=>(
                                 <div key={i+""+j} style={{background:(i+j)%2==0 ? themeArray[theme].l : themeArray[theme].d}}>
-                                <div key={i+""+j} className="flex h-12 w-12 sm:h-9 sm:w-9 md:h-11 md:w-11 lg:h-12 lg:w-12 xl:h-14 xl:w-14 xxl:h-16 xxl:w-16 justify-center items-center" 
+                                <div key={i+""+j} className="relative flex h-12 w-12 sm:h-9 sm:w-9 md:h-11 md:w-11 lg:h-12 lg:w-12 xl:h-14 xl:w-14 xxl:h-16 xxl:w-16 justify-center items-center" 
                                 style={{
                                     backgroundColor:
                                     (moveNumber>0 && boardData && ((i===boardData[moveNumber-1].fromRow && j===boardData[moveNumber-1].fromCol) ||
@@ -426,7 +426,13 @@ const GameDetails = () => {
                                     alignItems: "center",
                                 }}
                                 >
+                                    {j===0 && (
+                                        <div className="absolute top-0 left-0.5 lg:left-1 text-xxs lg:text-xs" style={{color:(i+j)%2===0 ? `${themeArray[theme].d}` : `${themeArray[theme].l}`}}>{pieceColour===1 ? 8 - i : i + 1}</div>
+                                    )}
                                     <ChessPiece col={col} />
+                                    {i===7 && (
+                                        <div className="absolute bottom-0 right-0.5 lg:right-1 text-xxs lg:text-xs" style={{color:(i+j)%2===0 ? `${themeArray[theme].d}` : `${themeArray[theme].l}`}}>{pieceColour===1 ? String.fromCharCode(97 + j) : String.fromCharCode(104 - j)}</div>
+                                    )}
                                 </div>
                                 </div>
                             ))}

@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@privy-io/react-auth": "^1.97.0",
     "jotai": "^2.10.3",
     "next": "15.0.4",
     "react": "^19.0.0",

@@ -466,20 +466,20 @@ const HomePageContent=()=>{
         else{
             if(colour==="white"){
                 if(side==="left"){
-                    if(board[0][1]===" " && board[0][2]===" " && board[0][3]===" "){
+                    if(board[0][1]===" " && board[0][2]===" "){
                         return allPossibleMovesForBlack.some((piece)=>{
                             piece.moves.some((move)=>{
-                                (move.row=== 0 && move.col===1) || (move.row===0 && move.col===2) || (move.row===0 && move.col===3)
+                                (move.row=== 0 && move.col===1) || (move.row===0 && move.col===2)
                             })
                         })
                     }
                     else return true
                 }
                 else{
-                    if(board[0][5]===" " && board[0][6]===" "){
+                    if(board[0][4]===" " && board[0][5]===" " && board[0][6]===" "){
                         return allPossibleMovesForBlack.some((piece)=>{
                             piece.moves.some((move)=>{
-                                (move.row=== 0 && move.col===5) || (move.row===0 && move.col===6)
+                                (move.row=== 0 && move.col===4) || (move.row=== 0 && move.col===5) || (move.row===0 && move.col===6)
                             })
                         })
                     }
@@ -488,20 +488,20 @@ const HomePageContent=()=>{
             }
             else{
                 if(side==="left"){
-                    if(board[7][1]===" " && board[7][2]===" " && board[7][3]===" "){
+                    if(board[7][1]===" " && board[7][2]===" "){
                         return allPossibleMovesForWhite.some((piece)=>{
                             piece.moves.some((move)=>{
-                                (move.row=== 7 && move.col===1) || (move.row===7 && move.col===2) || (move.row===7 && move.col===3)
+                                (move.row=== 7 && move.col===1) || (move.row===7 && move.col===2)
                             })
                         })
                     }
                     else return true
                 }
                 else{
-                    if(board[7][5]===" " && board[7][6]===" "){
+                    if(board[7][4]===" " && board[7][5]===" " && board[7][6]===" "){
                         return allPossibleMovesForWhite.some((piece)=>{
                             piece.moves.some((move)=>{
-                                (move.row=== 7 && move.col===5) || (move.row===7 && move.col===6)
+                                (move.row=== 7 && move.col===4) || (move.row=== 7 && move.col===5) || (move.row===7 && move.col===6)
                             })
                         })
                     }
@@ -618,21 +618,21 @@ const HomePageContent=()=>{
             if(selPiece==="r" && selRow===7 && selCol===7 && blackRookCastlePossible.right) setBlackRookCastlePossible((prev)=>({...prev,right:false}))
 
             //set the rook posi after castling
-            if(selPiece==="K" && selRow===0 && selCol===4){
-                if(whiteKingCastlePossible && whiteRookCastlePossible.left && newRow===0 && newCol===2){
-                    handleRookPosiAfterCastling(0,0,3)
+            if(selPiece==="K" && selRow===0 && selCol===3){
+                if(whiteKingCastlePossible && whiteRookCastlePossible.left && newRow===0 && newCol===1){
+                    handleRookPosiAfterCastling(0,0,2)
                 }
-                if(whiteKingCastlePossible && whiteRookCastlePossible.right && newRow===0 && newCol===6){
-                    handleRookPosiAfterCastling(0,7,5)
+                if(whiteKingCastlePossible && whiteRookCastlePossible.right && newRow===0 && newCol===5){
+                    handleRookPosiAfterCastling(0,7,4)
                 }
                 setWhiteKingCastlePossible(false)
             }
-            if(selPiece==="k" && selRow===7 && selCol===4){
-                if(blackKingCastlePossible && blackRookCastlePossible.left && newRow===7 && newCol===2){
-                    handleRookPosiAfterCastling(7,0,3)
+            if(selPiece==="k" && selRow===7 && selCol===3){
+                if(blackKingCastlePossible && blackRookCastlePossible.left && newRow===7 && newCol===1){
+                    handleRookPosiAfterCastling(7,0,2)
                 }
-                if(blackKingCastlePossible && blackRookCastlePossible.right && newRow===7 && newCol===6){
-                    handleRookPosiAfterCastling(7,7,5)
+                if(blackKingCastlePossible && blackRookCastlePossible.right && newRow===7 && newCol===5){
+                    handleRookPosiAfterCastling(7,7,4)
                 }
                 setBlackKingCastlePossible(false)
             }
@@ -1544,8 +1544,8 @@ const HomePageContent=()=>{
         
         if(pieceColour===1 && row===7 && col===4 && board[7][0]==="R" && whiteKingCastlePossible && whiteRookCastlePossible.left && !findThreatToWhiteKing(allPossibleMovesForBlack,board) && !checkMiddleSquaresAttacked("white","left")) movesArray.push({row:row,col:col-2})
         if(pieceColour===1 && row===7 && col===4 && board[7][7]==="R" && whiteKingCastlePossible && whiteRookCastlePossible.right && !findThreatToWhiteKing(allPossibleMovesForBlack,board) && !checkMiddleSquaresAttacked("white","right")) movesArray.push({row:row,col:col+2})
-        if(pieceColour===0 && row===0 && col===4 && board[0][0]==="R" && whiteKingCastlePossible && whiteRookCastlePossible.left && !findThreatToWhiteKing(allPossibleMovesForBlack,board) && !checkMiddleSquaresAttacked("white","left")) movesArray.push({row:row,col:col-2})
-        if(pieceColour===0 && row===0 && col===4 && board[0][7]==="R" && whiteKingCastlePossible && whiteRookCastlePossible.right && !findThreatToWhiteKing(allPossibleMovesForBlack,board) && !checkMiddleSquaresAttacked("white","right")) movesArray.push({row:row,col:col+2})
+        if(pieceColour===0 && row===0 && col===3 && board[0][0]==="R" && whiteKingCastlePossible && whiteRookCastlePossible.left && !findThreatToWhiteKing(allPossibleMovesForBlack,board) && !checkMiddleSquaresAttacked("white","left")) movesArray.push({row:row,col:col-2})
+        if(pieceColour===0 && row===0 && col===3 && board[0][7]==="R" && whiteKingCastlePossible && whiteRookCastlePossible.right && !findThreatToWhiteKing(allPossibleMovesForBlack,board) && !checkMiddleSquaresAttacked("white","right")) movesArray.push({row:row,col:col+2})
 
         if((pieceColour===1 && moves%2!==0) || (pieceColour===0 && moves%2===0)){
             setAllPossibleMovesForWhite((prev)=>{return [...prev,{piece:"K",posi:{row:row,col:col},moves:movesArray, protected:protectedArray}]})
@@ -1727,8 +1727,8 @@ const HomePageContent=()=>{
         
         if(pieceColour===1 && row===0 && col===4 && board[0][0]==="r" && blackKingCastlePossible && blackRookCastlePossible.left && !findThreatToBlackKing(allPossibleMovesForWhite,board) && !checkMiddleSquaresAttacked("black","left")) movesArray.push({row:row,col:col-2})
         if(pieceColour===1 && row===0 && col===4 && board[0][7]==="r" && blackKingCastlePossible && blackRookCastlePossible.right && !findThreatToBlackKing(allPossibleMovesForWhite,board) && !checkMiddleSquaresAttacked("black","right")) movesArray.push({row:row,col:col+2})
-        if(pieceColour===0 && row===7 && col===4 && board[7][0]==="r" && blackKingCastlePossible && blackRookCastlePossible.left && !findThreatToBlackKing(allPossibleMovesForWhite,board) && !checkMiddleSquaresAttacked("black","left")) movesArray.push({row:row,col:col-2})
-        if(pieceColour===0 && row===7 && col===4 && board[7][7]==="r" && blackKingCastlePossible && blackRookCastlePossible.right && !findThreatToBlackKing(allPossibleMovesForWhite,board) && !checkMiddleSquaresAttacked("black","right")) movesArray.push({row:row,col:col+2})
+        if(pieceColour===0 && row===7 && col===3 && board[7][0]==="r" && blackKingCastlePossible && blackRookCastlePossible.left && !findThreatToBlackKing(allPossibleMovesForWhite,board) && !checkMiddleSquaresAttacked("black","left")) movesArray.push({row:row,col:col-2})
+        if(pieceColour===0 && row===7 && col===3 && board[7][7]==="r" && blackKingCastlePossible && blackRookCastlePossible.right && !findThreatToBlackKing(allPossibleMovesForWhite,board) && !checkMiddleSquaresAttacked("black","right")) movesArray.push({row:row,col:col+2})
 
         if((pieceColour===1 && moves%2===0) || (pieceColour===0 && moves%2!==0)){
             setAllPossibleMovesForBlack((prev)=>{return [...prev,{piece:"k",posi:{row:row,col:col},moves:movesArray, protected:protectedArray}]})

@@ -81,7 +81,7 @@ const AnalysisPage = () => {
 
     return(
         <div className="flex flex-col mb-2 md:mb-4">
-            <button onClick={()=>router.push('/')} className="flex items-center m-2 md:m-4"><IoMdArrowRoundBack size={getSizeArrow()}/></button>
+            <button onClick={()=>router.push('/HomePage')} className="flex items-center m-2 md:m-4"><IoMdArrowRoundBack size={getSizeArrow()}/></button>
             <div className="text-black font-extrabold text-xl md:text-3xl font-anticDidone flex justify-center mb-2 md:mb-4">ANALYSIS</div>
             <div className="flex flex-wrap justify-center items-center px-3 gap-3">
                 {boardData && boardData.map((item,index)=>(

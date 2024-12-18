@@ -15,7 +15,7 @@ const Providers: React.FC<ProvidersProps> = ({ children }) => {
                 appearance: {
                     theme: "light",
                     accentColor: "#676FFF",
-                    logo: <img src='/images/chess-logo.jpg' width={60} height={60}></img>,
+                    logo: <img src='/icon.png' width={60} height={60}></img>,
                 },
                 loginMethods: ["email", "google"],
             }}

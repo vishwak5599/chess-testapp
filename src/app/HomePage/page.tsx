@@ -126,20 +126,20 @@ const HomePage=()=>{
 
 
     return(
-        <div className={`${!isProfileOpen ? "pt-6 md:pt-12" : "overflow-hidden"}`}>
+        <div className={`${!isProfileOpen ? "pt-6 md:pt-12" : "overflow-hidden"} relative`}>
             {isProfileOpen ? 
-            <div className="flex flex-col mb-2 md:mb-4 animate-slideLeft">
+            <div className="flex flex-col pb-2 md:pb-4 animate-slideLeft w-screen h-screen">
                 <button onClick={()=>setIsProfileOpen(false)} className="flex items-center m-2 md:m-4"><IoMdArrowRoundBack size={getSizeArrow()}/></button>
                 <div className="flex flex-col justify-center items-center">
                     <div>
                         {user && user.google && user.google.name ? (
-                            <figure className='h-14 w-14 sm:h-12 sm:w-12 lg:h-20 lg:w-20 outline-none rounded-full flex items-center justify-center bg-[#743dff] text-white text-xl text-center font-bold'>
+                            <figure className='h-14 w-14 sm:h-12 sm:w-12 lg:h-20 lg:w-20 outline-none rounded-full flex items-center justify-center bg-gray-600 text-white text-xl text-center font-bold'>
                                 <div className='pt-0.5 lg:pt-1.5 text-3xl lg:text-5xl'>
                                     <div>{user.google.name[0].toUpperCase()}</div>
                                 </div>
                             </figure>
                         ) : (
-                            <div><FaUser size={getSizeLogo()} color="#3b82f6" className="border-2 border-blue-500 rounded-full p-0.5 md:p-1 mr-2 md:mr-5"/></div>
+                            <div><FaUser size={getSizeLogo()} color="#4b5563" className="border-2 border-gray-400 rounded-full p-0.5 md:p-1 mr-2 md:mr-5"/></div>
                         )}
                     </div>
                     <div className="flex flex-col justify-center items-center mt-10">
@@ -152,152 +152,155 @@ const HomePage=()=>{
                             </div>
                         </div>
                         <div className="flex justify-center mt-6 lg:mt-8">
-                            <button className="text-lg md:text-xl font-bold text-white font-anticDidone bg-blue-500 border-4 px-5 py-1 md:py-2 rounded-lg hover:bg-blue-600 transition-all duration-150 ease-in-out border-white shadow-lg shadow-blue-500" onClick={()=>logout()}>LOG OUT</button>
+                            <button className="text-lg md:text-xl font-bold text-gray-600 font-anticDidone bg-white border-4 px-5 py-1 md:py-2 rounded-lg hover:bg-gray-200 transition-all duration-150 ease-in-out border-gray-600 shadow-lg shadow-gray-200" onClick={()=>logout()}>LOG OUT</button>
                         </div>
                     </div>
                 </div>
             </div> :
-            <div className="flex flex-col justify-center items-center gap-10 mt-10 md:mt-0">
-                <div className="flex flex-grow justify-between items-center -mt-8 pl-6 md:pl-18 w-screen">
-                    <div className="flex justify-center items-center flex-grow">
-                        <Image src={"/images/chess-logo.jpg"} alt={"logo"} width={getSizeLogo()} height={getSizeLogo()}></Image>
-                        <div className="text-xl md:text-2xl lg:text-3xl text-blue-500 font-extrabold font-anticDidone -ml-2 md:-ml-4">CHESS</div>
-                    </div>
-                    <div className="flex ml-auto items-center justify-start"><FaUser onClick={()=>setIsProfileOpen(true)} size={getSize1()} color="#3b82f6" className="border-2 border-blue-500 rounded-full p-0.5 md:p-1 mr-2 md:mr-5"/></div>
-                </div>
-                <div className="flex justify-center font-bold text-lg md:text-xl font-anticDidone -mt-8 md:-mt-6">CHOOSE YOUR SIDE</div>
-                    <div className="flex justify-center gap-8 md:gap-10 -mt-8">
-                        <button className={`${!selectRandomPieceColour && pieceColour==1 ? " border-blue-500 shadow-lg shadow-blue-500" : "border-white"} p-1 md:p-2 border-4 bg-gray-700 rounded-lg hover:scale-105`} onClick={()=>handleSelectPieceColour(1)}><FaChessKing size={getSize()} color="white"/></button>
-                        <button className={`${selectRandomPieceColour ? " border-blue-500 shadow-lg shadow-blue-500" : "border-white"} p-1 md:p-2 border-4 hover:scale-105 bg-gray-300 rounded-lg flex`} onClick={()=>handleSelectPieceColour(2)}><FaChessKing size={getSize()} color="white" style={{clipPath: "polygon(0 0, 50% 0, 50% 100%, 0 100%)"}}/><FaChessKing size={getSize()} color="black" className="absolute" style={{clipPath: "polygon(50% 0, 100% 0, 100% 100%, 50% 100%)"}}/></button>
-                        <button className={`${!selectRandomPieceColour && pieceColour==0 ? " border-blue-500 shadow-lg shadow-blue-500" : "border-white"} p-1 md:p-2 border-4 bg-gray-300 rounded-lg hover:scale-105`} onClick={()=>handleSelectPieceColour(0)}><FaChessKing size={getSize()} color="black"/></button>
-                    </div>
-                <div className="flex flex-col justify-center">
-                    <div className="flex flex-col md:flex-row justify-center items-center -mt-5">
-                        <div className={`flex justify-center text-xl font-bold font-anticDidone ${timeType===0 ? "bg-blue-500 hover:bg-blue-600 border-white" : "bg-white hover:bg-slate-200 border-blue-500"} transition-all duration-150 ease-in-out border-4 w-70 md:w-100 px-12 md:px-20 py-1 md:py-2 rounded-lg gap-1 md:gap-1.5`} onClick={()=>setTimeType(0)}>
-                            <div>{preTime.t<=2 ? <GiBulletBill color="orange" size={26}/> : preTime.t<=5 ? <AiFillThunderbolt color="gold" size={26}/> : <LuAlarmClock color="green" size={26}/>}</div>
-                            <div className={`flex justify-center text-base md:text-lg mt-0.5 md:mt-0 w-20 -ml-1 md:ml-1 ${timeType!==0 ? "text-blue-500" : "text-white"}`}>{preTime.i===0 ? `${preTime.t} min` : `${preTime.t} | ${preTime.i}`}</div>
-                            <button className="relative hover:scale-105 ml-2 -mr-8 md:ml-6 md:-mr-12" onClick={()=>handleDropdown()}>{!isDropdown ? <IoMdArrowDropdownCircle size={28} color={`${timeType===0 ? "white" : "#3b82f6"}`}/> : <IoMdArrowDropupCircle size={28} color={`${timeType===0 ? "white" : "#3b82f6"}`}/>}</button>
-                            {isDropdown && 
-                                <div className="absolute mt-10 justify-center bg-blue-500 border-4 px-4 py-1 rounded-lg border-white">
-                                    <div className="flex flex-col mt-2">
-                                        <div className="flex gap-1 md:gap-2">
-                                            <GiBulletBill color="orange"/>
-                                            <div className="text-sm md:text-base">BULLET</div>
-                                        </div>
-                                        <div className="flex gap-1.5 mt-2">
-                                            <button className="flex justify-center text-xs md:text-sm font-bold text-white bg-blue-500 hover:bg-blue-600 transition-all duration-150 ease-in-out border-2 w-14 md:w-20 py-2 rounded-lg border-white gap-1" onClick={()=>handleSetTime(1,0)}>1 min</button>
-                                            <button className="flex justify-center text-xs md:text-sm font-bold text-white bg-blue-500 hover:bg-blue-600 transition-all duration-150 ease-in-out border-2 w-14 md:w-20 py-2 rounded-lg border-white gap-1" onClick={()=>handleSetTime(1,1)}> 1 | 1</button>
-                                            <button className="flex justify-center text-xs md:text-sm font-bold text-white bg-blue-500 hover:bg-blue-600 transition-all duration-150 ease-in-out border-2 w-14 md:w-20 py-2 rounded-lg border-white gap-1" onClick={()=>handleSetTime(2,1)}> 2 | 1</button>
-                                        </div>
-                                    </div>
-                                    <div className="flex flex-col mt-2">
-                                        <div className="flex gap-1 md:gap-2">
-                                            <AiFillThunderbolt color="gold"/>
-                                            <div className="text-sm md:text-base">BLITZ</div>
-                                        </div>
-                                        <div className="flex gap-1.5 mt-1">
-                                            <button className="flex justify-center text-xs md:text-sm font-bold text-white bg-blue-500 hover:bg-blue-600 transition-all duration-150 ease-in-out border-2 w-14 md:w-20 py-2 rounded-lg border-white gap-1" onClick={()=>handleSetTime(3,0)}>3 min</button>
-                                            <button className="flex justify-center text-xs md:text-sm font-bold text-white bg-blue-500 hover:bg-blue-600 transition-all duration-150 ease-in-out border-2 w-14 md:w-20 py-2 rounded-lg border-white gap-1" onClick={()=>handleSetTime(3,2)}>3 | 2</button>
-                                            <button className="flex justify-center text-xs md:text-sm font-bold text-white bg-blue-500 hover:bg-blue-600 transition-all duration-150 ease-in-out border-2 w-14 md:w-20 py-2 rounded-lg border-white gap-1" onClick={()=>handleSetTime(5,0)}>5 min</button>
-                                        </div>
-                                    </div>
-                                    <div className="flex flex-col mt-2 mb-2">
-                                        <div className="flex gap-1 md:gap-2">
-                                            <LuAlarmClock color="green"/>
-                                            <div className="text-sm md:text-base">RAPID</div>
-                                        </div>
-                                        <div className="flex gap-1.5 mt-1">
-                                            <button className="flex justify-center text-xs md:text-sm font-bold text-white bg-blue-500 hover:bg-blue-600 transition-all duration-150 ease-in-out border-2 w-14 md:w-20 py-2 rounded-lg border-white gap-1" onClick={()=>handleSetTime(10,0)}>10 min</button>
-                                            <button className="flex justify-center text-xs md:text-sm font-bold text-white bg-blue-500 hover:bg-blue-600 transition-all duration-150 ease-in-out border-2 w-14 md:w-20 py-2 rounded-lg border-white gap-1" onClick={()=>handleSetTime(15,10)}>15 | 10</button>
-                                            <button className="flex justify-center text-xs md:text-sm font-bold text-white bg-blue-500 hover:bg-blue-600 transition-all duration-150 ease-in-out border-2 w-14 md:w-20 py-2 rounded-lg border-white gap-1" onClick={()=>handleSetTime(30,0)}>30 min</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            }
+            <div>
+                <div className="absolute inset-0 h-screen w-screen bg-[url('/images/loginScreenbg.jpeg')] bg-cover bg-center opacity-90 filter brightness-75 contrast-140 saturate-125 grayscale"></div>
+                <div className="relative z-10 flex flex-col justify-center items-center gap-10 mt-10 md:mt-0">
+                    <div className="flex flex-grow justify-between items-center -mt-8 pl-6 md:pl-18 w-screen">
+                        <div className="flex justify-center items-center flex-grow">
+                            <Image src={"/images/icon.png"} alt={"logo"} width={getSizeLogo()} height={getSizeLogo()}></Image>
+                            <div className="text-xl md:text-2xl lg:text-3xl text-white font-extrabold font-anticDidone -ml-2 md:-ml-4">CHESS</div>
                         </div>
-                        <div className="flex justify-center w-[90%] my-3 md:my-0 md:h-14 md:w-0 border-2 border-blue-500 rounded-2xl mx-4"></div>
-                        <div className={`flex justify-between border-4 px-6 md:px-10 rounded-lg ${timeType===1 ? "bg-blue-500 hover:bg-blue-600 border-white" : "bg-white hover:bg-slate-200 border-blue-500"}`} onClick={()=>setTimeType(1)}>
-                            <div className="flex justify-center items-center -my-2">
-                                <div className={`mt-1 text-base font-anticDidone font-black ${timeType===0 ? "text-blue-500" : "text-white"}`}>
-                                    CUSTOM
-                                </div>
-                                <RiArrowDropRightLine color={`${timeType===1 ? "white" : "#3b82f6"}`} size={30} className="-ml-1"/>
-                                <div className="flex gap-4 font-anticDidone font-bold text-white text-xl">
-                                    <div className="flex flex-col justify-center items-center">
-                                        <button onClick={() => {setCustTime((prev) => {if(prev.t<90){return { ...prev,t:prev.t+1}}return prev})}}><RiArrowDropUpLine size={40} color={`${timeType===1 ? "white" : "#3b82f6"}`} className="-mb-2"/></button>
-                                        <div className="flex justify-center items-center bg-gray-400 h-8 w-8 md:h-10 md:w-10 rounded-md">{custTime.t}</div>
-                                        <button onClick={() => {setCustTime((prev) => {if(prev.t>0){return {...prev,t:prev.t-1}}return prev})}}><RiArrowDropDownLine size={40} color={`${timeType===1 ? "white" : "#3b82f6"}`} className="-mt-2"/></button>
+                        <div className="flex ml-auto items-center justify-start"><FaUser onClick={()=>setIsProfileOpen(true)} size={getSize()} color="white" className="border-2 border-white rounded-full p-0.5 md:p-1 mr-2 md:mr-5"/></div>
+                    </div>
+                    <div className="flex justify-center font-bold text-lg md:text-xl font-anticDidone -mt-8 md:-mt-6">CHOOSE YOUR SIDE</div>
+                        <div className="flex justify-center gap-8 md:gap-10 -mt-8">
+                            <button className={`${!selectRandomPieceColour && pieceColour==1 ? " border-white shadow-lg shadow-white" : "border-gray-400"} p-1 md:p-2 border-4 bg-gray-500 rounded-lg hover:scale-105`} onClick={()=>handleSelectPieceColour(1)}><FaChessKing size={getSize()} color="white"/></button>
+                            <button className={`${selectRandomPieceColour ? " border-white shadow-lg shadow-white" : "border-gray-400"} p-1 md:p-2 border-4 hover:scale-105 bg-gray-300 rounded-lg flex`} onClick={()=>handleSelectPieceColour(2)}><FaChessKing size={getSize()} color="white" style={{clipPath: "polygon(0 0, 50% 0, 50% 100%, 0 100%)"}}/><FaChessKing size={getSize()} color="black" className="absolute" style={{clipPath: "polygon(50% 0, 100% 0, 100% 100%, 50% 100%)"}}/></button>
+                            <button className={`${!selectRandomPieceColour && pieceColour==0 ? " border-white shadow-lg shadow-white" : "border-gray-400"} p-1 md:p-2 border-4 bg-gray-300 rounded-lg hover:scale-105`} onClick={()=>handleSelectPieceColour(0)}><FaChessKing size={getSize()} color="black"/></button>
+                        </div>
+                    <div className="flex flex-col justify-center">
+                        <div className="flex flex-col md:flex-row justify-center items-center -mt-5">
+                            <div className={`flex justify-center text-xl font-bold font-anticDidone ${timeType===0 ? "bg-white hover:bg-gray-200 border-gray-600 shadow-lg shadow-white" : "bg-gray-400 hover:bg-gray-600 border-white"} transition-all duration-150 ease-in-out border-4 w-70 md:w-100 px-12 md:px-20 py-1 md:py-2 rounded-lg gap-1 md:gap-1.5`} onClick={()=>setTimeType(0)}>
+                                <div>{preTime.t<=2 ? <GiBulletBill color="orange" size={26}/> : preTime.t<=5 ? <AiFillThunderbolt color="gold" size={26}/> : <LuAlarmClock color="green" size={26}/>}</div>
+                                <div className={`flex justify-center text-base md:text-lg mt-0.5 md:mt-0 w-20 -ml-1 md:ml-1 ${timeType!==0 ? "text-gray-800" : "text-black"}`}>{preTime.i===0 ? `${preTime.t} min` : `${preTime.t} | ${preTime.i}`}</div>
+                                <button className="relative hover:scale-105 ml-2 -mr-8 md:ml-6 md:-mr-12" onClick={()=>handleDropdown()}>{!isDropdown ? <IoMdArrowDropdownCircle size={28} color={`${timeType===0 ? "#4b5563" : "white"}`}/> : <IoMdArrowDropupCircle size={28} color={`${timeType===0 ? "#4b5563" : "white"}`}/>}</button>
+                                {isDropdown && 
+                                    <div className="absolute mt-10 justify-center bg-white border-4 px-4 py-1 rounded-lg border-gray-600">
+                                        <div className="flex flex-col mt-2">
+                                            <div className="flex gap-1 md:gap-2">
+                                                <GiBulletBill color="orange"/>
+                                                <div className="text-sm md:text-base">BULLET</div>
+                                            </div>
+                                            <div className="flex gap-1.5 mt-2">
+                                                <button className="flex justify-center text-xs md:text-sm font-bold text-black bg-gray-400 hover:bg-gray-600 transition-all duration-150 ease-in-out border-2 w-14 md:w-20 py-2 rounded-lg border-gray-800 gap-1" onClick={()=>handleSetTime(1,0)}>1 min</button>
+                                                <button className="flex justify-center text-xs md:text-sm font-bold text-black bg-gray-400 hover:bg-gray-600 transition-all duration-150 ease-in-out border-2 w-14 md:w-20 py-2 rounded-lg border-gray-800 gap-1" onClick={()=>handleSetTime(1,1)}> 1 | 1</button>
+                                                <button className="flex justify-center text-xs md:text-sm font-bold text-black bg-gray-400 hover:bg-gray-600 transition-all duration-150 ease-in-out border-2 w-14 md:w-20 py-2 rounded-lg border-gray-800 gap-1" onClick={()=>handleSetTime(2,1)}> 2 | 1</button>
+                                            </div>
+                                        </div>
+                                        <div className="flex flex-col mt-2">
+                                            <div className="flex gap-1 md:gap-2">
+                                                <AiFillThunderbolt color="gold"/>
+                                                <div className="text-sm md:text-base">BLITZ</div>
+                                            </div>
+                                            <div className="flex gap-1.5 mt-1">
+                                                <button className="flex justify-center text-xs md:text-sm font-bold text-black bg-gray-400 hover:bg-gray-600 transition-all duration-150 ease-in-out border-2 w-14 md:w-20 py-2 rounded-lg border-gray-800 gap-1" onClick={()=>handleSetTime(3,0)}>3 min</button>
+                                                <button className="flex justify-center text-xs md:text-sm font-bold text-black bg-gray-400 hover:bg-gray-600 transition-all duration-150 ease-in-out border-2 w-14 md:w-20 py-2 rounded-lg border-gray-800 gap-1" onClick={()=>handleSetTime(3,2)}>3 | 2</button>
+                                                <button className="flex justify-center text-xs md:text-sm font-bold text-black bg-gray-400 hover:bg-gray-600 transition-all duration-150 ease-in-out border-2 w-14 md:w-20 py-2 rounded-lg border-gray-800 gap-1" onClick={()=>handleSetTime(5,0)}>5 min</button>
+                                            </div>
+                                        </div>
+                                        <div className="flex flex-col mt-2 mb-2">
+                                            <div className="flex gap-1 md:gap-2">
+                                                <LuAlarmClock color="green"/>
+                                                <div className="text-sm md:text-base">RAPID</div>
+                                            </div>
+                                            <div className="flex gap-1.5 mt-1">
+                                                <button className="flex justify-center text-xs md:text-sm font-bold text-black bg-gray-400 hover:bg-gray-600 transition-all duration-150 ease-in-out border-2 w-14 md:w-20 py-2 rounded-lg border-gray-800 gap-1" onClick={()=>handleSetTime(10,0)}>10 min</button>
+                                                <button className="flex justify-center text-xs md:text-sm font-bold text-black bg-gray-400 hover:bg-gray-600 transition-all duration-150 ease-in-out border-2 w-14 md:w-20 py-2 rounded-lg border-gray-800 gap-1" onClick={()=>handleSetTime(15,10)}>15 | 10</button>
+                                                <button className="flex justify-center text-xs md:text-sm font-bold text-black bg-gray-400 hover:bg-gray-600 transition-all duration-150 ease-in-out border-2 w-14 md:w-20 py-2 rounded-lg border-gray-800 gap-1" onClick={()=>handleSetTime(30,0)}>30 min</button>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div className={`flex justify-center items-center mt-6 h-14 border-2 ${timeType===1 ? "white" : "#3b82f6"} rounded-2xl mx-2`}></div>
-                                    <div className="flex flex-col justify-center items-center">
-                                        <button onClick={() => {setCustTime((prev) => {if(prev.i<30){return { ...prev,i:prev.i+1}}return prev})}}><RiArrowDropUpLine size={40} color={`${timeType===1 ? "white" : "#3b82f6"}`} className="-mb-2"/></button>
-                                        <div className="flex justify-center items-center bg-gray-400 h-8 w-8 md:h-10 md:w-10 rounded-md">{custTime.i}</div>
-                                        <button onClick={() => {setCustTime((prev) => {if(prev.i>0){return {...prev,i:prev.i-1}}return prev})}}><RiArrowDropDownLine size={40} color={`${timeType===1 ? "white" : "#3b82f6"}`} className="-mt-2"/></button>
+                                }
+                            </div>
+                            <div className="flex justify-center w-[90%] my-3 md:my-0 md:h-14 md:w-0 border-2 border-gray-800 rounded-2xl mx-4"></div>
+                            <div className={`flex justify-between border-4 px-6 md:px-10 rounded-lg ${timeType===1 ? "bg-white hover:bg-gray-200 border-gray-600 shadow-lg shadow-white" : "bg-gray-400 hover:bg-gray-600 border-white"}`} onClick={()=>setTimeType(1)}>
+                                <div className="flex justify-center items-center -my-2">
+                                    <div className={`mt-1 text-base font-anticDidone font-black ${timeType===0 ? "text-gray-800" : "text-black"}`}>
+                                        CUSTOM
+                                    </div>
+                                    <RiArrowDropRightLine color={`${timeType===1 ? "black" : "#1f2937"}`} size={30} className="-ml-1"/>
+                                    <div className="flex gap-4 font-anticDidone font-bold text-black text-xl">
+                                        <div className="flex flex-col justify-center items-center">
+                                            <button onClick={() => {setCustTime((prev) => {if(prev.t<90){return { ...prev,t:prev.t+1}}return prev})}}><RiArrowDropUpLine size={40} color={`${timeType===1 ? "black" : "#1f2937"}`} className="-mb-2"/></button>
+                                            <div className="flex justify-center items-center bg-gray-400 h-8 w-8 md:h-10 md:w-10 rounded-md">{custTime.t}</div>
+                                            <button onClick={() => {setCustTime((prev) => {if(prev.t>0){return {...prev,t:prev.t-1}}return prev})}}><RiArrowDropDownLine size={40} color={`${timeType===1 ? "black" : "#1f2937"}`} className="-mt-2"/></button>
+                                        </div>
+                                        <div className="flex justify-center items-center mt-6 h-14 border-2 border-gray-800 rounded-2xl mx-2"></div>
+                                        <div className="flex flex-col justify-center items-center">
+                                            <button onClick={() => {setCustTime((prev) => {if(prev.i<30){return { ...prev,i:prev.i+1}}return prev})}}><RiArrowDropUpLine size={40} color={`${timeType===1 ? "black" : "#1f2937"}`} className="-mb-2"/></button>
+                                            <div className="flex justify-center items-center bg-gray-400 h-8 w-8 md:h-10 md:w-10 rounded-md">{custTime.i}</div>
+                                            <button onClick={() => {setCustTime((prev) => {if(prev.i>0){return {...prev,i:prev.i-1}}return prev})}}><RiArrowDropDownLine size={40} color={`${timeType===1 ? "black" : "#1f2937"}`} className="-mt-2"/></button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div className="flex justify-center mt-2 md:mt-4">
-                        <button className="text-lg md:text-xl font-bold text-white font-anticDidone bg-blue-500 border-4 px-5 py-1 md:py-2 rounded-lg hover:bg-blue-600 transition-all duration-150 ease-in-out border-white shadow-lg shadow-blue-500" onClick={()=>handleStartGame()}>START GAME</button>
-                    </div>
-                    <div className="flex justify-center items-center"><div className="w-[60%] md:w-[40%] my-3 border-2 border-blue-500 rounded-2xl"></div></div>
-                    <div className="flex justify-center">
-                        <button className="text-base md:text-lg font-bold text-white font-anticDidone bg-blue-500 border-4 px-4 py-1 md:py-2 rounded-lg hover:bg-blue-600 transition-all duration-150 ease-in-out border-white shadow-lg shadow-blue-500" onClick={()=>handlePasssNPlayGame()}><div className="flex justify-center items-center gap-2">PASS N PLAY<div><FaPeopleArrows color="white" size={26}/></div></div></button>
-                    </div>
-                    <div className="flex justify-center gap-2">
                         <div className="flex justify-center mt-2 md:mt-4">
-                            <button className="text-sm md:text-base font-bold text-white font-anticDidone bg-blue-500 border-4 px-3 py-1 rounded-lg hover:bg-blue-600 transition-all duration-150 ease-in-out border-white shadow-lg shadow-blue-500" onClick={()=>setChooseTheme(true)}>CHANGE THEME</button>
+                            <button className="text-lg md:text-xl font-bold text-gray-600 font-anticDidone bg-white border-4 px-5 py-1 md:py-2 rounded-lg hover:bg-gray-200 transition-all duration-150 ease-in-out border-gray-600 shadow-lg shadow-white" onClick={()=>handleStartGame()}>START GAME</button>
                         </div>
-                        <div className="flex justify-center mt-2 md:mt-4">
-                            <button className="text-sm md:text-base font-bold text-white font-anticDidone bg-blue-500 border-4 px-8 py-1 rounded-lg hover:bg-blue-600 transition-all duration-150 ease-in-out border-white shadow-lg shadow-blue-500" onClick={()=>router.push("/AnalysisPage")}>ANALYSIS</button>
+                        <div className="flex justify-center items-center"><div className="w-[60%] md:w-[40%] my-3 border-2 border-gray-800 rounded-2xl"></div></div>
+                        <div className="flex justify-center">
+                            <button className="text-base md:text-lg font-bold text-gray-600 font-anticDidone bg-white border-4 px-4 py-1 md:py-2 rounded-lg hover:bg-gray-200 transition-all duration-150 ease-in-out border-gray-600 shadow-lg shadow-white" onClick={()=>handlePasssNPlayGame()}><div className="flex justify-center items-center gap-2">PASS N PLAY<div><FaPeopleArrows color="#4b5563" size={26}/></div></div></button>
                         </div>
-                    </div>
-                </div>
-                {chooseTheme &&
-                    <div className="absolute flex flex-col bg-white filter brightness-110 border-4 p-2 md:p-3 lg:p-4 border-black rounded-md w-[90%] h-[55%] md:w-[60%] md:h-[65%] lg:w-[50%] lg:h-[75%] animate-expand">
-                        <div className="flex flex-col items-end mb-4 lg:mb-10"><button onClick={()=>setChooseTheme(false)}><FaWindowClose color="#3b82f6" size={iconSize}/></button></div>
-                        <div className="flex flex-col mb-6 md:mb-10">
-                            <div className="flex flex-col justify-center items-center">
-                                <div className="border-4 border-black rounded-md">
-                                <div className="flex">
-                                    <div className={`${squareStyle}`} style={{background: (selected!==null && selected.row===0 && selected.col===0) ? themeArray[theme].s : themeArray[theme].l}} onClick={()=>setSelected({row:0,col:0})}><FaChessRook color="black" size={getSize1()}/></div>
-                                    <div className={`${squareStyle}`} style={{background: (selected!==null && selected.row===0 && selected.col===1) ? themeArray[theme].s : themeArray[theme].d}} onClick={()=>setSelected({row:0,col:1})}><FaChessKnight color="black" size={getSize1()}/></div>
-                                    <div className={`${squareStyle}`} style={{background: (selected!==null && selected.row===0 && selected.col===2) ? themeArray[theme].s : themeArray[theme].l}} onClick={()=>setSelected({row:0,col:2})}><FaChessBishop color="black" size={getSize1()}/></div>
-                                    <div className={`${squareStyle}`} style={{background: (selected!==null && selected.row===0 && selected.col===3) ? themeArray[theme].s : themeArray[theme].d}} onClick={()=>setSelected({row:0,col:3})}><FaChessQueen color="black" size={getSize1()}/></div>
-                                    <div className={`${squareStyle}`} style={{background: (selected!==null && selected.row===0 && selected.col===4) ? themeArray[theme].s : themeArray[theme].l}} onClick={()=>setSelected({row:0,col:4})}><FaChessKing color="black" size={getSize1()}/></div>
-                                    <div className={`${squareStyle}`} style={{background: (selected!==null && selected.row===0 && selected.col===5) ? themeArray[theme].s : themeArray[theme].d}} onClick={()=>setSelected({row:0,col:5})}><FaChessPawn color="black" size={getSize1()}/></div>
-                                </div>
-                                <div className="flex">
-                                    <div className={`${squareStyle}`} style={{background: (selected!==null && selected.row===1 && selected.col===0) ? themeArray[theme].s : themeArray[theme].d}} onClick={()=>setSelected({row:1,col:0})}><FaChessRook color="white" size={getSize1()}/></div>
-                                    <div className={`${squareStyle}`} style={{background: (selected!==null && selected.row===1 && selected.col===1) ? themeArray[theme].s : themeArray[theme].l}} onClick={()=>setSelected({row:1,col:1})}><FaChessKnight color="white" size={getSize1()}/></div>
-                                    <div className={`${squareStyle}`} style={{background: (selected!==null && selected.row===1 && selected.col===2) ? themeArray[theme].s : themeArray[theme].d}} onClick={()=>setSelected({row:1,col:2})}><FaChessBishop color="white" size={getSize1()}/></div>
-                                    <div className={`${squareStyle}`} style={{background: (selected!==null && selected.row===1 && selected.col===3) ? themeArray[theme].s : themeArray[theme].l}} onClick={()=>setSelected({row:1,col:3})}><FaChessQueen color="white" size={getSize1()}/></div>
-                                    <div className={`${squareStyle}`} style={{background: (selected!==null && selected.row===1 && selected.col===4) ? themeArray[theme].s : themeArray[theme].d}} onClick={()=>setSelected({row:1,col:4})}><FaChessKing color="white" size={getSize1()}/></div>
-                                    <div className={`${squareStyle}`} style={{background: (selected!==null && selected.row===1 && selected.col===5) ? themeArray[theme].s : themeArray[theme].l}} onClick={()=>setSelected({row:1,col:5})}><FaChessPawn color="white" size={getSize1()}/></div>
-                                </div>
-                                <div className="flex">
-                                    <div className={`${squareStyle}`} style={{background: themeArray[theme].l}}></div>
-                                    <div className={`${squareStyle}`} style={{background: themeArray[theme].d}}></div>
-                                    <div className={`${squareStyle}`} style={{background: themeArray[theme].l}}></div>
-                                    <div className={`${squareStyle}`} style={{background: themeArray[theme].d}}></div>
-                                    <div className={`${squareStyle}`} style={{background: themeArray[theme].l}}></div>
-                                    <div className={`${squareStyle}`} style={{background: themeArray[theme].d}}></div>
-                                </div>
-                                </div>
+                        <div className="flex justify-center gap-2">
+                            <div className="flex justify-center mt-2 md:mt-4">
+                                <button className="text-sm md:text-base font-bold text-gray-600 font-anticDidone bg-white border-4 px-3 py-1 rounded-lg hover:bg-gray-200 transition-all duration-150 ease-in-out border-gray-600 shadow-lg shadow-white" onClick={()=>setChooseTheme(true)}>CHANGE THEME</button>
+                            </div>
+                            <div className="flex justify-center mt-2 md:mt-4">
+                                <button className="text-sm md:text-base font-bold text-gray-600 font-anticDidone bg-white border-4 px-8 py-1 rounded-lg hover:bg-gray-200 transition-all duration-150 ease-in-out border-gray-600 shadow-lg shadow-white" onClick={()=>router.push("/AnalysisPage")}>ANALYSIS</button>
                             </div>
                         </div>
-                        <div className="flex justify-center gap-5 w-full flex-wrap mb-6 lg:mb-0">
-                            {themeArray.map((key,index)=>(
-                                <div key={index} className="flex border-2 border-black rounded-lg" onClick={()=>setTheme(index)}>
-                                    <div className="w-5 h-5 md:w-8 md:h-8 lg:w-10 lg:h-10" style={{background:themeArray[index].l}}></div>
-                                    <div className="w-5 h-5 md:w-8 md:h-8 lg:w-10 lg:h-10" style={{background:themeArray[index].d}}></div>
-                                    <div className="w-5 h-5 md:w-8 md:h-8 lg:w-10 lg:h-10" style={{background:themeArray[index].s}}></div>
-                                </div>
-                            ))}
-                        </div>
                     </div>
-                }
+                    {chooseTheme &&
+                        <div className="absolute flex flex-col bg-white filter brightness-110 border-4 p-2 md:p-3 lg:p-4 border-black rounded-md w-[90%] h-[55%] md:w-[60%] md:h-[65%] lg:w-[50%] lg:h-[75%] animate-expand">
+                            <div className="flex flex-col items-end mb-4 lg:mb-10"><button onClick={()=>setChooseTheme(false)}><FaWindowClose color="#4b5563" size={iconSize}/></button></div>
+                            <div className="flex flex-col mb-6 md:mb-10">
+                                <div className="flex flex-col justify-center items-center">
+                                    <div className="border-4 border-black rounded-md">
+                                    <div className="flex">
+                                        <div className={`${squareStyle}`} style={{background: (selected!==null && selected.row===0 && selected.col===0) ? themeArray[theme].s : themeArray[theme].l}} onClick={()=>setSelected({row:0,col:0})}><FaChessRook color="black" size={getSize1()}/></div>
+                                        <div className={`${squareStyle}`} style={{background: (selected!==null && selected.row===0 && selected.col===1) ? themeArray[theme].s : themeArray[theme].d}} onClick={()=>setSelected({row:0,col:1})}><FaChessKnight color="black" size={getSize1()}/></div>
+                                        <div className={`${squareStyle}`} style={{background: (selected!==null && selected.row===0 && selected.col===2) ? themeArray[theme].s : themeArray[theme].l}} onClick={()=>setSelected({row:0,col:2})}><FaChessBishop color="black" size={getSize1()}/></div>
+                                        <div className={`${squareStyle}`} style={{background: (selected!==null && selected.row===0 && selected.col===3) ? themeArray[theme].s : themeArray[theme].d}} onClick={()=>setSelected({row:0,col:3})}><FaChessQueen color="black" size={getSize1()}/></div>
+                                        <div className={`${squareStyle}`} style={{background: (selected!==null && selected.row===0 && selected.col===4) ? themeArray[theme].s : themeArray[theme].l}} onClick={()=>setSelected({row:0,col:4})}><FaChessKing color="black" size={getSize1()}/></div>
+                                        <div className={`${squareStyle}`} style={{background: (selected!==null && selected.row===0 && selected.col===5) ? themeArray[theme].s : themeArray[theme].d}} onClick={()=>setSelected({row:0,col:5})}><FaChessPawn color="black" size={getSize1()}/></div>
+                                    </div>
+                                    <div className="flex">
+                                        <div className={`${squareStyle}`} style={{background: (selected!==null && selected.row===1 && selected.col===0) ? themeArray[theme].s : themeArray[theme].d}} onClick={()=>setSelected({row:1,col:0})}><FaChessRook color="white" size={getSize1()}/></div>
+                                        <div className={`${squareStyle}`} style={{background: (selected!==null && selected.row===1 && selected.col===1) ? themeArray[theme].s : themeArray[theme].l}} onClick={()=>setSelected({row:1,col:1})}><FaChessKnight color="white" size={getSize1()}/></div>
+                                        <div className={`${squareStyle}`} style={{background: (selected!==null && selected.row===1 && selected.col===2) ? themeArray[theme].s : themeArray[theme].d}} onClick={()=>setSelected({row:1,col:2})}><FaChessBishop color="white" size={getSize1()}/></div>
+                                        <div className={`${squareStyle}`} style={{background: (selected!==null && selected.row===1 && selected.col===3) ? themeArray[theme].s : themeArray[theme].l}} onClick={()=>setSelected({row:1,col:3})}><FaChessQueen color="white" size={getSize1()}/></div>
+                                        <div className={`${squareStyle}`} style={{background: (selected!==null && selected.row===1 && selected.col===4) ? themeArray[theme].s : themeArray[theme].d}} onClick={()=>setSelected({row:1,col:4})}><FaChessKing color="white" size={getSize1()}/></div>
+                                        <div className={`${squareStyle}`} style={{background: (selected!==null && selected.row===1 && selected.col===5) ? themeArray[theme].s : themeArray[theme].l}} onClick={()=>setSelected({row:1,col:5})}><FaChessPawn color="white" size={getSize1()}/></div>
+                                    </div>
+                                    <div className="flex">
+                                        <div className={`${squareStyle}`} style={{background: themeArray[theme].l}}></div>
+                                        <div className={`${squareStyle}`} style={{background: themeArray[theme].d}}></div>
+                                        <div className={`${squareStyle}`} style={{background: themeArray[theme].l}}></div>
+                                        <div className={`${squareStyle}`} style={{background: themeArray[theme].d}}></div>
+                                        <div className={`${squareStyle}`} style={{background: themeArray[theme].l}}></div>
+                                        <div className={`${squareStyle}`} style={{background: themeArray[theme].d}}></div>
+                                    </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="flex justify-center gap-5 w-full flex-wrap mb-6 lg:mb-0">
+                                {themeArray.map((key,index)=>(
+                                    <div key={index} className="flex border-2 border-black rounded-lg" onClick={()=>setTheme(index)}>
+                                        <div className="w-5 h-5 md:w-8 md:h-8 lg:w-10 lg:h-10" style={{background:themeArray[index].l}}></div>
+                                        <div className="w-5 h-5 md:w-8 md:h-8 lg:w-10 lg:h-10" style={{background:themeArray[index].d}}></div>
+                                        <div className="w-5 h-5 md:w-8 md:h-8 lg:w-10 lg:h-10" style={{background:themeArray[index].s}}></div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    }
+                </div>
             </div>
             }
         </div>

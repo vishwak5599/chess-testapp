@@ -126,7 +126,7 @@ const HomePage=()=>{
 
 
     return(
-        <div className={`${!isProfileOpen ? "pt-6 md:pt-12" : "overflow-hidden"} relative`}>
+        <div className={`${!isProfileOpen ? "pt-12" : "overflow-hidden"} relative`}>
             {isProfileOpen ? 
             <div className="flex flex-col pb-2 md:pb-4 animate-slideLeft w-screen h-screen">
                 <button onClick={()=>setIsProfileOpen(false)} className="flex items-center m-2 md:m-4"><IoMdArrowRoundBack size={getSizeArrow()}/></button>
@@ -257,7 +257,7 @@ const HomePage=()=>{
                         </div>
                     </div>
                     {chooseTheme &&
-                        <div className="absolute flex flex-col bg-white filter brightness-110 border-4 p-2 md:p-3 lg:p-4 border-black rounded-md w-[90%] h-[55%] md:w-[60%] md:h-[65%] lg:w-[50%] lg:h-[75%] animate-expand">
+                        <div className="absolute flex flex-col bg-white filter brightness-110 border-4 p-2 md:p-3 lg:p-4 border-black rounded-md w-[90%] h-[80%] md:w-[60%] md:h-[90%] lg:w-[50%] lg:h-full animate-expand">
                             <div className="flex flex-col items-end mb-4 lg:mb-10"><button onClick={()=>setChooseTheme(false)}><FaWindowClose color="#4b5563" size={iconSize}/></button></div>
                             <div className="flex flex-col mb-6 md:mb-10">
                                 <div className="flex flex-col justify-center items-center">

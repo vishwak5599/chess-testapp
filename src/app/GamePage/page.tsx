@@ -73,7 +73,7 @@ const HomePageContent=()=>{
     const increment = searchParams ? searchParams.get('time')!=="inf" ? Number(searchParams.get('increment')) : null : 0
 
     //states
-    const [moves,setMoves] = useState(pieceColour===1 ? 0 : 1)
+    const [moves,setMoves] = useState(0)
     const [isSelected, setIsSelected] = useState(false)
     const [selectedPiece, setSelectedPiece] = useState<selectedPieceType>({piece: null,row: null,col: null})
     const [possibleMovesForSelectedPiece, setPossibleMovesForSelectedPiece] = useState<possibleMovesForPieceType[]>([])
@@ -155,16 +155,16 @@ const HomePageContent=()=>{
     useEffect(() => {
         if(whitePlayerTime!==null && blackPlayerTime!==null && increment!==null){
             let intervalId:NodeJS.Timeout
-            if (((pieceColour===1 && moves%2===0) || (pieceColour===0 && moves%2!==0)) && !(draw || staleMateWhiteWon || staleMateBlackWon || whiteWon || blackWon)) {
+            if (((pieceColour===1 && moves%2===0) || (pieceColour===0 && moves%2===0)) && !(draw || staleMateWhiteWon || staleMateBlackWon || whiteWon || blackWon)) {
                 if(whitePlayerTime>0){
                     intervalId = setInterval(()=>{
                         setWhitePlayerTime((prev)=>prev!==null ? prev-1 : 0)
                     }, 1000)
-                    //increement
+                    //increment
                     if(moves>1) setBlackPlayerTime((prev)=>prev!==null ? prev+increment : 0);
                     
                 }
-            } else if(((pieceColour===1 && moves%2!==0) || (pieceColour===0 && moves%2===0)) && !(draw || staleMateWhiteWon || staleMateBlackWon || whiteWon || blackWon)) {
+            } else if(((pieceColour===1 && moves%2!==0) || (pieceColour===0 && moves%2!==0)) && !(draw || staleMateWhiteWon || staleMateBlackWon || whiteWon || blackWon)) {
                 if(blackPlayerTime>0){
                     intervalId = setInterval(()=>{
                         setBlackPlayerTime((prev)=>prev!==null ? prev-1 : 0)
@@ -694,7 +694,7 @@ const HomePageContent=()=>{
     const handleSelectedPiece = (piece:string,i:number,j:number) => {
         //1. select a piece is any other piece is not selected
         if(!isSelected){
-            if((pieceColour===1 && moves%2===0 && whitePieces.includes(board[i][j])) || (pieceColour===1 && moves%2!==0 && blackPieces.includes(board[i][j])) || (pieceColour===0 && moves%2!==0 && whitePieces.includes(board[i][j])) || (pieceColour===0 && moves%2===0 && blackPieces.includes(board[i][j]))){
+            if((pieceColour===1 && moves%2===0 && whitePieces.includes(board[i][j])) || (pieceColour===1 && moves%2!==0 && blackPieces.includes(board[i][j])) || (pieceColour===0 && moves%2===0 && whitePieces.includes(board[i][j])) || (pieceColour===0 && moves%2!==0 && blackPieces.includes(board[i][j]))){
                 setIsSelected(true)
                 setSelectedPiece({piece:piece,row:i,col:j})
                 setPossibleMovesForSelectedPiece([])
@@ -706,7 +706,7 @@ const HomePageContent=()=>{
             setSelectedPiece({piece:null,row:null,col:null})
         }
         //3. select if another same colour piece is selected
-        else if(isSelected && ((pieceColour===1 && moves%2===0 && whitePieces.includes(board[i][j])) || (pieceColour===1 && moves%2!==0 && blackPieces.includes(board[i][j])) || (pieceColour===0 && moves%2!==0 && whitePieces.includes(board[i][j])) || (pieceColour===0 && moves%2===0 && blackPieces.includes(board[i][j])))){
+        else if(isSelected && ((pieceColour===1 && moves%2===0 && whitePieces.includes(board[i][j])) || (pieceColour===1 && moves%2!==0 && blackPieces.includes(board[i][j])) || (pieceColour===0 && moves%2===0 && whitePieces.includes(board[i][j])) || (pieceColour===0 && moves%2!==0 && blackPieces.includes(board[i][j])))){
             setPossibleMovesForSelectedPiece([])
             setIsSelected(true)
             setSelectedPiece({piece:piece,row:i,col:j})
@@ -731,7 +731,7 @@ const HomePageContent=()=>{
             }
 
             //for all the pieces check possible moves and find if opponent king is in threat
-            if((pieceColour===1 && moves%2===0) || (pieceColour===0 && moves%2!==0)){
+            if((pieceColour===1 && moves%2===0) || (pieceColour===0 && moves%2===0)){
                 let arr:allTempPossibleMovesType[] = []
                 updatedBoard.map((r,rind)=>{
                     r.map((c,cind)=>{
@@ -778,7 +778,7 @@ const HomePageContent=()=>{
     //Set possible moves for a selected piece
     useEffect(()=>{
         if(isSelected){
-            if((pieceColour===1 && moves%2===0) || (pieceColour===0 && moves%2!==0)){
+            if((pieceColour===1 && moves%2===0) || (pieceColour===0 && moves%2===0)){
                 const possibleMovesForPieceIfWhite = allPossibleMovesForWhite.find((item)=>(item.piece===selectedPiece.piece && item.posi.row===selectedPiece.row && item.posi.col===selectedPiece.col))
                 if(possibleMovesForPieceIfWhite) setPossibleMovesForSelectedPiece(possibleMovesForPieceIfWhite?.moves)
             }
@@ -1552,7 +1552,7 @@ const HomePageContent=()=>{
         if(pieceColour===0 && row===0 && col===3 && board[0][0]==="R" && whiteKingCastlePossible && whiteRookCastlePossible.left && !findThreatToWhiteKing(allPossibleMovesForBlack,board) && !checkMiddleSquaresAttacked("white","left")) movesArray.push({row:row,col:col-2})
         if(pieceColour===0 && row===0 && col===3 && board[0][7]==="R" && whiteKingCastlePossible && whiteRookCastlePossible.right && !findThreatToWhiteKing(allPossibleMovesForBlack,board) && !checkMiddleSquaresAttacked("white","right")) movesArray.push({row:row,col:col+2})
 
-        if((pieceColour===1 && moves%2!==0) || (pieceColour===0 && moves%2===0)){
+        if((pieceColour===1 && moves%2!==0) || (pieceColour===0 && moves%2!==0)){
             setAllPossibleMovesForWhite((prev)=>{return [...prev,{piece:"K",posi:{row:row,col:col},moves:movesArray, protected:protectedArray}]})
         }
         else{
@@ -1735,7 +1735,7 @@ const HomePageContent=()=>{
         if(pieceColour===0 && row===7 && col===3 && board[7][0]==="r" && blackKingCastlePossible && blackRookCastlePossible.left && !findThreatToBlackKing(allPossibleMovesForWhite,board) && !checkMiddleSquaresAttacked("black","left")) movesArray.push({row:row,col:col-2})
         if(pieceColour===0 && row===7 && col===3 && board[7][7]==="r" && blackKingCastlePossible && blackRookCastlePossible.right && !findThreatToBlackKing(allPossibleMovesForWhite,board) && !checkMiddleSquaresAttacked("black","right")) movesArray.push({row:row,col:col+2})
 
-        if((pieceColour===1 && moves%2===0) || (pieceColour===0 && moves%2!==0)){
+        if((pieceColour===1 && moves%2===0) || (pieceColour===0 && moves%2===0)){
             setAllPossibleMovesForBlack((prev)=>{return [...prev,{piece:"k",posi:{row:row,col:col},moves:movesArray, protected:protectedArray}]})
         }
         else{
@@ -1815,7 +1815,7 @@ const HomePageContent=()=>{
     },[curBlack])
 
     useEffect(()=>{
-        if(blackComp && ((pieceColour===1 && moves%2===0) || (pieceColour===0 && moves%2!==0))){
+        if(blackComp && ((pieceColour===1 && moves%2===0) || (pieceColour===0 && moves%2===0))){
             curWhite.some((piece)=>{
                 if(piece.piece==="K"){
                     findMovesForK(piece.row,piece.col)
@@ -1826,7 +1826,7 @@ const HomePageContent=()=>{
     },[pieceColour,moves,blackComp])
 
     useEffect(()=>{
-        if(whiteComp && ((pieceColour===1 && moves%2!==0) || (pieceColour===0 && moves%2===0))){
+        if(whiteComp && ((pieceColour===1 && moves%2!==0) || (pieceColour===0 && moves%2!==0))){
             curBlack.some((piece)=>{
                 if(piece.piece==="k"){
                     findMovesFork(piece.row,piece.col)
@@ -1923,7 +1923,7 @@ const HomePageContent=()=>{
                                 )}
                             </div>
                         )}
-                        <div className="w-5">{moves%2!==0 ? <FaStopwatch color={`${pieceColour===1 ? "white" : "black"}`} /> : ""}</div>
+                        <div className="w-5">{((pieceColour===1 && moves%2!==0 || (pieceColour===0 && moves%2===0))) && <FaStopwatch color={`${moves%2!==0 ? "white" : "black"}`} />}</div>
                     </div>}
                 </div>
                 <div className="relative rounded-md my-2 md:my-3" style={{border:`${windowSize >= 768 ? "12px" : "6px"} solid ${themeArray[theme].s}`}}>
@@ -2002,7 +2002,7 @@ const HomePageContent=()=>{
                 </div>
                 <div className="flex justify-center items-center gap-3 mt-1">
                     {whitePlayerTime!==null && blackPlayerTime!==null && increment!==null && <div key="sw-2" className={`${pieceColour===1 ? `${moves%2===0 ? "bg-white" : "bg-slate-500"} text-black` : "bg-black text-white"} flex justify-end items-center font-bold font-technology text-base md:text-xl p-1 rounded-md gap-2`} style={{border: `2px solid ${themeArray[theme].s}`}}>
-                        <div className="w-5">{moves%2===0 ? <FaStopwatch color={`${pieceColour===1 ? "black" : "white"}`} /> : ""}</div>
+                        <div className="w-5">{((pieceColour===1 && moves%2===0 || (pieceColour===0 && moves%2!==0))) && <FaStopwatch color={`${moves%2===0 ? "black" : "white"}`} />}</div>
                         {(pieceColour===1) ? (
                             <div className="w-30 md:w-24">
                                 {whitePlayerTime < 60 ? (

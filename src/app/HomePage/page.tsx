@@ -6,12 +6,16 @@ import { LuAlarmClock } from "react-icons/lu"
 import { IoMdArrowDropupCircle, IoMdArrowDropdownCircle, IoMdArrowRoundBack } from "react-icons/io"
 import { AiFillThunderbolt } from "react-icons/ai"
 import { RiArrowDropRightLine, RiArrowDropUpLine, RiArrowDropDownLine } from "react-icons/ri"
+import { MdDoneOutline } from "react-icons/md"
+import { ImCross } from "react-icons/im"
+import { IoNotificationsSharp } from "react-icons/io5"
 import useWindowSize from "../Components/UseWindowSize"
 import { FaChessRook, FaChessKnight, FaChessBishop, FaChessQueen, FaChessKing, FaChessPawn, FaWindowClose, FaPeopleArrows, FaUser} from "react-icons/fa"
 import { themeAtom } from "../Atoms/ThemeAtom"
 import { useAtom } from "jotai"
 import Image from "next/image"
 import { usePrivy } from "@privy-io/react-auth"
+import {io} from "socket.io-client"
 
 
 const HomePage=()=>{
@@ -34,6 +38,54 @@ const HomePage=()=>{
     const [chooseTheme, setChooseTheme] = useState(false)
     const [selected, setSelected] = useState<{row:number|null,col:number|null}>({row:null,col:null})
     const [isProfileOpen, setIsProfileOpen] = useState(false)
+    const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
+    const [socket, setSocket] = useState<any>(undefined)
+    const [playOnlinePopup, setPlayOnlinePopup] = useState(false)
+    const [sendRequestUserId, setSendRequestUserId] = useState("")
+    const [incomingRequests, setIncomingRequests] = useState<{fromUserId:String,fromUserName:String,fromPieceColour:number}[]>([])
+
+    useEffect(()=>{
+        const socket = io("http://localhost:3001")
+        setSocket(socket)
+        socket.on('gameRequest', ({fromUserId,fromUserName,fromPieceColour})=>{
+            setIncomingRequests((prev)=>{
+                if(prev.some((req)=>req.fromUserId===fromUserId && req.fromUserName===fromUserName && req.fromPieceColour===fromPieceColour)){
+                    return prev
+                }
+                return [...prev,{fromUserId,fromUserName,fromPieceColour}]
+            })
+            // setTimeout(()=>{
+            //     setIncomingRequests((prev)=>{
+            //         return prev.filter((req)=>req.fromUserId!==fromUserId && req.fromUserName!==fromUserName)
+            //     })
+            // },20000)
+        })
+        socket.on('requestAccepted', ({acceptedUserId,acceptedUserName,requestedPieceColour})=>{
+            router.push(`/GamePage?pieceColour=${requestedPieceColour}&time=inf&increment=inf&oppoUid=${acceptedUserId}&oppoUname=${acceptedUserName}`)
+        })
+        return () => {
+            socket.disconnect()
+        }
+    },[])
+
+    const handleSendRequest = () => {
+        socket.emit("sendRequest",user?.id.split(":")[2],user?.google?.name,sendRequestUserId,pieceColour)
+        setPlayOnlinePopup(false)
+    }
+
+    const handleAcceptIncomingRequest = (fromUserId:String,fromUserName:String,fromPieceColour:number) =>{
+        socket.emit("acceptRequest",user?.id.split(":")[2],user?.google?.name,fromUserId,fromPieceColour)
+        if(fromPieceColour===1) router.push(`/GamePage?pieceColour=0&time=inf&increment=inf&oppoUid=${fromUserId}&oppoUname=${fromUserName}`)
+        else router.push(`/GamePage?pieceColour=1&time=inf&increment=inf&oppoUid=${fromUserId}&oppoUname=${fromUserName}`)
+    }
+
+    const handleRejectIncomingRequest = (userId:String) =>{
+        setIncomingRequests((prev)=>{
+            return prev.filter((req)=>(
+                req.fromUserId!==userId
+            ))
+        })
+    }
     
     const handleStartGame=()=>{
         const time = timeType===0 ? preTime.t : custTime.t
@@ -61,11 +113,24 @@ const HomePage=()=>{
         return windowSize<680 ? 22 : windowSize<768 ? 24 : windowSize<1024 ? 26 : windowSize<1128 ? 28 : windowSize<1440 ? 30 : windowSize<1800 ? 30 : 32
     }
 
+    const getSizeYes = () =>{
+        return windowSize<680 ? 16 : windowSize<768 ? 20 : windowSize<1024 ? 26 : windowSize<1128 ? 28 : windowSize<1440 ? 30 : windowSize<1800 ? 30 : 32
+    }
+
+    const getSizeNo = () =>{
+        return windowSize<680 ? 16 : windowSize<768 ? 18 : windowSize<1024 ? 22 : windowSize<1128 ? 24 : windowSize<1440 ? 26 : windowSize<1800 ? 26 : 28
+    }
+
     useEffect(()=>{
         if(ready && !authenticated){
+            socket.emit("customDisconnect")
             router.push("/")
+
         }
-    },[ready, authenticated])
+        else if(ready && authenticated && socket){
+            socket.emit("register",user?.id.split(":")[2])
+        }
+    },[ready, authenticated, socket])
 
     //update width
     useEffect(() => {
@@ -126,7 +191,7 @@ const HomePage=()=>{
 
 
     return(
-        <div className={`${!isProfileOpen ? "pt-12" : "overflow-hidden"} relative`}>
+        <div className={`${!(isProfileOpen || isNotificationsOpen) ? "pt-12" : "overflow-hidden"} relative`}>
             {isProfileOpen ? 
             <div className="flex flex-col pb-2 md:pb-4 animate-slideLeft w-screen h-screen">
                 <button onClick={()=>setIsProfileOpen(false)} className="flex items-center m-2 md:m-4"><IoMdArrowRoundBack size={getSizeArrow()}/></button>
@@ -144,6 +209,9 @@ const HomePage=()=>{
                     </div>
                     <div className="flex flex-col justify-center items-center mt-10">
                         <div className="flex flex-col gap-4 justify-start items-start text-sm md:text-xl font-bold font-anticDidone text-black">
+                        <div className="flex justify-center items-center gap-2 md:gap-4 w-screen">
+                                <div>USERID  :</div><div className="w-[70%] md:w-[40%] border-2 border-black px-2 py-1 rounded-md">{user?.id.split(":")[2]}</div>
+                            </div>
                             <div className="flex justify-center items-center gap-2 md:gap-4 w-screen">
                                 <div>NAME  :</div><div className="w-[70%] md:w-[40%] border-2 border-black px-2 py-1 rounded-md">{user?.google?.name}</div>
                             </div>
@@ -157,15 +225,67 @@ const HomePage=()=>{
                     </div>
                 </div>
             </div> :
+            isNotificationsOpen ? 
+            <div className="overflow-x-hidden pb-10 md:pb-16">
+                <div className="flex flex-col animate-slideLeft w-screen h-screen">
+                    <button onClick={()=>setIsNotificationsOpen(false)} className="flex items-center m-2 md:m-4"><IoMdArrowRoundBack size={getSizeArrow()}/></button>
+                    <div className="flex justify-center items-center font-extrabold font-anticDidone text-lg md:text-3xl">GAME REQUESTS</div>
+                    <div className="flex flex-col justify-center items-center mt-5 gap-2">
+                    {incomingRequests.length>0 && incomingRequests.map((req,index)=>(
+                        <div key={index} className="flex justify-center items-center w-[90%] md:w-[70%] lg:w-[50%] py-2 px-[1%] rounded-md text-xs md:text-lg font-anticDidone font-bold border-2 border-black bg-white">
+                            <div className="flex gap-10">
+                                <div className="flex justify-center items-center pl-2">
+                                    <div className="flex flex-col md:flex-row md:gap-1.5 text-center md:text-start"><div className="text-blue-600">{req.fromUserName}</div>wants to play with you</div>
+                                </div>
+                                <div className="flex ml-auto pr-2 gap-2 items-center justify-center">
+                                    <div onClick={()=>handleAcceptIncomingRequest(req.fromUserId,req.fromUserName,req.fromPieceColour)} className="cursor-pointer border-2 border-green-600 rounded-md p-0.5 md:p-1.5"><MdDoneOutline size={getSizeYes()} color="green"/></div>
+                                    <div onClick={()=>handleRejectIncomingRequest(req.fromUserId)} className="cursor-pointer border-2 border-red-600 rounded-md p-0.5 md:p-2"><ImCross size={getSizeNo()} color="red"/></div>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                    </div>
+                </div>
+            </div> :
             <div>
-                <div className="absolute inset-0 h-screen w-screen bg-[url('/images/loginScreenbg.jpeg')] bg-cover bg-center opacity-90 filter brightness-75 contrast-140 saturate-125 grayscale"></div>
+                <div className="absolute z-10 inset-0 h-screen w-screen bg-[url('/images/loginScreenbg.jpeg')] bg-cover bg-center opacity-90 filter brightness-75 contrast-140 saturate-125 grayscale"></div>
+                {playOnlinePopup && 
+                    <div className="absolute z-20 h-[35%] w-[90%] md:h-[45%] md:w-[55%] lg:h-[55%] lg:w-[55%] flex flex-col bg-white rounded-lg" 
+                    style={{border: `4px solid ${themeArray[theme].s}`, 
+                        top: '50%', 
+                        left: '50%', 
+                        transform: 'translate(-50%, -50%)'
+                    }}>
+                        <div className="flex flex-col items-end mt-2 mr-2 md:mt-3 md:mr-3 lg:mt-4 lg:mr-4"><button onClick={()=>setPlayOnlinePopup(false)}><FaWindowClose color="#3b82f6" size={iconSize}/></button></div>
+                        <div className="flex justify-center items-center mt-10 md:mt-14">
+                            <input 
+                                id="userIdInput" 
+                                type="text" 
+                                placeholder="Enter player user-id" 
+                                onChange={(e)=>setSendRequestUserId(e.target.value)}
+                                className="w-[90%] md:w-[80%] p-2 border border-black rounded-lg text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                            />
+                        </div>
+                        <div className="flex flex-col gap-4 lg:gap-6 justify-center items-center mt-4 lg:mt-6">
+                            <button onClick={()=>handleSendRequest()} className="text-xs md:text-sm lg:text-lg font-bold font-anticDidone text-black p-1 rounded-md border-2 md:border-4" style={{borderColor: `${themeArray[theme].s}`}}>SEND REQUEST</button>
+                        </div>
+                    </div>
+                }
                 <div className="relative z-10 flex flex-col justify-center items-center gap-10 mt-10 md:mt-0">
-                    <div className="flex flex-grow justify-between items-center -mt-8 pl-6 md:pl-18 w-screen">
+                    <div className="flex flex-grow justify-between items-center -mt-8 pl-14 md:pl-28 w-screen">
                         <div className="flex justify-center items-center flex-grow">
                             <Image src={"/images/icon.png"} alt={"logo"} width={getSizeLogo()} height={getSizeLogo()}></Image>
                             <div className="text-xl md:text-2xl lg:text-3xl text-white font-extrabold font-anticDidone -ml-2 md:-ml-4">CHESS</div>
                         </div>
-                        <div className="flex ml-auto items-center justify-start"><FaUser onClick={()=>setIsProfileOpen(true)} size={getSize()} color="white" className="border-2 border-white rounded-full p-0.5 md:p-1 mr-2 md:mr-5"/></div>
+                        <div className="relative flex ml-auto items-center">
+                            <IoNotificationsSharp onClick={()=>setIsNotificationsOpen(true)} size={getSize()} color="white" className="cursor-pointer border-2 border-white rounded-full p-0.5 md:p-1 mr-2 md:mr-5"/>
+                            {incomingRequests.length > 0 && (
+                                <div className="absolute top-0 right-1 md:right-4 bg-red-600 text-white text-xs md:text-sm font-bold rounded-full h-4 w-4 md:h-5 md:w-5 flex items-center justify-center">
+                                    {incomingRequests.length}
+                                </div>
+                            )}
+                        </div>
+                        <div className="cursor-pointer flex ml-auto items-center justify-start"><FaUser onClick={()=>setIsProfileOpen(true)} size={getSize()} color="white" className="border-2 border-white rounded-full p-0.5 md:p-1 mr-2 md:mr-5"/></div>
                     </div>
                     <div className="flex justify-center font-bold text-lg md:text-xl font-anticDidone -mt-8 md:-mt-6">CHOOSE YOUR SIDE</div>
                         <div className="flex justify-center gap-8 md:gap-10 -mt-8">
@@ -174,78 +294,85 @@ const HomePage=()=>{
                             <button className={`${!selectRandomPieceColour && pieceColour==0 ? " border-white shadow-lg shadow-white" : "border-gray-400"} p-1 md:p-2 border-4 bg-gray-300 rounded-lg hover:scale-105`} onClick={()=>handleSelectPieceColour(0)}><FaChessKing size={getSize()} color="black"/></button>
                         </div>
                     <div className="flex flex-col justify-center">
-                        <div className="flex flex-col md:flex-row justify-center items-center -mt-5">
-                            <div className={`flex justify-center text-xl font-bold font-anticDidone ${timeType===0 ? "bg-white hover:bg-gray-200 border-gray-600 shadow-lg shadow-white" : "bg-gray-400 hover:bg-gray-600 border-white"} transition-all duration-150 ease-in-out border-4 w-70 md:w-100 px-12 md:px-20 py-1 md:py-2 rounded-lg gap-1 md:gap-1.5`} onClick={()=>setTimeType(0)}>
-                                <div>{preTime.t<=2 ? <GiBulletBill color="orange" size={26}/> : preTime.t<=5 ? <AiFillThunderbolt color="gold" size={26}/> : <LuAlarmClock color="green" size={26}/>}</div>
-                                <div className={`flex justify-center text-base md:text-lg mt-0.5 md:mt-0 w-20 -ml-1 md:ml-1 ${timeType!==0 ? "text-gray-800" : "text-black"}`}>{preTime.i===0 ? `${preTime.t} min` : `${preTime.t} | ${preTime.i}`}</div>
-                                <button className="relative hover:scale-105 ml-2 -mr-8 md:ml-6 md:-mr-12" onClick={()=>handleDropdown()}>{!isDropdown ? <IoMdArrowDropdownCircle size={28} color={`${timeType===0 ? "#4b5563" : "white"}`}/> : <IoMdArrowDropupCircle size={28} color={`${timeType===0 ? "#4b5563" : "white"}`}/>}</button>
-                                {isDropdown && 
-                                    <div className="absolute mt-10 justify-center bg-white border-4 px-4 py-1 rounded-lg border-gray-600">
-                                        <div className="flex flex-col mt-2">
-                                            <div className="flex gap-1 md:gap-2">
-                                                <GiBulletBill color="orange"/>
-                                                <div className="text-sm md:text-base">BULLET</div>
+                        <div>
+                            <div className="flex flex-col md:flex-row justify-center items-center -mt-5">
+                                <div className={`flex justify-center text-xl font-bold font-anticDidone ${timeType===0 ? "bg-white hover:bg-gray-200 border-gray-600 shadow-lg shadow-white" : "bg-gray-400 hover:bg-gray-600 border-white"} transition-all duration-150 ease-in-out border-4 w-70 md:w-100 px-12 md:px-20 py-1 md:py-2 rounded-lg gap-1 md:gap-1.5`} onClick={()=>setTimeType(0)}>
+                                    <div>{preTime.t<=2 ? <GiBulletBill color="orange" size={26}/> : preTime.t<=5 ? <AiFillThunderbolt color="gold" size={26}/> : <LuAlarmClock color="green" size={26}/>}</div>
+                                    <div className={`flex justify-center text-base md:text-lg mt-0.5 md:mt-0 w-20 -ml-1 md:ml-1 ${timeType!==0 ? "text-gray-800" : "text-black"}`}>{preTime.i===0 ? `${preTime.t} min` : `${preTime.t} | ${preTime.i}`}</div>
+                                    <button className="relative hover:scale-105 ml-2 -mr-8 md:ml-6 md:-mr-12" onClick={()=>handleDropdown()}>{!isDropdown ? <IoMdArrowDropdownCircle size={28} color={`${timeType===0 ? "#4b5563" : "white"}`}/> : <IoMdArrowDropupCircle size={28} color={`${timeType===0 ? "#4b5563" : "white"}`}/>}</button>
+                                    {isDropdown && 
+                                        <div className="absolute mt-10 justify-center bg-white border-4 px-4 py-1 rounded-lg border-gray-600">
+                                            <div className="flex flex-col mt-2">
+                                                <div className="flex gap-1 md:gap-2">
+                                                    <GiBulletBill color="orange"/>
+                                                    <div className="text-sm md:text-base">BULLET</div>
+                                                </div>
+                                                <div className="flex gap-1.5 mt-2">
+                                                    <button className="flex justify-center text-xs md:text-sm font-bold text-black bg-gray-400 hover:bg-gray-600 transition-all duration-150 ease-in-out border-2 w-14 md:w-20 py-2 rounded-lg border-gray-800 gap-1" onClick={()=>handleSetTime(1,0)}>1 min</button>
+                                                    <button className="flex justify-center text-xs md:text-sm font-bold text-black bg-gray-400 hover:bg-gray-600 transition-all duration-150 ease-in-out border-2 w-14 md:w-20 py-2 rounded-lg border-gray-800 gap-1" onClick={()=>handleSetTime(1,1)}> 1 | 1</button>
+                                                    <button className="flex justify-center text-xs md:text-sm font-bold text-black bg-gray-400 hover:bg-gray-600 transition-all duration-150 ease-in-out border-2 w-14 md:w-20 py-2 rounded-lg border-gray-800 gap-1" onClick={()=>handleSetTime(2,1)}> 2 | 1</button>
+                                                </div>
                                             </div>
-                                            <div className="flex gap-1.5 mt-2">
-                                                <button className="flex justify-center text-xs md:text-sm font-bold text-black bg-gray-400 hover:bg-gray-600 transition-all duration-150 ease-in-out border-2 w-14 md:w-20 py-2 rounded-lg border-gray-800 gap-1" onClick={()=>handleSetTime(1,0)}>1 min</button>
-                                                <button className="flex justify-center text-xs md:text-sm font-bold text-black bg-gray-400 hover:bg-gray-600 transition-all duration-150 ease-in-out border-2 w-14 md:w-20 py-2 rounded-lg border-gray-800 gap-1" onClick={()=>handleSetTime(1,1)}> 1 | 1</button>
-                                                <button className="flex justify-center text-xs md:text-sm font-bold text-black bg-gray-400 hover:bg-gray-600 transition-all duration-150 ease-in-out border-2 w-14 md:w-20 py-2 rounded-lg border-gray-800 gap-1" onClick={()=>handleSetTime(2,1)}> 2 | 1</button>
+                                            <div className="flex flex-col mt-2">
+                                                <div className="flex gap-1 md:gap-2">
+                                                    <AiFillThunderbolt color="gold"/>
+                                                    <div className="text-sm md:text-base">BLITZ</div>
+                                                </div>
+                                                <div className="flex gap-1.5 mt-1">
+                                                    <button className="flex justify-center text-xs md:text-sm font-bold text-black bg-gray-400 hover:bg-gray-600 transition-all duration-150 ease-in-out border-2 w-14 md:w-20 py-2 rounded-lg border-gray-800 gap-1" onClick={()=>handleSetTime(3,0)}>3 min</button>
+                                                    <button className="flex justify-center text-xs md:text-sm font-bold text-black bg-gray-400 hover:bg-gray-600 transition-all duration-150 ease-in-out border-2 w-14 md:w-20 py-2 rounded-lg border-gray-800 gap-1" onClick={()=>handleSetTime(3,2)}>3 | 2</button>
+                                                    <button className="flex justify-center text-xs md:text-sm font-bold text-black bg-gray-400 hover:bg-gray-600 transition-all duration-150 ease-in-out border-2 w-14 md:w-20 py-2 rounded-lg border-gray-800 gap-1" onClick={()=>handleSetTime(5,0)}>5 min</button>
+                                                </div>
+                                            </div>
+                                            <div className="flex flex-col mt-2 mb-2">
+                                                <div className="flex gap-1 md:gap-2">
+                                                    <LuAlarmClock color="green"/>
+                                                    <div className="text-sm md:text-base">RAPID</div>
+                                                </div>
+                                                <div className="flex gap-1.5 mt-1">
+                                                    <button className="flex justify-center text-xs md:text-sm font-bold text-black bg-gray-400 hover:bg-gray-600 transition-all duration-150 ease-in-out border-2 w-14 md:w-20 py-2 rounded-lg border-gray-800 gap-1" onClick={()=>handleSetTime(10,0)}>10 min</button>
+                                                    <button className="flex justify-center text-xs md:text-sm font-bold text-black bg-gray-400 hover:bg-gray-600 transition-all duration-150 ease-in-out border-2 w-14 md:w-20 py-2 rounded-lg border-gray-800 gap-1" onClick={()=>handleSetTime(15,10)}>15 | 10</button>
+                                                    <button className="flex justify-center text-xs md:text-sm font-bold text-black bg-gray-400 hover:bg-gray-600 transition-all duration-150 ease-in-out border-2 w-14 md:w-20 py-2 rounded-lg border-gray-800 gap-1" onClick={()=>handleSetTime(30,0)}>30 min</button>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div className="flex flex-col mt-2">
-                                            <div className="flex gap-1 md:gap-2">
-                                                <AiFillThunderbolt color="gold"/>
-                                                <div className="text-sm md:text-base">BLITZ</div>
-                                            </div>
-                                            <div className="flex gap-1.5 mt-1">
-                                                <button className="flex justify-center text-xs md:text-sm font-bold text-black bg-gray-400 hover:bg-gray-600 transition-all duration-150 ease-in-out border-2 w-14 md:w-20 py-2 rounded-lg border-gray-800 gap-1" onClick={()=>handleSetTime(3,0)}>3 min</button>
-                                                <button className="flex justify-center text-xs md:text-sm font-bold text-black bg-gray-400 hover:bg-gray-600 transition-all duration-150 ease-in-out border-2 w-14 md:w-20 py-2 rounded-lg border-gray-800 gap-1" onClick={()=>handleSetTime(3,2)}>3 | 2</button>
-                                                <button className="flex justify-center text-xs md:text-sm font-bold text-black bg-gray-400 hover:bg-gray-600 transition-all duration-150 ease-in-out border-2 w-14 md:w-20 py-2 rounded-lg border-gray-800 gap-1" onClick={()=>handleSetTime(5,0)}>5 min</button>
-                                            </div>
+                                    }
+                                </div>
+                                <div className="flex justify-center w-[90%] my-3 md:my-0 md:h-14 md:w-0 border-2 border-gray-800 rounded-2xl mx-4"></div>
+                                <div className={`flex justify-between border-4 px-6 md:px-10 rounded-lg ${timeType===1 ? "bg-white hover:bg-gray-200 border-gray-600 shadow-lg shadow-white" : "bg-gray-400 hover:bg-gray-600 border-white"}`} onClick={()=>setTimeType(1)}>
+                                    <div className="flex justify-center items-center -my-2">
+                                        <div className={`mt-1 text-base font-anticDidone font-black ${timeType===0 ? "text-gray-800" : "text-black"}`}>
+                                            CUSTOM
                                         </div>
-                                        <div className="flex flex-col mt-2 mb-2">
-                                            <div className="flex gap-1 md:gap-2">
-                                                <LuAlarmClock color="green"/>
-                                                <div className="text-sm md:text-base">RAPID</div>
+                                        <RiArrowDropRightLine color={`${timeType===1 ? "black" : "#1f2937"}`} size={30} className="-ml-1"/>
+                                        <div className="flex gap-4 font-anticDidone font-bold text-black text-xl">
+                                            <div className="flex flex-col justify-center items-center">
+                                                <button onClick={() => {setCustTime((prev) => {if(prev.t<90){return { ...prev,t:prev.t+1}}return prev})}}><RiArrowDropUpLine size={40} color={`${timeType===1 ? "black" : "#1f2937"}`} className="-mb-2"/></button>
+                                                <div className="flex justify-center items-center bg-gray-400 h-8 w-8 md:h-10 md:w-10 rounded-md">{custTime.t}</div>
+                                                <button onClick={() => {setCustTime((prev) => {if(prev.t>0){return {...prev,t:prev.t-1}}return prev})}}><RiArrowDropDownLine size={40} color={`${timeType===1 ? "black" : "#1f2937"}`} className="-mt-2"/></button>
                                             </div>
-                                            <div className="flex gap-1.5 mt-1">
-                                                <button className="flex justify-center text-xs md:text-sm font-bold text-black bg-gray-400 hover:bg-gray-600 transition-all duration-150 ease-in-out border-2 w-14 md:w-20 py-2 rounded-lg border-gray-800 gap-1" onClick={()=>handleSetTime(10,0)}>10 min</button>
-                                                <button className="flex justify-center text-xs md:text-sm font-bold text-black bg-gray-400 hover:bg-gray-600 transition-all duration-150 ease-in-out border-2 w-14 md:w-20 py-2 rounded-lg border-gray-800 gap-1" onClick={()=>handleSetTime(15,10)}>15 | 10</button>
-                                                <button className="flex justify-center text-xs md:text-sm font-bold text-black bg-gray-400 hover:bg-gray-600 transition-all duration-150 ease-in-out border-2 w-14 md:w-20 py-2 rounded-lg border-gray-800 gap-1" onClick={()=>handleSetTime(30,0)}>30 min</button>
+                                            <div className="flex justify-center items-center mt-6 h-14 border-2 border-gray-800 rounded-2xl mx-2"></div>
+                                            <div className="flex flex-col justify-center items-center">
+                                                <button onClick={() => {setCustTime((prev) => {if(prev.i<30){return { ...prev,i:prev.i+1}}return prev})}}><RiArrowDropUpLine size={40} color={`${timeType===1 ? "black" : "#1f2937"}`} className="-mb-2"/></button>
+                                                <div className="flex justify-center items-center bg-gray-400 h-8 w-8 md:h-10 md:w-10 rounded-md">{custTime.i}</div>
+                                                <button onClick={() => {setCustTime((prev) => {if(prev.i>0){return {...prev,i:prev.i-1}}return prev})}}><RiArrowDropDownLine size={40} color={`${timeType===1 ? "black" : "#1f2937"}`} className="-mt-2"/></button>
                                             </div>
-                                        </div>
-                                    </div>
-                                }
-                            </div>
-                            <div className="flex justify-center w-[90%] my-3 md:my-0 md:h-14 md:w-0 border-2 border-gray-800 rounded-2xl mx-4"></div>
-                            <div className={`flex justify-between border-4 px-6 md:px-10 rounded-lg ${timeType===1 ? "bg-white hover:bg-gray-200 border-gray-600 shadow-lg shadow-white" : "bg-gray-400 hover:bg-gray-600 border-white"}`} onClick={()=>setTimeType(1)}>
-                                <div className="flex justify-center items-center -my-2">
-                                    <div className={`mt-1 text-base font-anticDidone font-black ${timeType===0 ? "text-gray-800" : "text-black"}`}>
-                                        CUSTOM
-                                    </div>
-                                    <RiArrowDropRightLine color={`${timeType===1 ? "black" : "#1f2937"}`} size={30} className="-ml-1"/>
-                                    <div className="flex gap-4 font-anticDidone font-bold text-black text-xl">
-                                        <div className="flex flex-col justify-center items-center">
-                                            <button onClick={() => {setCustTime((prev) => {if(prev.t<90){return { ...prev,t:prev.t+1}}return prev})}}><RiArrowDropUpLine size={40} color={`${timeType===1 ? "black" : "#1f2937"}`} className="-mb-2"/></button>
-                                            <div className="flex justify-center items-center bg-gray-400 h-8 w-8 md:h-10 md:w-10 rounded-md">{custTime.t}</div>
-                                            <button onClick={() => {setCustTime((prev) => {if(prev.t>0){return {...prev,t:prev.t-1}}return prev})}}><RiArrowDropDownLine size={40} color={`${timeType===1 ? "black" : "#1f2937"}`} className="-mt-2"/></button>
-                                        </div>
-                                        <div className="flex justify-center items-center mt-6 h-14 border-2 border-gray-800 rounded-2xl mx-2"></div>
-                                        <div className="flex flex-col justify-center items-center">
-                                            <button onClick={() => {setCustTime((prev) => {if(prev.i<30){return { ...prev,i:prev.i+1}}return prev})}}><RiArrowDropUpLine size={40} color={`${timeType===1 ? "black" : "#1f2937"}`} className="-mb-2"/></button>
-                                            <div className="flex justify-center items-center bg-gray-400 h-8 w-8 md:h-10 md:w-10 rounded-md">{custTime.i}</div>
-                                            <button onClick={() => {setCustTime((prev) => {if(prev.i>0){return {...prev,i:prev.i-1}}return prev})}}><RiArrowDropDownLine size={40} color={`${timeType===1 ? "black" : "#1f2937"}`} className="-mt-2"/></button>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <div className="flex justify-center mt-2 md:mt-4">
-                            <button className="text-lg md:text-xl font-bold text-gray-600 font-anticDidone bg-white border-4 px-5 py-1 md:py-2 rounded-lg hover:bg-gray-200 transition-all duration-150 ease-in-out border-gray-600 shadow-lg shadow-white" onClick={()=>handleStartGame()}>START GAME</button>
-                        </div>
-                        <div className="flex justify-center items-center"><div className="w-[60%] md:w-[40%] my-3 border-2 border-gray-800 rounded-2xl"></div></div>
-                        <div className="flex justify-center">
-                            <button className="text-base md:text-lg font-bold text-gray-600 font-anticDidone bg-white border-4 px-4 py-1 md:py-2 rounded-lg hover:bg-gray-200 transition-all duration-150 ease-in-out border-gray-600 shadow-lg shadow-white" onClick={()=>handlePasssNPlayGame()}><div className="flex justify-center items-center gap-2">PASS N PLAY<div><FaPeopleArrows color="#4b5563" size={26}/></div></div></button>
+                            <div className="flex justify-center mt-2 md:mt-4">
+                                <button className="text-lg md:text-xl font-bold text-gray-600 font-anticDidone bg-white border-4 px-5 py-1 md:py-2 rounded-lg hover:bg-gray-200 transition-all duration-150 ease-in-out border-gray-600 shadow-lg shadow-white" onClick={()=>handleStartGame()}>START GAME</button>
+                            </div>
+                            <div className="flex justify-center items-center"><div className="w-[60%] md:w-[40%] my-3 border-2 border-gray-800 rounded-2xl"></div></div>
+                            <div className="flex flex-col md:flex-row justify-center items-center gap-2">
+                                <div className="flex justify-center">
+                                    <button className="text-base md:text-lg font-bold text-gray-600 font-anticDidone bg-white border-4 px-4 py-1 md:py-2 rounded-lg hover:bg-gray-200 transition-all duration-150 ease-in-out border-gray-600 shadow-lg shadow-white" onClick={()=>handlePasssNPlayGame()}><div className="flex justify-center items-center gap-2">PASS N PLAY<div><FaPeopleArrows color="#4b5563" size={26}/></div></div></button>
+                                </div>
+                                <div className="flex justify-center">
+                                    <button className="text-base md:text-lg font-bold text-gray-600 font-anticDidone bg-white border-4 px-4 py-1 md:py-2 rounded-lg hover:bg-gray-200 transition-all duration-150 ease-in-out border-gray-600 shadow-lg shadow-white" onClick={()=>setPlayOnlinePopup(true)}>PLAY ONLINE</button>
+                                </div>
+                            </div>
                         </div>
                         <div className="flex justify-center gap-2">
                             <div className="flex justify-center mt-2 md:mt-4">

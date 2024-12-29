@@ -4,10 +4,13 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { Suspense, useEffect, useRef, useState } from "react"
 import { FaStopwatch } from "react-icons/fa6"
 import { MdSkipPrevious } from "react-icons/md"
-import { FaWindowClose } from "react-icons/fa"
+import { FaUser, FaWindowClose } from "react-icons/fa"
 import useWindowSize from '../Components/UseWindowSize'
 import { themeAtom } from "../Atoms/ThemeAtom"
 import { useAtom } from "jotai"
+
+import { usePrivy } from "@privy-io/react-auth"
+import { io } from "socket.io-client"
 
 type selectedPieceType = {
     piece : string | null
@@ -67,10 +70,12 @@ const HomePageContent=()=>{
     const windowSize = useWindowSize()
     const router = useRouter()
     const searchParams = useSearchParams()
+    const {user, ready, authenticated} = usePrivy()
 
     const pieceColour = searchParams ? Number(searchParams.get('pieceColour')) : 1
     const time = searchParams ? searchParams.get('time')!=="inf" ? Number(searchParams.get('time'))*60 : null : 30*60
     const increment = searchParams ? searchParams.get('time')!=="inf" ? Number(searchParams.get('increment')) : null : 0
+    const opponent = (searchParams && searchParams.get('oppoUid') && searchParams.get('oppoUname')) ? {oppoUid:searchParams.get('oppoUid'),oppoUname:searchParams.get('oppoUname')} : null
 
     //states
     const [moves,setMoves] = useState(0)
@@ -87,6 +92,7 @@ const HomePageContent=()=>{
     const [whiteRookCastlePossible,setWhiteRookCastlePossible] = useState({left:true,right:true})
     const [blackRookCastlePossible,setBlackRookCastlePossible] = useState({left:true,right:true})
     const [allMoves, setAllMoves] = useState<moveType[]>([])
+    const [socket, setSocket] = useState<any>(undefined)
 
     //set game result
     const [whiteWon, setWhiteWon] = useState(false)
@@ -234,7 +240,7 @@ const HomePageContent=()=>{
 
     //**check if anyone won or there is any stalemate and make it a draw */
     useEffect(()=>{
-        if((pieceColour===1 && moves%2===0) || (pieceColour===0 && moves%2!==0)){
+        if(opponent){
             const ifWhiteKingInThreat = findThreatToWhiteKing(allPossibleMovesForBlack,board)
             if(ifWhiteKingInThreat){
                 if (audioRefCheck.current) {
@@ -303,8 +309,6 @@ const HomePageContent=()=>{
                     }
                 }
             }
-        }
-        else{
             const ifBlackKingInThreat = findThreatToBlackKing(allPossibleMovesForWhite,board)
             if(ifBlackKingInThreat){
                 if (audioRefCheck.current) {
@@ -374,7 +378,149 @@ const HomePageContent=()=>{
                 }
             }
         }
-    },[moves,board,allPossibleMovesForBlack,allPossibleMovesForWhite])
+        else{
+            if(moves%2===0){
+                const ifWhiteKingInThreat = findThreatToWhiteKing(allPossibleMovesForBlack,board)
+                if(ifWhiteKingInThreat){
+                    if (audioRefCheck.current) {
+                        audioRefCheck.current.volume=1
+                        audioRefCheck.current.play()
+                    }
+                    const whiteKingPiece = allPossibleMovesForWhite.find((piece) => piece.piece === "K")
+                    let flag = false
+                    if (whiteKingPiece && whiteKingPiece.moves.length === 0) {
+                        outerLoop: for (const piece of allPossibleMovesForWhite) {
+                            for (const move of piece.moves) {
+                                let updatedBoard:string[][] = [...board]
+                                updatedBoard[piece.posi.row] = [...board[piece.posi.row]]
+                                updatedBoard[move.row] = [...board[move.row]]
+                                updatedBoard[piece.posi.row][piece.posi.col] = " "
+                                updatedBoard[move.row][move.col] = piece.piece
+                                if((pieceColour===1 && piece.piece==="P" && piece.posi.row===3 && allMoves[allMoves.length-1].piece==="p" && move.row===2 && move.col===allMoves[allMoves.length-1].toCol && allMoves[allMoves.length-1].toRow===3) ||
+                                    (pieceColour===0 && piece.piece==="P" && piece.posi.row===4 && allMoves[allMoves.length-1].piece==="p" && move.row===5 && move.col===allMoves[allMoves.length-1].toCol && allMoves[allMoves.length-1].toRow===4))
+                                {
+                                    updatedBoard[allMoves[allMoves.length-1].toRow][allMoves[allMoves.length-1].toCol] = " "
+                                }
+                                let arr:allTempPossibleMovesType[] = []
+                                updatedBoard.map((r,rind)=>{
+                                    r.map((c,cind)=>{
+                                        if(blackPieces.includes(c)){
+                                            if(c==="p") arr.push(findMovesForp(rind,cind,false,updatedBoard))
+                                            if(c==="n") arr.push(findMovesForn(rind,cind,false,updatedBoard))
+                                            if(c==="r") arr.push(findMovesForr(rind,cind,false,updatedBoard))
+                                            if(c==="b") arr.push(findMovesForb(rind,cind,false,updatedBoard))
+                                            if(c==="q") arr.push(findMovesForq(rind,cind,false,updatedBoard))
+                                        }
+                                    })
+                                })
+                                const afterMoveIfWhiteKingInThreat = findThreatToWhiteKing(arr,updatedBoard)
+                                if(!afterMoveIfWhiteKingInThreat){
+                                    flag=true
+                                    break outerLoop
+                                }
+                            }
+                        }
+                        if(flag===false){
+                            if (audioRefGameOverCheckMate.current) {
+                                audioRefGameOverCheckMate.current.volume=1
+                                audioRefGameOverCheckMate.current.play()
+                            }
+                            setBlackWon(true)
+                        }
+                    }
+                }
+                else{
+                    const whiteKingPiece = allPossibleMovesForWhite.find((piece) => piece.piece === "K")
+                    let flag = false
+                    if (whiteKingPiece && whiteKingPiece.moves.length === 0) {
+                        outerLoop: for (const piece of allPossibleMovesForWhite) {
+                            if(piece.moves.length>0){
+                                flag=true
+                                break outerLoop
+                            }
+                        }
+                        if(flag===false){
+                            if (audioRefGameOverStaleMate.current) {
+                                audioRefGameOverStaleMate.current.volume=1
+                                audioRefGameOverStaleMate.current.play()
+                            }
+                            setStaleMateWhiteWon(true)
+                        }
+                    }
+                }
+            }
+            else{
+                const ifBlackKingInThreat = findThreatToBlackKing(allPossibleMovesForWhite,board)
+                if(ifBlackKingInThreat){
+                    if (audioRefCheck.current) {
+                        audioRefCheck.current.volume=1
+                        audioRefCheck.current.play()
+                    }
+                    const blackKingPiece = allPossibleMovesForBlack.find((piece) => piece.piece === "k")
+                    let flag = false
+                    if (blackKingPiece && blackKingPiece.moves.length === 0) {
+                        outerLoop: for (const piece of allPossibleMovesForBlack) {
+                            for (const move of piece.moves) {
+                                let updatedBoard:string[][] = [...board]
+                                updatedBoard[piece.posi.row] = [...board[piece.posi.row]]
+                                updatedBoard[move.row] = [...board[move.row]]
+                                updatedBoard[piece.posi.row][piece.posi.col] = " "
+                                updatedBoard[move.row][move.col] = piece.piece
+                                if((pieceColour===1 && piece.piece==="p" && piece.posi.row===4 && allMoves[allMoves.length-1].piece==="P" && move.row===5 && move.col===allMoves[allMoves.length-1].toCol && allMoves[allMoves.length-1].toRow===4) ||
+                                    (pieceColour===0 && piece.piece==="p" && piece.posi.row===3 && allMoves[allMoves.length-1].piece==="P" && move.row===2 && move.col===allMoves[allMoves.length-1].toCol && allMoves[allMoves.length-1].toRow===3))
+                                {
+                                    updatedBoard[allMoves[allMoves.length-1].toRow][allMoves[allMoves.length-1].toCol] = " "
+                                }
+                                let arr:allTempPossibleMovesType[] = []
+                                updatedBoard.map((r,rind)=>{
+                                    r.map((c,cind)=>{
+                                        if(whitePieces.includes(c)){
+                                            if(c==="P") arr.push(findMovesForP(rind,cind,false,updatedBoard))
+                                            if(c==="N") arr.push(findMovesForN(rind,cind,false,updatedBoard))
+                                            if(c==="R") arr.push(findMovesForR(rind,cind,false,updatedBoard))
+                                            if(c==="B") arr.push(findMovesForB(rind,cind,false,updatedBoard))
+                                            if(c==="Q") arr.push(findMovesForQ(rind,cind,false,updatedBoard))
+                                        }
+                                    })
+                                })
+                                const afterMoveIfBlackKingInThreat = findThreatToBlackKing(arr,updatedBoard)
+                                if(!afterMoveIfBlackKingInThreat){
+                                    flag=true
+                                    break outerLoop
+                                }
+                            }
+                        }
+                        if(flag===false){
+                            if (audioRefGameOverCheckMate.current) {
+                                audioRefGameOverCheckMate.current.volume=1
+                                audioRefGameOverCheckMate.current.play()
+                            }
+                            setWhiteWon(true)
+                        }
+                    }
+                }
+                else{
+                    const blackKingPiece = allPossibleMovesForWhite.find((piece) => piece.piece === "k")
+                    let flag = false
+                    if (blackKingPiece && blackKingPiece.moves.length === 0) {
+                        outerLoop: for (const piece of allPossibleMovesForBlack) {
+                            if(piece.moves.length>0){
+                                flag=true
+                                break outerLoop
+                            }
+                        }
+                        if(flag===false){
+                            if (audioRefGameOverStaleMate.current) {
+                                audioRefGameOverStaleMate.current.volume=1
+                                audioRefGameOverStaleMate.current.play()
+                            }
+                            setStaleMateBlackWon(true)
+                        }
+                    }
+                }
+            }
+        }
+    },[moves,allPossibleMovesForBlack,allPossibleMovesForWhite])
 
     //function to find if White King is in threat
     const findThreatToWhiteKing = (moves:allPossibleMovesType[] | allTempPossibleMovesType[], custBoard:string[][]) => {
@@ -539,15 +685,14 @@ const HomePageContent=()=>{
                 newBoard[newRow] = [...prevBoard[newRow]]
                 newBoard[selRow][selCol] = " "
                 newBoard[newRow][newCol] = updatedPiece
+                if(user && opponent) socket.emit("updateBoard",user?.id.split(":")[2],opponent?.oppoUid,newBoard,moves+1)
                 return newBoard
             })
             //set the allMoves i.e previousPiece and updatedPiece if pawn moves to lastsquare
             setAllMoves((prev) => {
-                if(prev.length>0) {
-                    return [...prev.slice(0,allMoves.length-1),{...prev[prev.length - 1],lastSquareUpdatedPiece: updatedPiece,lastSquarePreviousPiece: lastSquarePreviousPiece}]
-                }
-                return [{...prev[prev.length - 1],lastSquareUpdatedPiece: updatedPiece,lastSquarePreviousPiece: lastSquarePreviousPiece}]
+                return [...prev.slice(0,prev.length-1),{...prev[prev.length - 1],lastSquareUpdatedPiece: updatedPiece,lastSquarePreviousPiece: lastSquarePreviousPiece}]
             })
+            if(user && opponent) socket.emit("newMove",user?.id.split(":")[2],opponent?.oppoUid,null,updatedPiece,lastSquarePreviousPiece)
         }
         setPawnToLastSquarePosi({piece:null,selRow:null,selCol:null,newRow:null,newCol:null})
         setMoves((prev)=>prev+1)
@@ -571,6 +716,41 @@ const HomePageContent=()=>{
             audioRefCastle.current.play()
         }
     }
+
+    useEffect(()=>{
+        if(opponent){
+            const socket = io("http://localhost:3001")
+            setSocket(socket)
+            socket.on('boardUpdated', ({board,movesCount})=>{
+                setBoard(board)
+                setMoves(movesCount)
+            })
+            socket.on('updateMove', ({move,updatedPiece,lastSquarePreviousPiece})=>{
+                if(updatedPiece===null && lastSquarePreviousPiece===null){
+                    setAllMoves((prev)=>{return [...prev,move]})
+                }
+                else if(move===null){
+                    setAllMoves((prev) => {
+                        return [...prev.slice(0,prev.length-1),{...prev[prev.length - 1],lastSquareUpdatedPiece: updatedPiece,lastSquarePreviousPiece: lastSquarePreviousPiece}]
+                    })
+                }
+            })
+            return () => {
+                socket.disconnect()
+            }
+        }
+    },[])
+
+    useEffect(()=>{
+        if(ready && !authenticated){
+            socket.emit("customDisconnect")
+            router.push("/")
+
+        }
+        else if(ready && authenticated && socket){
+            socket.emit("register",user?.id.split(":")[2])
+        }
+    },[ready, authenticated, socket])
 
     const updateSelectedPiecePosition = (selPiece:string,selRow:number,selCol:number,newRow:number,newCol:number) => {
 
@@ -663,12 +843,14 @@ const HomePageContent=()=>{
         (pieceColour===0 && selPiece==="P" && selRow===4 && allMoves[allMoves.length-1].piece==="p" && newRow===5 && newCol===allMoves[allMoves.length-1].toCol && allMoves[allMoves.length-1].toRow===4) ||
         (pieceColour===0 && selPiece==="p" && selRow===3 && allMoves[allMoves.length-1].piece==="P" && newRow===2 && newCol===allMoves[allMoves.length-1].toCol && allMoves[allMoves.length-1].toRow===3)){
             setAllMoves((prev)=>{return [...prev,{piece:selPiece,fromRow:selRow,fromCol:selCol,toRow:newRow,toCol:newCol,enpass:true}]})
+            if(user && opponent) socket.emit("newMove",user?.id.split(":")[2],opponent?.oppoUid,{piece:selPiece,fromRow:7-selRow,fromCol:7-selCol,toRow:7-newRow,toCol:7-newCol,enpass:true},null,null)
         }
         //lastSquare move is set in handlePawnToLastSquare func
 
         //normal move
         else{
             setAllMoves((prev)=>{return [...prev,{piece:selPiece,fromRow:selRow,fromCol:selCol,toRow:newRow,toCol:newCol}]})
+            if(user && opponent) socket.emit("newMove",user?.id.split(":")[2],opponent?.oppoUid,{piece:selPiece,fromRow:7-selRow,fromCol:7-selCol,toRow:7-newRow,toCol:7-newCol},null,null)
         }
 
         //update the selected piece position only when it is not pawn to last square
@@ -682,9 +864,9 @@ const HomePageContent=()=>{
                 newBoard[newRow] = [...prevBoard[newRow]]
                 newBoard[selRow][selCol] = " "
                 newBoard[newRow][newCol] = selPiece
+                if(user && opponent) socket.emit("updateBoard",user?.id.split(":")[2],opponent?.oppoUid,newBoard,moves+1)
                 return newBoard
             })
-
             //increase the count of moves when pawn does not reach last square and when it reaches moves are updated in handlePawnToLastSquare func
             setMoves((prev)=>prev+1)
         }
@@ -694,10 +876,19 @@ const HomePageContent=()=>{
     const handleSelectedPiece = (piece:string,i:number,j:number) => {
         //1. select a piece is any other piece is not selected
         if(!isSelected){
-            if((pieceColour===1 && moves%2===0 && whitePieces.includes(board[i][j])) || (pieceColour===1 && moves%2!==0 && blackPieces.includes(board[i][j])) || (pieceColour===0 && moves%2===0 && whitePieces.includes(board[i][j])) || (pieceColour===0 && moves%2!==0 && blackPieces.includes(board[i][j]))){
-                setIsSelected(true)
-                setSelectedPiece({piece:piece,row:i,col:j})
-                setPossibleMovesForSelectedPiece([])
+            if(opponent){
+                if((pieceColour===1 && moves%2===0 && whitePieces.includes(board[i][j])) || (pieceColour===0 && moves%2!==0 && blackPieces.includes(board[i][j]))){
+                    setIsSelected(true)
+                    setSelectedPiece({piece:piece,row:i,col:j})
+                    setPossibleMovesForSelectedPiece([])
+                }
+            }
+            else{
+                if((pieceColour===1 && moves%2===0 && whitePieces.includes(board[i][j])) || (pieceColour===1 && moves%2!==0 && blackPieces.includes(board[i][j])) || (pieceColour===0 && moves%2===0 && whitePieces.includes(board[i][j])) || (pieceColour===0 && moves%2!==0 && blackPieces.includes(board[i][j]))){
+                    setIsSelected(true)
+                    setSelectedPiece({piece:piece,row:i,col:j})
+                    setPossibleMovesForSelectedPiece([])
+                }
             }
         }
         //2. deselect if same piece is selected again
@@ -706,7 +897,7 @@ const HomePageContent=()=>{
             setSelectedPiece({piece:null,row:null,col:null})
         }
         //3. select if another same colour piece is selected
-        else if(isSelected && ((pieceColour===1 && moves%2===0 && whitePieces.includes(board[i][j])) || (pieceColour===1 && moves%2!==0 && blackPieces.includes(board[i][j])) || (pieceColour===0 && moves%2===0 && whitePieces.includes(board[i][j])) || (pieceColour===0 && moves%2!==0 && blackPieces.includes(board[i][j])))){
+        else if(isSelected && ((opponent && ((pieceColour===1 && moves%2===0 && whitePieces.includes(board[i][j])) || (pieceColour===0 && moves%2!==0 && blackPieces.includes(board[i][j])))) || ((pieceColour===1 && moves%2===0 && whitePieces.includes(board[i][j])) || (pieceColour===1 && moves%2!==0 && blackPieces.includes(board[i][j])) || (pieceColour===0 && moves%2===0 && whitePieces.includes(board[i][j])) || (pieceColour===0 && moves%2!==0 && blackPieces.includes(board[i][j]))))){
             setPossibleMovesForSelectedPiece([])
             setIsSelected(true)
             setSelectedPiece({piece:piece,row:i,col:j})
@@ -778,13 +969,25 @@ const HomePageContent=()=>{
     //Set possible moves for a selected piece
     useEffect(()=>{
         if(isSelected){
-            if((pieceColour===1 && moves%2===0) || (pieceColour===0 && moves%2===0)){
-                const possibleMovesForPieceIfWhite = allPossibleMovesForWhite.find((item)=>(item.piece===selectedPiece.piece && item.posi.row===selectedPiece.row && item.posi.col===selectedPiece.col))
-                if(possibleMovesForPieceIfWhite) setPossibleMovesForSelectedPiece(possibleMovesForPieceIfWhite?.moves)
+            if(opponent){
+                if(pieceColour===1){
+                    const possibleMovesForPieceIfWhite = allPossibleMovesForWhite.find((item)=>(item.piece===selectedPiece.piece && item.posi.row===selectedPiece.row && item.posi.col===selectedPiece.col))
+                    if(possibleMovesForPieceIfWhite) setPossibleMovesForSelectedPiece(possibleMovesForPieceIfWhite?.moves)
+                }
+                else{
+                    const possibleMovesForPieceIfBlack = allPossibleMovesForBlack.find((item)=>(item.piece===selectedPiece.piece && item.posi.row===selectedPiece.row && item.posi.col===selectedPiece.col))
+                    if(possibleMovesForPieceIfBlack) setPossibleMovesForSelectedPiece(possibleMovesForPieceIfBlack?.moves)
+                }
             }
             else{
-                const possibleMovesForPieceIfBlack = allPossibleMovesForBlack.find((item)=>(item.piece===selectedPiece.piece && item.posi.row===selectedPiece.row && item.posi.col===selectedPiece.col))
-                if(possibleMovesForPieceIfBlack) setPossibleMovesForSelectedPiece(possibleMovesForPieceIfBlack?.moves)
+                if((pieceColour===1 && moves%2===0) || (pieceColour===0 && moves%2===0)){
+                    const possibleMovesForPieceIfWhite = allPossibleMovesForWhite.find((item)=>(item.piece===selectedPiece.piece && item.posi.row===selectedPiece.row && item.posi.col===selectedPiece.col))
+                    if(possibleMovesForPieceIfWhite) setPossibleMovesForSelectedPiece(possibleMovesForPieceIfWhite?.moves)
+                }
+                else{
+                    const possibleMovesForPieceIfBlack = allPossibleMovesForBlack.find((item)=>(item.piece===selectedPiece.piece && item.posi.row===selectedPiece.row && item.posi.col===selectedPiece.col))
+                    if(possibleMovesForPieceIfBlack) setPossibleMovesForSelectedPiece(possibleMovesForPieceIfBlack?.moves)
+                }
             }
         }
         else{
@@ -806,8 +1009,8 @@ const HomePageContent=()=>{
                 if(row>0 && col>0 && whitePieces.includes(Board[row-1][col-1])) protectedArray.push({row:row-1,col:col-1})
                 if(row>0 && col<7 && whitePieces.includes(Board[row-1][col+1])) protectedArray.push({row:row-1,col:col+1})
             }
-            if(row===3 && col>0 && Board[row][col-1]==="p" && allMoves[allMoves.length-1].piece==="p" && allMoves[allMoves.length-1].toRow===3 && allMoves[allMoves.length-1].toCol===col-1) movesArray.push({row:row-1,col:col-1})
-            if(row===3 && col<7 && Board[row][col+1]==="p" && allMoves[allMoves.length-1].piece==="p" && allMoves[allMoves.length-1].toRow===3 && allMoves[allMoves.length-1].toCol===col+1) movesArray.push({row:row-1,col:col+1})
+            if(row===3 && col>0 && allMoves.length>0 && allMoves[allMoves.length-1].piece && Board[row][col-1]==="p" && allMoves[allMoves.length-1].piece==="p" && allMoves[allMoves.length-1].toRow===3 && allMoves[allMoves.length-1].toCol===col-1) movesArray.push({row:row-1,col:col-1})
+            if(row===3 && col<7 && allMoves.length>0 && allMoves[allMoves.length-1].piece && Board[row][col+1]==="p" && allMoves[allMoves.length-1].piece==="p" && allMoves[allMoves.length-1].toRow===3 && allMoves[allMoves.length-1].toCol===col+1) movesArray.push({row:row-1,col:col+1})
         }
         else{
             if(row<7 && Board[row+1][col]===" ") movesArray.push({row:row+1,col:col})
@@ -818,8 +1021,8 @@ const HomePageContent=()=>{
                 if(row<7 && col<7 && whitePieces.includes(Board[row+1][col+1])) protectedArray.push({row:row+1,col:col+1})
                 if(row<7 && col>0 && whitePieces.includes(Board[row+1][col-1])) protectedArray.push({row:row+1,col:col-1})
             }
-            if(row===4 && col>0 && Board[row][col-1]==="p" && allMoves[allMoves.length-1].piece==="p" && allMoves[allMoves.length-1].toRow===4 && allMoves[allMoves.length-1].toCol===col-1) movesArray.push({row:row+1,col:col-1})
-            if(row===4 && col<7 && Board[row][col+1]==="p" && allMoves[allMoves.length-1].piece==="p" && allMoves[allMoves.length-1].toRow===4 && allMoves[allMoves.length-1].toCol===col+1) movesArray.push({row:row+1,col:col+1})
+            if(row===4 && col>0 && allMoves.length>0 && allMoves[allMoves.length-1].piece && Board[row][col-1]==="p" && allMoves[allMoves.length-1].piece==="p" && allMoves[allMoves.length-1].toRow===4 && allMoves[allMoves.length-1].toCol===col-1) movesArray.push({row:row+1,col:col-1})
+            if(row===4 && col<7 && allMoves.length>0 && allMoves[allMoves.length-1].piece && Board[row][col+1]==="p" && allMoves[allMoves.length-1].piece==="p" && allMoves[allMoves.length-1].toRow===4 && allMoves[allMoves.length-1].toCol===col+1) movesArray.push({row:row+1,col:col+1})
         }
         if(forRealBoard) return {piece:"P",posi:{row:row,col:col},moves:movesArray,protected:protectedArray}
         else return {piece:"P",posi:{row:row,col:col},moves:movesArray}
@@ -839,8 +1042,8 @@ const HomePageContent=()=>{
                 if(row<7 && col<7 && blackPieces.includes(Board[row+1][col+1])) protectedArray.push({row:row+1,col:col+1})
                 if(row<7 && col>0 && blackPieces.includes(Board[row+1][col-1])) protectedArray.push({row:row+1,col:col-1})
             }
-            if(row===4 && col>0 && Board[row][col-1]==="P" && allMoves[allMoves.length-1].piece==="P" && allMoves[allMoves.length-1].toRow===4 && allMoves[allMoves.length-1].toCol===col-1) movesArray.push({row:row+1,col:col-1})
-            if(row===4 && col<7 && Board[row][col+1]==="P" && allMoves[allMoves.length-1].piece==="P" && allMoves[allMoves.length-1].toRow===4 && allMoves[allMoves.length-1].toCol===col+1) movesArray.push({row:row+1,col:col+1})
+            if(row===4 && col>0 && allMoves.length>0 && allMoves[allMoves.length-1].piece && Board[row][col-1]==="P" && allMoves[allMoves.length-1].piece==="P" && allMoves[allMoves.length-1].toRow===4 && allMoves[allMoves.length-1].toCol===col-1) movesArray.push({row:row+1,col:col-1})
+            if(row===4 && col<7 && allMoves.length>0 && allMoves[allMoves.length-1].piece && Board[row][col+1]==="P" && allMoves[allMoves.length-1].piece==="P" && allMoves[allMoves.length-1].toRow===4 && allMoves[allMoves.length-1].toCol===col+1) movesArray.push({row:row+1,col:col+1})
             
         }
         else{
@@ -852,8 +1055,8 @@ const HomePageContent=()=>{
                 if(row>0 && col>0 && blackPieces.includes(Board[row-1][col-1])) protectedArray.push({row:row-1,col:col-1})
                 if(row>0 && col<7 && blackPieces.includes(Board[row-1][col+1])) protectedArray.push({row:row-1,col:col+1})
             }
-            if(row===3 && col>0 && Board[row][col-1]==="P" && allMoves[allMoves.length-1].piece==="P" && allMoves[allMoves.length-1].toRow===3 && allMoves[allMoves.length-1].toCol===col-1) movesArray.push({row:row-1,col:col-1})
-            if(row===3 && col<7 && Board[row][col+1]==="P" && allMoves[allMoves.length-1].piece==="P" && allMoves[allMoves.length-1].toRow===3 && allMoves[allMoves.length-1].toCol===col+1) movesArray.push({row:row-1,col:col+1})
+            if(row===3 && col>0 && allMoves.length>0 && allMoves[allMoves.length-1].piece && Board[row][col-1]==="P" && allMoves[allMoves.length-1].piece==="P" && allMoves[allMoves.length-1].toRow===3 && allMoves[allMoves.length-1].toCol===col-1) movesArray.push({row:row-1,col:col-1})
+            if(row===3 && col<7 && allMoves.length>0 && allMoves[allMoves.length-1].piece && Board[row][col+1]==="P" && allMoves[allMoves.length-1].piece==="P" && allMoves[allMoves.length-1].toRow===3 && allMoves[allMoves.length-1].toCol===col+1) movesArray.push({row:row-1,col:col+1})
         }
         if(forRealBoard) return {piece:"p",posi:{row:row,col:col},moves:movesArray,protected:protectedArray}
         else return {piece:"p",posi:{row:row,col:col},moves:movesArray}
@@ -1463,8 +1666,8 @@ const HomePageContent=()=>{
                     )
                 }
                 else if(expiece.piece==="b"){
-                    const isSameLeftDiag = expiece.posi.row-row===expiece.posi.col-col && ((expiece.posi.row<row && expiece.posi.col<col) || (expiece.posi.row>row && expiece.posi.col>col))
-                    const isSameRightDiag = expiece.posi.row-row===expiece.posi.col-col && ((expiece.posi.row<row && expiece.posi.col>col) || (expiece.posi.row>row && expiece.posi.col<col))
+                    const isSameLeftDiag = Math.abs(expiece.posi.row-row)===Math.abs(expiece.posi.col-col) && ((expiece.posi.row<row && expiece.posi.col<col) || (expiece.posi.row>row && expiece.posi.col>col))
+                    const isSameRightDiag = Math.abs(expiece.posi.row-row)===Math.abs(expiece.posi.col-col) && ((expiece.posi.row<row && expiece.posi.col>col) || (expiece.posi.row>row && expiece.posi.col<col))
                     const ifAttacked = expiece.moves.some(
                         (exmove) => exmove.row === move.row && exmove.col === move.col
                     )
@@ -1495,8 +1698,8 @@ const HomePageContent=()=>{
                         else removeMoves.push({row:row-1,col:col})
                     }
 
-                    const isSameLeftDiag = expiece.posi.row-row===expiece.posi.col-col && ((expiece.posi.row<row && expiece.posi.col<col) || (expiece.posi.row>row && expiece.posi.col>col))
-                    const isSameRightDiag = expiece.posi.row-row===expiece.posi.col-col && ((expiece.posi.row<row && expiece.posi.col>col) || (expiece.posi.row>row && expiece.posi.col<col))
+                    const isSameLeftDiag = Math.abs(expiece.posi.row-row)===Math.abs(expiece.posi.col-col) && ((expiece.posi.row<row && expiece.posi.col<col) || (expiece.posi.row>row && expiece.posi.col>col))
+                    const isSameRightDiag = Math.abs(expiece.posi.row-row)===Math.abs(expiece.posi.col-col) && ((expiece.posi.row<row && expiece.posi.col>col) || (expiece.posi.row>row && expiece.posi.col<col))
                     
                     if(ifAttacked && isSameLeftDiag){
                         if(expiece.posi.row<row && expiece.posi.col<col) removeMoves.push({row:row+1,col:col+1})
@@ -1552,7 +1755,7 @@ const HomePageContent=()=>{
         if(pieceColour===0 && row===0 && col===3 && board[0][0]==="R" && whiteKingCastlePossible && whiteRookCastlePossible.left && !findThreatToWhiteKing(allPossibleMovesForBlack,board) && !checkMiddleSquaresAttacked("white","left")) movesArray.push({row:row,col:col-2})
         if(pieceColour===0 && row===0 && col===3 && board[0][7]==="R" && whiteKingCastlePossible && whiteRookCastlePossible.right && !findThreatToWhiteKing(allPossibleMovesForBlack,board) && !checkMiddleSquaresAttacked("white","right")) movesArray.push({row:row,col:col+2})
 
-        if((pieceColour===1 && moves%2!==0) || (pieceColour===0 && moves%2!==0)){
+        if(moves%2!==0){
             setAllPossibleMovesForWhite((prev)=>{return [...prev,{piece:"K",posi:{row:row,col:col},moves:movesArray, protected:protectedArray}]})
         }
         else{
@@ -1634,8 +1837,8 @@ const HomePageContent=()=>{
                     )
                 }
                 else if(expiece.piece==="B"){
-                    const isSameLeftDiag = expiece.posi.row-row===expiece.posi.col-col && ((expiece.posi.row<row && expiece.posi.col<col) || (expiece.posi.row>row && expiece.posi.col>col))
-                    const isSameRightDiag = expiece.posi.row-row===expiece.posi.col-col && ((expiece.posi.row<row && expiece.posi.col>col) || (expiece.posi.row>row && expiece.posi.col<col))
+                    const isSameLeftDiag = Math.abs(expiece.posi.row-row)===Math.abs(expiece.posi.col-col) && ((expiece.posi.row<row && expiece.posi.col<col) || (expiece.posi.row>row && expiece.posi.col>col))
+                    const isSameRightDiag = Math.abs(expiece.posi.row-row)===Math.abs(expiece.posi.col-col) && ((expiece.posi.row<row && expiece.posi.col>col) || (expiece.posi.row>row && expiece.posi.col<col))
                     const ifAttacked = expiece.moves.some(
                         (exmove) => exmove.row === move.row && exmove.col === move.col
                     )
@@ -1666,8 +1869,8 @@ const HomePageContent=()=>{
                         else removeMoves.push({row:row-1,col:col})
                     }
 
-                    const isSameLeftDiag = expiece.posi.row-row===expiece.posi.col-col && ((expiece.posi.row<row && expiece.posi.col<col) || (expiece.posi.row>row && expiece.posi.col>col))
-                    const isSameRightDiag = expiece.posi.row-row===expiece.posi.col-col && ((expiece.posi.row<row && expiece.posi.col>col) || (expiece.posi.row>row && expiece.posi.col<col))
+                    const isSameLeftDiag = Math.abs(expiece.posi.row-row)===Math.abs(expiece.posi.col-col) && ((expiece.posi.row<row && expiece.posi.col<col) || (expiece.posi.row>row && expiece.posi.col>col))
+                    const isSameRightDiag = Math.abs(expiece.posi.row-row)===Math.abs(expiece.posi.col-col) && ((expiece.posi.row<row && expiece.posi.col>col) || (expiece.posi.row>row && expiece.posi.col<col))
                     
                     if(ifAttacked && isSameLeftDiag){
                         if(expiece.posi.row<row && expiece.posi.col<col) removeMoves.push({row:row+1,col:col+1})
@@ -1735,7 +1938,7 @@ const HomePageContent=()=>{
         if(pieceColour===0 && row===7 && col===3 && board[7][0]==="r" && blackKingCastlePossible && blackRookCastlePossible.left && !findThreatToBlackKing(allPossibleMovesForWhite,board) && !checkMiddleSquaresAttacked("black","left")) movesArray.push({row:row,col:col-2})
         if(pieceColour===0 && row===7 && col===3 && board[7][7]==="r" && blackKingCastlePossible && blackRookCastlePossible.right && !findThreatToBlackKing(allPossibleMovesForWhite,board) && !checkMiddleSquaresAttacked("black","right")) movesArray.push({row:row,col:col+2})
 
-        if((pieceColour===1 && moves%2===0) || (pieceColour===0 && moves%2===0)){
+        if(moves%2===0){
             setAllPossibleMovesForBlack((prev)=>{return [...prev,{piece:"k",posi:{row:row,col:col},moves:movesArray, protected:protectedArray}]})
         }
         else{
@@ -1815,7 +2018,7 @@ const HomePageContent=()=>{
     },[curBlack])
 
     useEffect(()=>{
-        if(blackComp && ((pieceColour===1 && moves%2===0) || (pieceColour===0 && moves%2===0))){
+        if(blackComp && moves%2===0){
             curWhite.some((piece)=>{
                 if(piece.piece==="K"){
                     findMovesForK(piece.row,piece.col)
@@ -1826,7 +2029,7 @@ const HomePageContent=()=>{
     },[pieceColour,moves,blackComp])
 
     useEffect(()=>{
-        if(whiteComp && ((pieceColour===1 && moves%2!==0) || (pieceColour===0 && moves%2!==0))){
+        if(whiteComp && moves%2!==0){
             curBlack.some((piece)=>{
                 if(piece.piece==="k"){
                     findMovesFork(piece.row,piece.col)
@@ -1868,17 +2071,31 @@ const HomePageContent=()=>{
     useEffect(() => {
         setAllPossibleMovesForWhite([])
         setAllPossibleMovesForBlack([])
-
-            if ((pieceColour === 1 && moves % 2 === 0) || (pieceColour === 0 && moves % 2 !== 0)) {
-                // If it is white turn, handle black pieces first, then 
+        if(opponent){
+            if(moves%2===0){
+                // If it is white turn, handle black pieces first, then white
                 handleAllBlackPieces()
                 handleAllWhitePieces()
-            } else {
+            } 
+            else{
                 // If it is black turn, handle white pieces first, then black
                 handleAllWhitePieces()
                 handleAllBlackPieces()
             }
-    },[pieceColour,moves,board])
+        }
+        else{
+            if((pieceColour===1 && moves%2===0) || (pieceColour===0 && moves%2!==0)) {
+                // If it is white turn, handle black pieces first, then 
+                handleAllBlackPieces()
+                handleAllWhitePieces()
+            } 
+            else{
+                // If it is black turn, handle white pieces first, then black
+                handleAllWhitePieces()
+                handleAllBlackPieces()
+            }
+        }
+    },[moves])
 
     const themeArray = [
         { l: "#A3B18C", d: "#4A4A4A", s: "#1C1C1C"},   // My Choice
@@ -1889,6 +2106,10 @@ const HomePageContent=()=>{
         { l: "#A1D3A1", d: "#4C6B2F", s: "#2A4D31" },  // Natural Green Theme
         { l: "#F5A7B8", d: "#E63946", s: "#FF6F61" },  // Soft Pink and Red with Coral
     ]
+
+    const getSizeLogo = () =>{
+        return windowSize<640 ? 24 : windowSize<768 ? 26 : windowSize<1024 ? 30 : windowSize<1128 ? 32 : windowSize<1440 ? 34 : windowSize<1800 ? 36 : 36
+    }
 
 
     return(
@@ -1926,6 +2147,12 @@ const HomePageContent=()=>{
                         <div className="w-5">{((pieceColour===1 && moves%2!==0 || (pieceColour===0 && moves%2===0))) && <FaStopwatch color={`${moves%2!==0 ? "white" : "black"}`} />}</div>
                     </div>}
                 </div>
+                {opponent && 
+                    <div className="flex mr-auto">
+                        <div><FaUser size={getSizeLogo()} color="#4b5563" className="border-2 border-gray-400 bg-gray-400 p-0.5 md:p-1 mr-2 md:mr-5"/></div>
+                        <div className="flex md:-ml-3 text-xs md:text-base font-bold font-anticDidone">{opponent.oppoUname}</div>
+                    </div>
+                }
                 <div className="relative rounded-md my-2 md:my-3" style={{border:`${windowSize >= 768 ? "12px" : "6px"} solid ${themeArray[theme].s}`}}>
                     {pawnToLastSquarePosi.piece!==null ? 
                     <div className="absolute inset-0 flex bg-white justify-center items-center bg-opacity-60 z-20">
@@ -2000,6 +2227,12 @@ const HomePageContent=()=>{
                         ))}
                     </div>
                 </div>
+                {opponent && 
+                    <div className="flex mr-auto">
+                        <div><FaUser size={getSizeLogo()} color="#4b5563" className="border-2 border-gray-400 bg-gray-400 p-0.5 md:p-1 mr-2 md:mr-5"/></div>
+                        <div className="flex md:-ml-3 text-xs md:text-base font-bold font-anticDidone">{user?.google?.name}</div>
+                    </div>
+                }
                 <div className="flex justify-center items-center gap-3 mt-1">
                     {whitePlayerTime!==null && blackPlayerTime!==null && increment!==null && <div key="sw-2" className={`${pieceColour===1 ? `${moves%2===0 ? "bg-white" : "bg-slate-500"} text-black` : "bg-black text-white"} flex justify-end items-center font-bold font-technology text-base md:text-xl p-1 rounded-md gap-2`} style={{border: `2px solid ${themeArray[theme].s}`}}>
                         <div className="w-5">{((pieceColour===1 && moves%2===0 || (pieceColour===0 && moves%2!==0))) && <FaStopwatch color={`${moves%2===0 ? "black" : "white"}`} />}</div>
@@ -2031,7 +2264,7 @@ const HomePageContent=()=>{
                 <div className="absolute flex flex-col bg-white h-[35%] w-[55%] md:h-[40%] md:w-[35%] lg:h-[45%] lg:w-[25%] rounded-lg" style={{border: `4px solid ${themeArray[theme].s}`}}>
                     <div className="flex flex-col items-end mt-2 mr-2 md:mt-3 md:mr-3 lg:mt-4 lg:mr-4"><button onClick={()=>setPauseTheBoard(true)}><FaWindowClose color="#3b82f6" size={iconSize}/></button></div>
                     <div className="flex flex-col gap-4 lg:gap-6 justify-center items-center mt-4 lg:mt-6">
-                        <div className="text-base md:text-lg lg:text-3xl font-extrabold text-center" style={{color: themeArray[theme].s}}>{draw ? "DRAW!!" : (staleMateWhiteWon || staleMateBlackWon) ? "DRAW BY STALEMATE" : whiteWon ? <div className="flex flex-col"><div>VICTORY</div><div>WHITE WON</div></div> : blackWon ? <div className="flex flex-col"><div>VICTORY</div><div>BLACK WON</div></div> : ""}</div>
+                        <div className="text-base md:text-lg lg:text-3xl font-extrabold text-center" style={{color: themeArray[theme].s}}>{draw ? "DRAW!!" : (staleMateWhiteWon || staleMateBlackWon) ? "DRAW BY STALEMATE" : whiteWon ? <div className="flex flex-col"><div>{opponent ? pieceColour===1 ? "VICTORY" : "DEFEAT" : "VICTORY"}</div><div>WHITE WON</div></div> : blackWon ? <div className="flex flex-col"><div>{opponent ? pieceColour===0 ? "VICTORY" : "DEFEAT" : "VICTORY"}</div><div>BLACK WON</div></div> : ""}</div>
                         <button onClick={()=>router.push("/HomePage")} className="text-sm md:text-base lg:text-xl font-extrabold text-black p-1 md:p-2 rounded-lg hover:scale-105" style={{border: `4px solid ${themeArray[theme].s}`}}>GO BACK</button>
                     </div>
                 </div>

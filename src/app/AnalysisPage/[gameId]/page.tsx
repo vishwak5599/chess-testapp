@@ -165,41 +165,81 @@ const GameDetails = () => {
                     newBoard[boardData[moveNumber].toRow][boardData[moveNumber].toCol] = boardData[moveNumber].piece
                     return newBoard
                 })
-                if(boardData[moveNumber].toRow===7 && boardData[moveNumber].toCol===2){
-                    setBoard((prevBoard)=>{
-                        const newBoard = [...prevBoard]
-                        newBoard[7] = [...prevBoard[7]]
-                        newBoard[7][0] = " "
-                        newBoard[7][3] = pieceColour===1 ? "R" : "r"
-                        return newBoard
-                    })
+                if(pieceColour===1){
+                    if(boardData[moveNumber].toRow===7 && boardData[moveNumber].toCol===2){
+                        setBoard((prevBoard)=>{
+                            const newBoard = [...prevBoard]
+                            newBoard[7] = [...prevBoard[7]]
+                            newBoard[7][0] = " "
+                            newBoard[7][3] = "R"
+                            return newBoard
+                        })
+                    }
+                    else if(boardData[moveNumber].toRow===7 && boardData[moveNumber].toCol===6){
+                        setBoard((prevBoard)=>{
+                            const newBoard = [...prevBoard]
+                            newBoard[7] = [...prevBoard[7]]
+                            newBoard[7][7] = " "
+                            newBoard[7][5] = "R"
+                            return newBoard
+                        })
+                    }
+                    else if(boardData[moveNumber].toRow===0 && boardData[moveNumber].toCol===2){
+                        setBoard((prevBoard)=>{
+                            const newBoard = [...prevBoard]
+                            newBoard[0] = [...prevBoard[0]]
+                            newBoard[0][0] = " "
+                            newBoard[0][3] = "r"
+                            return newBoard
+                        })
+                    }
+                    else if(boardData[moveNumber].toRow===0 && boardData[moveNumber].toCol===6){
+                        setBoard((prevBoard)=>{
+                            const newBoard = [...prevBoard]
+                            newBoard[0] = [...prevBoard[0]]
+                            newBoard[0][7] = " "
+                            newBoard[0][5] = "r"
+                            return newBoard
+                        })
+                    }
                 }
-                else if(boardData[moveNumber].toRow===7 && boardData[moveNumber].toCol===6){
-                    setBoard((prevBoard)=>{
-                        const newBoard = [...prevBoard]
-                        newBoard[7] = [...prevBoard[7]]
-                        newBoard[7][7] = " "
-                        newBoard[7][5] = pieceColour===1 ? "R" : "r"
-                        return newBoard
-                    })
-                }
-                else if(boardData[moveNumber].toRow===0 && boardData[moveNumber].toCol===2){
-                    setBoard((prevBoard)=>{
-                        const newBoard = [...prevBoard]
-                        newBoard[0] = [...prevBoard[0]]
-                        newBoard[0][0] = " "
-                        newBoard[0][3] = pieceColour===1 ? "r" : "R"
-                        return newBoard
-                    })
-                }
-                else if(boardData[moveNumber].toRow===0 && boardData[moveNumber].toCol===6){
-                    setBoard((prevBoard)=>{
-                        const newBoard = [...prevBoard]
-                        newBoard[0] = [...prevBoard[0]]
-                        newBoard[0][0] = " "
-                        newBoard[0][5] = pieceColour===1 ? "r" : "R"
-                        return newBoard
-                    })
+                else{
+                    if(boardData[moveNumber].toRow===7 && boardData[moveNumber].toCol===1){
+                        setBoard((prevBoard)=>{
+                            const newBoard = [...prevBoard]
+                            newBoard[7] = [...prevBoard[7]]
+                            newBoard[7][0] = " "
+                            newBoard[7][2] = "r"
+                            return newBoard
+                        })
+                    }
+                    else if(boardData[moveNumber].toRow===7 && boardData[moveNumber].toCol===5){
+                        setBoard((prevBoard)=>{
+                            const newBoard = [...prevBoard]
+                            newBoard[7] = [...prevBoard[7]]
+                            newBoard[7][7] = " "
+                            newBoard[7][4] = "r"
+                            return newBoard
+                        })
+                    }
+                    else if(boardData[moveNumber].toRow===0 && boardData[moveNumber].toCol===1){
+                        setBoard((prevBoard)=>{
+                            const newBoard = [...prevBoard]
+                            newBoard[0] = [...prevBoard[0]]
+                            newBoard[0][0] = " "
+                            newBoard[0][2] = "R"
+                            return newBoard
+                        })
+                    }
+                    else if(boardData[moveNumber].toRow===0 && boardData[moveNumber].toCol===5){
+                        setBoard((prevBoard)=>{
+                            const newBoard = [...prevBoard]
+                            newBoard[0] = [...prevBoard[0]]
+                            newBoard[0][7] = " "
+                            newBoard[0][4] = "R"
+                            return newBoard
+                        })
+                    }
                 }
                 if(audioRefCastle.current){
                     audioRefCastle.current.volume=1

@@ -719,7 +719,7 @@ const HomePageContent=()=>{
 
     useEffect(()=>{
         if(opponent){
-            const socket = io("http://localhost:3001")
+            const socket = io("https://chesstestbackend.onrender.com/")
             setSocket(socket)
             socket.on('boardUpdated', ({board,movesCount})=>{
                 setBoard(board)

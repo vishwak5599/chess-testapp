@@ -45,7 +45,7 @@ const HomePage=()=>{
     const [incomingRequests, setIncomingRequests] = useState<{fromUserId:String,fromUserName:String,fromPieceColour:number}[]>([])
 
     useEffect(()=>{
-        const socket = io("http://localhost:3001")
+        const socket = io("https://chesstestbackend.onrender.com/")
         setSocket(socket)
         socket.on('gameRequest', ({fromUserId,fromUserName,fromPieceColour})=>{
             setIncomingRequests((prev)=>{

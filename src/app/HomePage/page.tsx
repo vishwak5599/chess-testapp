@@ -9,6 +9,7 @@ import { RiArrowDropRightLine, RiArrowDropUpLine, RiArrowDropDownLine } from "re
 import { MdDoneOutline } from "react-icons/md"
 import { ImCross } from "react-icons/im"
 import { IoNotificationsSharp } from "react-icons/io5"
+import { FaClipboard, FaClipboardCheck } from "react-icons/fa"
 import useWindowSize from "../Components/UseWindowSize"
 import { FaChessRook, FaChessKnight, FaChessBishop, FaChessQueen, FaChessKing, FaChessPawn, FaWindowClose, FaPeopleArrows, FaUser} from "react-icons/fa"
 import { themeAtom } from "../Atoms/ThemeAtom"
@@ -43,6 +44,7 @@ const HomePage=()=>{
     const [playOnlinePopup, setPlayOnlinePopup] = useState(false)
     const [sendRequestUserId, setSendRequestUserId] = useState("")
     const [incomingRequests, setIncomingRequests] = useState<{fromUserId:String,fromUserName:String,fromPieceColour:number}[]>([])
+    const [copied, setCopied] = useState(false)
 
     useEffect(()=>{
         const socket = io("https://chesstestbackend.onrender.com/")
@@ -177,6 +179,18 @@ const HomePage=()=>{
         }
     }
 
+    const handleCopy = async () => {
+        try {
+            if(user){
+                await navigator.clipboard.writeText(user.id.split(":")[2])
+                setCopied(true)
+                setTimeout(() => setCopied(false), 2000)
+            }
+        } catch (error) {
+          console.error('Failed to copy: ', error)
+        }
+    }
+
     const themeArray = [
         { l: "#A3B18C", d: "#4A4A4A", s: "#1C1C1C"},   // My Choice
         { l: "#E1B6F4", d: "#8A2BE2", s: "#9C4A94" },  // Light Lavender and Deep Purple
@@ -208,17 +222,18 @@ const HomePage=()=>{
                         )}
                     </div>
                     <div className="flex flex-col justify-center items-center mt-10">
-                        <div className="flex flex-col gap-4 justify-start items-start text-sm md:text-xl font-bold font-anticDidone text-black">
-                        <div className="flex justify-center items-center gap-2 md:gap-4 w-screen">
-                                <div>USERID  :</div><div className="w-[70%] md:w-[40%] border-2 border-black px-2 py-1 rounded-md">{user?.id.split(":")[2]}</div>
+                        <div className="flex flex-col gap-4 justify-center items-center text-sm md:text-xl font-bold font-anticDidone text-black">
+                            <div className="flex justify-center items-center gap-1 md:gap-2 w-screen">
+                                <div>USERID  :</div><div className="w-[65%] md:w-[38%] border-2 border-black px-2 py-1 rounded-md">{user?.id.split(":")[2]}</div>
+                                <div onClick={()=>handleCopy()} className={`flex justify-center items-center cursor-pointer border-2 ${copied ? "border-green-700 shadow-green-700" : "border-black shadow-black"} rounded-md shadow-sm p-1`}>{!copied ? <FaClipboard size={getSizeNo()+2}/> : <FaClipboardCheck size={getSizeNo()+2} color="green"/>}</div>
                             </div>
-                            <div className="flex justify-center items-center gap-2 md:gap-4 w-screen">
+                            <div className="flex justify-center items-center gap-1 md:gap-2 w-screen">
                                 <div>NAME  :</div><div className="w-[70%] md:w-[40%] border-2 border-black px-2 py-1 rounded-md">{user?.google?.name}</div>
                             </div>
-                            <div className="flex justify-center items-center gap-2 md:gap-4 w-screen">
+                            <div className="flex justify-center items-center gap-1 md:gap-2 w-screen">
                                 <div>EMAIL :</div><div className="w-[70%] md:w-[40%] border-2 border-black px-2 py-1 rounded-md">{user?.google?.email}</div>
                             </div>
-                        </div>
+                            </div>
                         <div className="flex justify-center mt-6 lg:mt-8">
                             <button className="text-lg md:text-xl font-bold text-gray-600 font-anticDidone bg-white border-4 px-5 py-1 md:py-2 rounded-lg hover:bg-gray-200 transition-all duration-150 ease-in-out border-gray-600 shadow-lg shadow-gray-200" onClick={()=>logout()}>LOG OUT</button>
                         </div>

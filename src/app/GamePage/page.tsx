@@ -157,6 +157,42 @@ const HomePageContent=()=>{
         updateSize()
     }, [windowSize])
 
+    //if player choose to play online
+    useEffect(()=>{
+        if(opponent){
+            const socket = io("https://chesstestbackend.onrender.com/")
+            setSocket(socket)
+            socket.on('boardUpdated', ({board,movesCount})=>{
+                setBoard(board)
+                setMoves(movesCount)
+            })
+            socket.on('updateMove', ({move,updatedPiece,lastSquarePreviousPiece})=>{
+                if(updatedPiece===null && lastSquarePreviousPiece===null){
+                    setAllMoves((prev)=>{return [...prev,move]})
+                }
+                else if(move===null){
+                    setAllMoves((prev) => {
+                        return [...prev.slice(0,prev.length-1),{...prev[prev.length - 1],lastSquareUpdatedPiece: updatedPiece,lastSquarePreviousPiece: lastSquarePreviousPiece}]
+                    })
+                }
+            })
+            return () => {
+                socket.disconnect()
+            }
+        }
+    },[])
+
+    useEffect(()=>{
+        if(ready && !authenticated){
+            socket.emit("customDisconnect")
+            router.push("/")
+
+        }
+        else if(ready && authenticated && socket){
+            socket.emit("register",user?.id.split(":")[2])
+        }
+    },[ready, authenticated, socket])
+
     //decrease the timer for players for each move
     useEffect(() => {
         if(whitePlayerTime!==null && blackPlayerTime!==null && increment!==null){
@@ -232,7 +268,7 @@ const HomePageContent=()=>{
     //add to local storage
     useEffect(()=>{
         if(draw || staleMateWhiteWon || staleMateBlackWon || whiteWon || blackWon){
-            localStorage.setItem(`game-${localStorage.length-24}`, JSON.stringify({allMoves:allMoves,lastBoard:board,pieceColour:pieceColour,result:(whiteWon ? "white" : blackWon ? "black" : "draw")}));
+            localStorage.setItem(`game-${localStorage.length}`, JSON.stringify({allMoves:allMoves,lastBoard:board,pieceColour:pieceColour,result:(whiteWon ? "white" : blackWon ? "black" : "draw")}));
         }
     },[draw,staleMateWhiteWon,staleMateBlackWon,whiteWon,blackWon])
 
@@ -716,41 +752,6 @@ const HomePageContent=()=>{
             audioRefCastle.current.play()
         }
     }
-
-    useEffect(()=>{
-        if(opponent){
-            const socket = io("https://chesstestbackend.onrender.com/")
-            setSocket(socket)
-            socket.on('boardUpdated', ({board,movesCount})=>{
-                setBoard(board)
-                setMoves(movesCount)
-            })
-            socket.on('updateMove', ({move,updatedPiece,lastSquarePreviousPiece})=>{
-                if(updatedPiece===null && lastSquarePreviousPiece===null){
-                    setAllMoves((prev)=>{return [...prev,move]})
-                }
-                else if(move===null){
-                    setAllMoves((prev) => {
-                        return [...prev.slice(0,prev.length-1),{...prev[prev.length - 1],lastSquareUpdatedPiece: updatedPiece,lastSquarePreviousPiece: lastSquarePreviousPiece}]
-                    })
-                }
-            })
-            return () => {
-                socket.disconnect()
-            }
-        }
-    },[])
-
-    useEffect(()=>{
-        if(ready && !authenticated){
-            socket.emit("customDisconnect")
-            router.push("/")
-
-        }
-        else if(ready && authenticated && socket){
-            socket.emit("register",user?.id.split(":")[2])
-        }
-    },[ready, authenticated, socket])
 
     const updateSelectedPiecePosition = (selPiece:string,selRow:number,selCol:number,newRow:number,newCol:number) => {
 

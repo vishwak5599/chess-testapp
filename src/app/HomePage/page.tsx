@@ -6,7 +6,7 @@ import { LuAlarmClock } from "react-icons/lu"
 import { IoMdArrowDropupCircle, IoMdArrowDropdownCircle, IoMdArrowRoundBack } from "react-icons/io"
 import { AiFillThunderbolt } from "react-icons/ai"
 import { RiArrowDropRightLine, RiArrowDropUpLine, RiArrowDropDownLine } from "react-icons/ri"
-import { MdDoneOutline } from "react-icons/md"
+import { MdDoneOutline, MdQuestionMark } from "react-icons/md"
 import { ImCross } from "react-icons/im"
 import { IoNotificationsSharp } from "react-icons/io5"
 import { FaClipboard, FaClipboardCheck } from "react-icons/fa"
@@ -265,8 +265,8 @@ const HomePage=()=>{
             <div>
                 <div className="absolute z-10 inset-0 h-screen w-screen bg-[url('/images/loginScreenbg.jpeg')] bg-cover bg-center opacity-90 filter brightness-75 contrast-140 saturate-125 grayscale"></div>
                 {playOnlinePopup && 
-                    <div className="absolute z-20 h-[35%] w-[90%] md:h-[45%] md:w-[55%] lg:h-[55%] lg:w-[55%] flex flex-col bg-white rounded-lg" 
-                    style={{border: `4px solid ${themeArray[theme].s}`, 
+                    <div className="absolute z-20 h-[35%] w-[90%] md:h-[45%] md:w-[55%] lg:h-[55%] lg:w-[55%] flex flex-col bg-white rounded-md border-black animate-expand" 
+                    style={{
                         top: '50%', 
                         left: '50%', 
                         transform: 'translate(-50%, -50%)'
@@ -305,7 +305,7 @@ const HomePage=()=>{
                     <div className="flex justify-center font-bold text-lg md:text-xl font-anticDidone -mt-8 md:-mt-6">CHOOSE YOUR SIDE</div>
                         <div className="flex justify-center gap-8 md:gap-10 -mt-8">
                             <button className={`${!selectRandomPieceColour && pieceColour==1 ? " border-white shadow-lg shadow-white" : "border-gray-400"} p-1 md:p-2 border-4 bg-gray-500 rounded-lg hover:scale-105`} onClick={()=>handleSelectPieceColour(1)}><FaChessKing size={getSize()} color="white"/></button>
-                            <button className={`${selectRandomPieceColour ? " border-white shadow-lg shadow-white" : "border-gray-400"} p-1 md:p-2 border-4 hover:scale-105 bg-gray-300 rounded-lg flex`} onClick={()=>handleSelectPieceColour(2)}><FaChessKing size={getSize()} color="white" style={{clipPath: "polygon(0 0, 50% 0, 50% 100%, 0 100%)"}}/><FaChessKing size={getSize()} color="black" className="absolute" style={{clipPath: "polygon(50% 0, 100% 0, 100% 100%, 50% 100%)"}}/></button>
+                            <button className={`${selectRandomPieceColour ? " border-white shadow-lg shadow-white" : "border-gray-400"} relative p-1 md:p-2 border-4 hover:scale-105 bg-gray-300 rounded-lg flex`} onClick={()=>handleSelectPieceColour(2)}><FaChessKing size={getSize()} color="white" style={{clipPath: "polygon(0 0, 50% 0, 50% 100%, 0 100%)"}}/><MdQuestionMark size={getSizeNo()} color="black" style={{clipPath: "polygon(0 0, 50% 0, 50% 100%, 0 100%)"}} className="absolute top-[35%] left-[30%]" /><MdQuestionMark size={getSizeNo()} color="white" style={{clipPath: "polygon(50% 0, 100% 0, 100% 100%, 50% 100%)"}} className="absolute z-10 top-[35%] left-[30%]" /><FaChessKing size={getSize()} color="black" className="absolute" style={{clipPath: "polygon(50% 0, 100% 0, 100% 100%, 50% 100%)"}}/></button>
                             <button className={`${!selectRandomPieceColour && pieceColour==0 ? " border-white shadow-lg shadow-white" : "border-gray-400"} p-1 md:p-2 border-4 bg-gray-300 rounded-lg hover:scale-105`} onClick={()=>handleSelectPieceColour(0)}><FaChessKing size={getSize()} color="black"/></button>
                         </div>
                     <div className="flex flex-col justify-center">

@@ -93,7 +93,8 @@ const HomePageContent=()=>{
     const [blackRookCastlePossible,setBlackRookCastlePossible] = useState({left:true,right:true})
     const [allMoves, setAllMoves] = useState<moveType[]>([])
     const [socket, setSocket] = useState<any>(undefined)
-
+    const [halfMoveCount, setHalfMoveCount] = useState<number>(0)
+ 
     //set game result
     const [whiteWon, setWhiteWon] = useState(false)
     const [blackWon, setBlackWon] = useState(false)
@@ -232,6 +233,11 @@ const HomePageContent=()=>{
     },[whitePlayerTime,blackPlayerTime])
 
     //ways of draw
+
+    //50 moves rule
+    useEffect(()=>{
+        if(halfMoveCount===100) setDraw(true)
+    },[halfMoveCount])
 
     //if there is no pieces on board other than kings
     useEffect(()=>{
@@ -872,6 +878,12 @@ const HomePageContent=()=>{
             setMoves((prev)=>prev+1)
         }
 
+        if(selPiece==="P" || selPiece==="p" || board[newRow][newCol]!==" "){
+            setHalfMoveCount(0)
+        }
+        else{
+            setHalfMoveCount((prev)=>prev+1)
+        }
     }
 
     const handleSelectedPiece = (piece:string,i:number,j:number) => {

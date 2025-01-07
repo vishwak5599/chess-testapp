@@ -8,6 +8,7 @@ import { FaUser, FaWindowClose } from "react-icons/fa"
 import useWindowSize from '../Components/UseWindowSize'
 import { themeAtom } from "../Atoms/ThemeAtom"
 import { useAtom } from "jotai"
+import { BsRobot } from "react-icons/bs"
 
 import { usePrivy } from "@privy-io/react-auth"
 import { io } from "socket.io-client"
@@ -76,6 +77,7 @@ const HomePageContent=()=>{
     const time = searchParams ? searchParams.get('time')!=="inf" ? Number(searchParams.get('time'))*60 : null : 30*60
     const increment = searchParams ? searchParams.get('time')!=="inf" ? Number(searchParams.get('increment')) : null : 0
     const opponent = (searchParams && searchParams.get('oppoUid') && searchParams.get('oppoUname')) ? {oppoUid:searchParams.get('oppoUid'),oppoUname:searchParams.get('oppoUname')} : null
+    const depth = (searchParams && searchParams.get('depth')) ? searchParams.get('depth') : null
 
     //states
     const [moves,setMoves] = useState(0)
@@ -140,6 +142,113 @@ const HomePageContent=()=>{
     )
     const whitePieces = ["R","N","B","Q","K","P"]
     const blackPieces = ["r","n","b","q","k","p"]
+
+    useEffect(()=>{
+        if(depth && ((pieceColour===1 && moves%2!==0) || (pieceColour===0 && moves%2===0))){
+            let boardString = ""
+            if(pieceColour===1){
+                for(let i=0;i<8;i++){
+                    let count=0
+                    for(let j=0;j<8;j++){
+                        if(board[i][j]===" ") count++
+                        else if(board[i][j]!==" "){
+                            if(count>0) boardString+=(String(count))
+                            boardString+=(board[i][j])
+                            count=0
+                        }
+                        if(j===7 && count>0) boardString+=(String(count))
+                    }
+                    if(i!==7) boardString+=("/")
+                }
+            }
+            else{
+                for(let i=7;i>=0;i--){
+                    let count=0
+                    for(let j=7;j>=0;j--){
+                        if(board[i][j]===" ") count++
+                        else if(board[i][j]!==" "){
+                            if(count>0) boardString+=(String(count))
+                            boardString+=(board[i][j])
+                            count=0
+                        }
+                        if(j===0 && count>0) boardString+=(String(count))
+                    }
+                    if(i!==0) boardString+=("/")
+                }
+            }
+            boardString+=" "
+            if(pieceColour===1) boardString+="b"
+            else boardString+="w"
+            boardString+=" "
+            if(pieceColour===1){
+                if(whiteKingCastlePossible && whiteRookCastlePossible.right) boardString+="K"
+                if(whiteKingCastlePossible && whiteRookCastlePossible.left) boardString+="Q"
+                if(blackKingCastlePossible && blackRookCastlePossible.right) boardString+="k"
+                if(blackKingCastlePossible && blackRookCastlePossible.left) boardString+="q"
+            }
+            else{
+                if(whiteKingCastlePossible && whiteRookCastlePossible.left) boardString+="K"
+                if(whiteKingCastlePossible && whiteRookCastlePossible.right) boardString+="Q"
+                if(blackKingCastlePossible && blackRookCastlePossible.left) boardString+="k"
+                if(blackKingCastlePossible && blackRookCastlePossible.right) boardString+="q"
+            }
+            if(!whiteKingCastlePossible && !blackKingCastlePossible) boardString+="-"
+            boardString+=" "
+            if(pieceColour===1){
+                if(allMoves.length>0 && allMoves[allMoves.length-1].piece==="P" && allMoves[allMoves.length-1].fromRow===6 && allMoves[allMoves.length-1].toRow===4){
+                    boardString+=String.fromCharCode(97 + allMoves[allMoves.length-1].fromCol)
+                    boardString+=allMoves[allMoves.length-1].toRow-1
+                }
+                else boardString+="-"
+            }
+            else{
+                if(allMoves.length>0 && allMoves[allMoves.length-1].piece==="p" && allMoves[allMoves.length-1].fromRow===6 && allMoves[allMoves.length-1].toRow===4){
+                    boardString+=String.fromCharCode(104 - allMoves[allMoves.length-1].fromCol)
+                    boardString+=allMoves[allMoves.length-1].toRow-1
+                }
+                else boardString+="-"
+            }
+            boardString+=" "
+            boardString+=halfMoveCount
+            boardString+=" "
+            boardString+=(Math.floor(allMoves.length/2)+1)
+            console.log(boardString)
+
+            const fetchData = async () => {
+                const url = new URL("https://stockfish.online/api/s/v2.php")
+                url.searchParams.append("fen", boardString)
+                url.searchParams.append("depth", depth)
+                try {
+                    const response = await fetch(url)
+                    if (!response.ok) {
+                        throw new Error("Failed to fetch analysis.")
+                    }
+                    const data = await response.json()
+                    const move = data.continuation.split(" ")[0]
+                    let fromRow, fromCol, toRow, toCol, selPiece
+                    if(pieceColour===1){
+                        fromRow = 8-move[1]
+                        fromCol = move[0].charCodeAt(0) - 'a'.charCodeAt(0)
+                        toRow =  8-move[3]
+                        toCol = move[2].charCodeAt(0) - 'a'.charCodeAt(0)
+                    }
+                    else{
+                        fromRow = move[1]-1
+                        fromCol = 'h'.charCodeAt(0) - move[0].charCodeAt(0)
+                        toRow =  move[3]-1
+                        toCol = 'h'.charCodeAt(0) - move[2].charCodeAt(0)
+                    }
+                    selPiece=board[fromRow][fromCol]
+                    updateSelectedPiecePosition(selPiece, fromRow, fromCol, toRow, toCol)
+                    console.log(data)
+                    console.log(fromRow,fromCol,toRow,toCol)
+                } catch (err) {
+                    console.log(err)
+                }
+            }
+            fetchData()
+        }
+    },[board])
 
     //update width
     useEffect(() => {
@@ -760,7 +869,12 @@ const HomePageContent=()=>{
     }
 
     const updateSelectedPiecePosition = (selPiece:string,selRow:number,selCol:number,newRow:number,newCol:number) => {
-
+        if(selPiece==="P" || selPiece==="p" || board[newRow][newCol]!==" "){
+            setHalfMoveCount(0)
+        }
+        else{
+            setHalfMoveCount((prev)=>prev+1)
+        }
         if(pieceColour===1){
             //remove the enpassant pawns if enpassant move happens
             if(selPiece==="P" && selRow===3 && allMoves[allMoves.length-1].piece==="p" && newRow===2 && newCol===allMoves[allMoves.length-1].toCol && allMoves[allMoves.length-1].toRow===3) removeEnpassedPawns("p",allMoves[allMoves.length-1].toRow,allMoves[allMoves.length-1].toCol)
@@ -877,13 +991,6 @@ const HomePageContent=()=>{
             //increase the count of moves when pawn does not reach last square and when it reaches moves are updated in handlePawnToLastSquare func
             setMoves((prev)=>prev+1)
         }
-
-        if(selPiece==="P" || selPiece==="p" || board[newRow][newCol]!==" "){
-            setHalfMoveCount(0)
-        }
-        else{
-            setHalfMoveCount((prev)=>prev+1)
-        }
     }
 
     const handleSelectedPiece = (piece:string,i:number,j:number) => {
@@ -917,7 +1024,6 @@ const HomePageContent=()=>{
         }
         //4. update
         else if (isSelected && selectedPiece.piece!==null && selectedPiece.row!==null && selectedPiece.col!==null && possibleMovesForSelectedPiece.some((m)=>m.row===i && m.col===j)) {
-
             //create a temporary array to update the board position and check the if the king is in threat after a move is made
             let updatedBoard:string[][] = [...board]
             updatedBoard[selectedPiece.row] = [...board[selectedPiece.row]]
@@ -2160,10 +2266,10 @@ const HomePageContent=()=>{
                         <div className="w-5">{((pieceColour===1 && moves%2!==0 || (pieceColour===0 && moves%2===0))) && <FaStopwatch color={`${moves%2!==0 ? "white" : "black"}`} />}</div>
                     </div>}
                 </div>
-                {opponent && 
+                {(opponent || depth) && 
                     <div className="flex mr-auto">
-                        <div><FaUser size={getSizeLogo()} color="#4b5563" className="border-2 border-gray-400 bg-gray-400 p-0.5 md:p-1 mr-2 md:mr-5"/></div>
-                        <div className="flex md:-ml-3 text-xs md:text-base font-bold font-anticDidone">{opponent.oppoUname}</div>
+                        <div>{opponent ? <FaUser size={getSizeLogo()} color="#4b5563" className="border-2 border-gray-400 bg-gray-400 p-0.5 md:p-1 mr-2 md:mr-5"/> : <BsRobot size={getSizeLogo()} color="#4b5563" className="border-2 border-gray-400 bg-gray-400 p-0.5 md:p-1 mr-2 md:mr-5"/>}</div>
+                        <div className="flex md:-ml-3 text-xs md:text-base font-bold font-anticDidone">{opponent ? opponent.oppoUname : "BOT"}</div>
                     </div>
                 }
                 <div className="relative rounded-md my-2 md:my-3" style={{border:`${windowSize >= 768 ? "12px" : "6px"} solid ${themeArray[theme].s}`}}>
@@ -2240,7 +2346,7 @@ const HomePageContent=()=>{
                         ))}
                     </div>
                 </div>
-                {opponent && 
+                {(opponent || depth) && 
                     <div className="flex mr-auto">
                         <div><FaUser size={getSizeLogo()} color="#4b5563" className="border-2 border-gray-400 bg-gray-400 p-0.5 md:p-1 mr-2 md:mr-5"/></div>
                         <div className="flex md:-ml-3 text-xs md:text-base font-bold font-anticDidone">{user?.google?.name}</div>

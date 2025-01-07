@@ -81,9 +81,11 @@ const AnalysisPage = () => {
 
     return(
         <div className="flex flex-col mb-2 md:mb-4">
-            <button onClick={()=>router.push('/HomePage')} className="flex items-center m-2 md:m-4"><IoMdArrowRoundBack size={getSizeArrow()}/></button>
-            <div className="text-black font-extrabold text-xl md:text-3xl font-anticDidone flex justify-center mb-2 md:mb-4">ANALYSIS</div>
-            <div className="flex flex-wrap justify-center items-center px-3 gap-3">
+            <header className="sticky top-0 left-0 right-0 flex shadow-md bg-white z-50">
+                <button onClick={()=>router.push('/HomePage')} className="flex items-center m-2 md:m-4 cursor-pointer z-50"><IoMdArrowRoundBack size={getSizeArrow()}/></button>
+                <div className="flex-grow mt-2 md:mt-4 -ml-10 md:-ml-14 lg:-ml-16 text-black font-extrabold text-xl md:text-3xl font-anticDidone flex justify-center mb-2 md:mb-4">ANALYSIS</div>
+            </header>
+            <div className="flex flex-wrap justify-center items-center px-3 gap-3 mt-[80px]">
                 {boardData && boardData.length>0 && boardData.map((item,index)=>(
                     <div key={index} className="flex flex-col justify-center items-center w-[45%] md:w-[32%] rounded-md">
                         <div className={`absolute flex justify-center items-center text-lg md:text-xl font-bold ${item.result==="white" ? "text-white" : "text-black"}`}>{item.result==="white" ? "WHITE WON" : item.result==="black" ? "BLACK WON" : "DRAW"}</div>

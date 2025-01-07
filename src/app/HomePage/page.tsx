@@ -1,6 +1,7 @@
 "use client"
 import { useEffect, useState } from "react"
 import { GiBulletBill } from "react-icons/gi"
+import { BsRobot } from "react-icons/bs"
 import { useRouter } from "next/navigation"
 import { LuAlarmClock } from "react-icons/lu"
 import { IoMdArrowDropupCircle, IoMdArrowDropdownCircle, IoMdArrowRoundBack } from "react-icons/io"
@@ -45,6 +46,21 @@ const HomePage=()=>{
     const [sendRequestUserId, setSendRequestUserId] = useState("")
     const [incomingRequests, setIncomingRequests] = useState<{fromUserId:String,fromUserName:String,fromPieceColour:number}[]>([])
     const [copied, setCopied] = useState(false)
+    const [isBotDialogOpen, setIsBotDialogOpen] = useState(false)
+    const [selectedBot, setSelectedBot] = useState(0)
+
+    const depthEloArr = [
+        {depth:1,elo:1000},
+        {depth:2,elo:1200},
+        {depth:4,elo:1400},
+        {depth:8,elo:1600},
+        {depth:10,elo:1900},
+        {depth:11,elo:2000},
+        {depth:12,elo:2100},
+        {depth:13,elo:2200},
+        {depth:14,elo:2300},
+        {depth:15,elo:2400}
+    ]
 
     useEffect(()=>{
         const socket = io("https://chesstestbackend.onrender.com/")
@@ -118,6 +134,10 @@ const HomePage=()=>{
 
     const getSizeNo = () =>{
         return windowSize<680 ? 16 : windowSize<768 ? 18 : windowSize<1024 ? 22 : windowSize<1128 ? 24 : windowSize<1440 ? 26 : windowSize<1800 ? 26 : 28
+    }
+
+    const getSizeBotImage = () =>{
+        return windowSize<680 ? 80 : windowSize<768 ? 100 : windowSize<1024 ? 120 : windowSize<1128 ? 130 : windowSize<1440 ? 150 : windowSize<1800 ? 150 : 160
     }
 
     useEffect(()=>{
@@ -261,28 +281,6 @@ const HomePage=()=>{
             </div> :
             <div>
                 <div className="absolute z-10 inset-0 h-screen w-screen bg-[url('/images/loginScreenbg.jpeg')] bg-cover bg-center opacity-90 filter brightness-75 contrast-140 saturate-125 grayscale"></div>
-                {playOnlinePopup && 
-                    <div className="absolute z-20 h-[35%] w-[90%] md:h-[45%] md:w-[55%] lg:h-[55%] lg:w-[55%] flex flex-col bg-white rounded-md border-black border-4" 
-                    style={{
-                        top: '50%', 
-                        left: '50%', 
-                        transform: 'translate(-50%, -50%)'
-                    }}>
-                        <div className="flex flex-col items-end mt-2 mr-2 md:mt-3 md:mr-3 lg:mt-4 lg:mr-4"><button onClick={()=>setPlayOnlinePopup(false)}><FaWindowClose color="#3b82f6" size={iconSize}/></button></div>
-                        <div className="flex justify-center items-center mt-10 md:mt-14">
-                            <input 
-                                id="userIdInput" 
-                                type="text" 
-                                placeholder="Enter player user-id" 
-                                onChange={(e)=>setSendRequestUserId(e.target.value)}
-                                className="w-[90%] md:w-[80%] p-2 border border-black rounded-lg text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-blue-500" 
-                            />
-                        </div>
-                        <div className="flex flex-col gap-4 lg:gap-6 justify-center items-center mt-4 lg:mt-6">
-                            <button onClick={()=>handleSendRequest()} className="text-xs md:text-sm lg:text-lg font-bold font-anticDidone text-black p-1 rounded-md border-2 md:border-4" style={{borderColor: `${themeArray[theme].s}`}}>SEND REQUEST</button>
-                        </div>
-                    </div>
-                }
                 <div className="relative z-10 flex flex-col justify-center items-center gap-10 mt-10 md:mt-0">
                     <div className="flex flex-grow justify-between items-center -mt-8 pl-14 md:pl-28 w-screen">
                         <div className="flex justify-center items-center flex-grow">
@@ -384,6 +382,9 @@ const HomePage=()=>{
                                 <div className="flex justify-center">
                                     <button className="text-base md:text-lg font-bold text-gray-600 font-anticDidone bg-white border-4 px-4 py-1 md:py-2 rounded-lg hover:bg-gray-200 transition-all duration-150 ease-in-out border-gray-600 shadow-lg shadow-white" onClick={()=>setPlayOnlinePopup(true)}>PLAY ONLINE</button>
                                 </div>
+                                <div className="flex justify-center">
+                                    <button className="text-base md:text-lg font-bold text-gray-600 font-anticDidone bg-white border-4 px-4 py-1 md:py-2 rounded-lg hover:bg-gray-200 transition-all duration-150 ease-in-out border-gray-600" onClick={()=>setIsBotDialogOpen(true)}><div className="flex justify-center items-center gap-2">Vs BOT<BsRobot size={getSizeArrow()}/></div></button>
+                                </div>
                             </div>
                         </div>
                         <div className="flex justify-center gap-2">
@@ -429,13 +430,49 @@ const HomePage=()=>{
                                 </div>
                             </div>
                             <div className="flex justify-center gap-5 w-full flex-wrap mb-6 lg:mb-0">
-                                {themeArray.map((key,index)=>(
+                                {themeArray.map((item,index)=>(
                                     <div key={index} className="flex border-2 border-black rounded-lg" onClick={()=>setTheme(index)}>
                                         <div className="w-5 h-5 md:w-8 md:h-8 lg:w-10 lg:h-10" style={{background:themeArray[index].l}}></div>
                                         <div className="w-5 h-5 md:w-8 md:h-8 lg:w-10 lg:h-10" style={{background:themeArray[index].d}}></div>
                                         <div className="w-5 h-5 md:w-8 md:h-8 lg:w-10 lg:h-10" style={{background:themeArray[index].s}}></div>
                                     </div>
                                 ))}
+                            </div>
+                        </div>
+                    }
+                    {playOnlinePopup && 
+                        <div className="absolute z-20 h-[35%] w-[90%] md:h-[45%] md:w-[55%] lg:h-[55%] lg:w-[55%] flex flex-col bg-white rounded-md border-black border-4 animate-expand">
+                            <div className="flex flex-col items-end mt-2 mr-2 md:mt-3 md:mr-3 lg:mt-4 lg:mr-4"><button onClick={()=>setPlayOnlinePopup(false)}><FaWindowClose color="#3b82f6" size={iconSize}/></button></div>
+                            <div className="flex justify-center items-center mt-10 md:mt-14">
+                                <input 
+                                    id="userIdInput" 
+                                    type="text" 
+                                    placeholder="Enter player user-id" 
+                                    onChange={(e)=>setSendRequestUserId(e.target.value)}
+                                    className="w-[90%] md:w-[80%] p-2 border border-black rounded-lg text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                                />
+                            </div>
+                            <div className="flex flex-col gap-4 lg:gap-6 justify-center items-center mt-4 lg:mt-6">
+                            <button className="text-sm md:text-base font-bold text-gray-600 font-anticDidone bg-white border-4 px-8 py-1 rounded-lg hover:bg-gray-400 transition-all duration-150 ease-in-out border-gray-600 shadow-lg shadow-white" onClick={()=>handleSendRequest()}>SEND REQUEST</button>
+                            </div>
+                        </div>
+                    }
+                    {isBotDialogOpen &&
+                        <div className="absolute flex flex-col bg-white filter brightness-110 border-4 p-2 md:p-2 lg:p-3 b-4 border-black rounded-md w-[90%] h-[80%] md:w-[60%] md:h-[85%] lg:w-[50%] lg:h-[105%] z-20 animate-expand">
+                            <div className="flex flex-col items-end"><button onClick={()=>setIsBotDialogOpen(false)}><FaWindowClose color="#3b82f6" size={iconSize}/></button></div>
+                            <div className="flex justify-center items-center gap-2 mb-2 md:mb-4"><BsRobot size={getSizeArrow()} color="#4b5563" /><div className="text-lg md:text-xl lg:text-2xl font-anticDidone font-bold">PLAY BOTS</div></div>
+                            <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-5 gap-2 md:gap-3 mb-4">
+                                {depthEloArr.map((item,index)=>(
+                                    <div key={`${index}`} onClick={()=>setSelectedBot(index)} className={`border-2 md:border-4 ${selectedBot===index ? "border-gray-900 shadow-md shadow-gray-700" : "border-gray-400"} hover:scale-105 rounded-md cursor-pointer`}>
+                                        <div>
+                                            <Image src={`/images/lvl${index+1}.jpg`} alt="bg-lvl-images" height={getSizeBotImage()} width={getSizeBotImage()}></Image>
+                                            <div className="flex justify-center items-center font-black font-anticDidone text-xs sm:text-sm md:text-base lg:text-lg">{item.elo}</div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="flex justify-center items-center">
+                                <button className="text-sm md:text-base font-bold text-gray-600 font-anticDidone bg-white border-4 px-8 py-1 rounded-lg hover:bg-gray-400 transition-all duration-150 ease-in-out border-gray-600 shadow-lg shadow-white" onClick={()=>router.push(`/GamePage?pieceColour=${pieceColour}&time=inf&increment=inf&depth=${depthEloArr[selectedBot].depth}`)}>START GAME</button>
                             </div>
                         </div>
                     }

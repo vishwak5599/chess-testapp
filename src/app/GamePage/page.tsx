@@ -143,6 +143,7 @@ const HomePageContent=()=>{
     const whitePieces = ["R","N","B","Q","K","P"]
     const blackPieces = ["r","n","b","q","k","p"]
 
+    //to play with bot, create a FEN string of board to call an api for the best move using depth
     useEffect(()=>{
         if(depth && ((pieceColour===1 && moves%2!==0) || (pieceColour===0 && moves%2===0))){
             let boardString = ""
@@ -996,7 +997,7 @@ const HomePageContent=()=>{
     const handleSelectedPiece = (piece:string,i:number,j:number) => {
         //1. select a piece is any other piece is not selected
         if(!isSelected){
-            if(opponent){
+            if(opponent || depth){
                 if((pieceColour===1 && moves%2===0 && whitePieces.includes(board[i][j])) || (pieceColour===0 && moves%2!==0 && blackPieces.includes(board[i][j]))){
                     setIsSelected(true)
                     setSelectedPiece({piece:piece,row:i,col:j})
@@ -1017,7 +1018,7 @@ const HomePageContent=()=>{
             setSelectedPiece({piece:null,row:null,col:null})
         }
         //3. select if another same colour piece is selected
-        else if(isSelected && ((opponent && ((pieceColour===1 && moves%2===0 && whitePieces.includes(board[i][j])) || (pieceColour===0 && moves%2!==0 && blackPieces.includes(board[i][j])))) || ((pieceColour===1 && moves%2===0 && whitePieces.includes(board[i][j])) || (pieceColour===1 && moves%2!==0 && blackPieces.includes(board[i][j])) || (pieceColour===0 && moves%2===0 && whitePieces.includes(board[i][j])) || (pieceColour===0 && moves%2!==0 && blackPieces.includes(board[i][j]))))){
+        else if(isSelected && (((opponent || depth) && ((pieceColour===1 && moves%2===0 && whitePieces.includes(board[i][j])) || (pieceColour===0 && moves%2!==0 && blackPieces.includes(board[i][j])))) || ((pieceColour===1 && moves%2===0 && whitePieces.includes(board[i][j])) || (pieceColour===1 && moves%2!==0 && blackPieces.includes(board[i][j])) || (pieceColour===0 && moves%2===0 && whitePieces.includes(board[i][j])) || (pieceColour===0 && moves%2!==0 && blackPieces.includes(board[i][j]))))){
             setPossibleMovesForSelectedPiece([])
             setIsSelected(true)
             setSelectedPiece({piece:piece,row:i,col:j})
@@ -1088,7 +1089,7 @@ const HomePageContent=()=>{
     //Set possible moves for a selected piece
     useEffect(()=>{
         if(isSelected){
-            if(opponent){
+            if(opponent || depth){
                 if(pieceColour===1){
                     const possibleMovesForPieceIfWhite = allPossibleMovesForWhite.find((item)=>(item.piece===selectedPiece.piece && item.posi.row===selectedPiece.row && item.posi.col===selectedPiece.col))
                     if(possibleMovesForPieceIfWhite) setPossibleMovesForSelectedPiece(possibleMovesForPieceIfWhite?.moves)

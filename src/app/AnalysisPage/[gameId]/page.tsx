@@ -57,9 +57,11 @@ const GameDetails = () => {
         [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']
       ])
     const [isMovesPlaying, setIsMovesPlaying] = useState(false)
-    const [evaluation, setEvaluation] = useState<number | null>(0)
+    const [winChance, setWinChance] = useState<number>(50)
     const [whiteChance, setWhiteChance] = useState(50)
     const [blackChance, setBlackChance] = useState(50)
+    const [bestMove, setBestMove] = useState<string>()
+    const [continuationArr, setContinuationArr] = useState<string[]>([])
     const [capturedPieces, setCapturedPieces] = useState([])
 
     const whitePieces = ["R","N","B","Q","K","P"]
@@ -108,7 +110,7 @@ const GameDetails = () => {
                     }
                 }
                 boardString+=" "
-                if(pieceColour===1) boardString+="b"
+                if(moveNumber%2!==0) boardString+="b"
                 else boardString+="w"
                 boardString+=" "
                 if(pieceColour===1){
@@ -143,18 +145,25 @@ const GameDetails = () => {
                 boardString+=boardData[moveNumber].halfMoveCount
                 boardString+=" "
                 boardString+=(Math.floor(boardData.length/2)+1)
-                const url = new URL("https://stockfish.online/api/s/v2.php")
-                url.searchParams.append("fen", boardString)
-                url.searchParams.append("depth", "15")
+                const requestBody={
+                    "fen":boardString,
+                    "depth":15
+                }
                 try {
-                    const response = await fetch(url)
-                    if (!response.ok) {
-                        throw new Error("Failed to fetch analysis.")
-                    }
+                    const response = await fetch("https://chess-api.com/v1", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify(requestBody),
+                    })
                     const data = await response.json()
-                    const evaluation = data.evaluation
-                    console.log(evaluation)
-                    setEvaluation(evaluation)
+                    const winChance = data.winChance
+                    const bestMove = data.from + data.to
+                    const continuationArr = data.continuationArr
+                    setWinChance(winChance)
+                    setBestMove(bestMove)
+                    setContinuationArr(continuationArr)
                 } catch (err) {
                     console.log(err)
                 }
@@ -164,35 +173,9 @@ const GameDetails = () => {
     },[moveNumber])
 
     useEffect(() => {
-        // Normalize evaluation value from -10 to 10 into winning chances
-        if(evaluation){
-            if (evaluation<=0) {
-            // White is winning or draw
-            const blackPercent = 50 + (-evaluation)
-            const whitePercent = 100 - blackPercent
-            setWhiteChance(whitePercent)
-            setBlackChance(blackPercent)
-            } else {
-            // Black is winning
-            const whitePercent = 50 + (evaluation)
-            const blackPercent = 100 - whitePercent
-            setWhiteChance(whitePercent)
-            setBlackChance(blackPercent)
-            }
-        }
-        else{
-            if(moveNumber>0 && boardData){
-                if(whitePieces.includes(boardData[moveNumber-1].piece)){
-                    setWhiteChance(100)
-                    setBlackChance(0)
-                }
-                else if(blackPieces.includes(boardData[moveNumber-1].piece)){
-                    setWhiteChance(0)
-                    setBlackChance(100)
-                }
-            }
-        }
-      }, [evaluation])
+        setWhiteChance(winChance)
+        setBlackChance(100-winChance)
+      },[winChance])
 
     useEffect(()=>{
         if (typeof window !== 'undefined') {
@@ -575,7 +558,10 @@ const GameDetails = () => {
             <audio ref={audioRefCapture} src="/sounds/capture.mp3" />
             <audio ref={audioRefMove} src="/sounds/move.mp3" />
             <audio ref={audioRefGameOverCheckMate} src="/sounds/gameovercheckmate.mp3" />
-            <button onClick={()=>router.push('/AnalysisPage')} className="flex items-center w-screen m-2 md:m-4"><IoMdArrowRoundBack size={getSizeArrow()}/></button>
+            <div className="flex">
+                <button onClick={()=>router.push('/AnalysisPage')} className="flex items-center m-2 md:m-4"><IoMdArrowRoundBack size={getSizeArrow()}/></button>
+                <div className="flex w-full justify-center items-center -ml-2 md:-ml-7 lg:-ml-5">{!Number.isNaN(bestMove) && <div className="flex justify-center items-center border-2 border-black rounded-md text-sm md:text-base font-bold font-anticDidone text-black px-2 py-2 gap-1 h-[50%]"><div className="text-nowrap">Best Move :</div>{bestMove}</div>}</div>
+            </div>
             <div className="flex justify-center items-center">
                 <div className="flex flex-col items-center h-full">
                     <div className="flex h-full gap-2">

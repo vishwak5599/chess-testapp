@@ -6,6 +6,8 @@ import { useAtom } from "jotai"
 import { themeAtom } from "../Atoms/ThemeAtom"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
+import { usePrivy } from "@privy-io/react-auth"
+
 type moveType = {
     piece : string
     fromRow : number
@@ -25,6 +27,7 @@ const AnalysisPage = () => {
     //hooks
     const windowSize = useWindowSize()
     const router = useRouter()
+    const {user} = usePrivy()
 
     const [boardData, setBoardData] = useState<{gameId:string,allMoves:moveType[],lastBoard:string[][],pieceColour:number,result:string}[]>([])
 
@@ -42,7 +45,7 @@ const AnalysisPage = () => {
         for (let i=0;i<localStorage.length;i++){
             if (typeof window !== 'undefined') {
                 const itemKey = localStorage.key(i)
-                if(itemKey){
+                if(itemKey && itemKey.split("-")[0]===user?.id.split(":")[2]){
                     const itemValue = localStorage.getItem(itemKey)
                     if(itemValue){
                         try{
@@ -88,7 +91,7 @@ const AnalysisPage = () => {
             <div className="flex flex-wrap justify-center items-center px-3 gap-3 mt-[80px]">
                 {boardData && boardData.length>0 && boardData.map((item,index)=>(
                     <div key={index} className="flex flex-col justify-center items-center w-[45%] md:w-[32%] rounded-md">
-                        <div className={`absolute flex justify-center items-center text-lg md:text-xl font-bold ${item.result==="white" ? "text-white" : "text-black"}`}>{item.result==="white" ? "WHITE WON" : item.result==="black" ? "BLACK WON" : "DRAW"}</div>
+                        <div className={`absolute flex justify-center items-center text-lg md:text-xl font-bold cursor-pointer ${item.result==="white" ? "text-white" : "text-black"}`} onClick={()=>router.push(`/AnalysisPage/${item.gameId}`)} >{item.result==="white" ? "WHITE WON" : item.result==="black" ? "BLACK WON" : "DRAW"}</div>
                         <div className="border-2 md:border-4 border-black rounded-md cursor-pointer" onClick={()=>router.push(`/AnalysisPage/${item.gameId}`)}>
                             {item && item.lastBoard && item.lastBoard.map((row,rindex)=>(
                                 <div key={rindex} className="flex w-full">

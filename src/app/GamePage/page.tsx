@@ -213,7 +213,6 @@ const HomePageContent=()=>{
             boardString+=halfMoveCount
             boardString+=" "
             boardString+=(Math.floor(allMoves.length/2)+1)
-            console.log(boardString)
 
             const fetchData = async () => {
                 const url = new URL("https://stockfish.online/api/s/v2.php")
@@ -241,8 +240,6 @@ const HomePageContent=()=>{
                     }
                     selPiece=board[fromRow][fromCol]
                     updateSelectedPiecePosition(selPiece, fromRow, fromCol, toRow, toCol)
-                    console.log(data)
-                    console.log(fromRow,fromCol,toRow,toCol)
                 } catch (err) {
                     console.log(err)
                 }
@@ -384,7 +381,14 @@ const HomePageContent=()=>{
     //add to local storage
     useEffect(()=>{
         if(draw || staleMateWhiteWon || staleMateBlackWon || whiteWon || blackWon){
-            localStorage.setItem(`game-${localStorage.length}`, JSON.stringify({allMoves:allMoves,lastBoard:board,pieceColour:pieceColour,result:(whiteWon ? "white" : blackWon ? "black" : "draw")}));
+            let max=0
+            for(let i=0;i<localStorage.length;i++){
+                const key = localStorage.key(i)
+                if(key && key?.split("-")[0]===user?.id.split(":")[2]){
+                    if(Number.parseInt(key?.split("-")[2])>max) max=Number.parseInt(key?.split("-")[2])
+                }
+            }
+            localStorage.setItem(`${user?.id.split(":")[2]}-game-${max+1}`, JSON.stringify({allMoves:allMoves,lastBoard:board,pieceColour:pieceColour,result:(whiteWon ? "white" : blackWon ? "black" : "draw")}));
         }
     },[draw,staleMateWhiteWon,staleMateBlackWon,whiteWon,blackWon])
 
@@ -964,15 +968,15 @@ const HomePageContent=()=>{
         (pieceColour===1 && selPiece==="p" && selRow===4 && allMoves[allMoves.length-1].piece==="P" && newRow===5 && newCol===allMoves[allMoves.length-1].toCol && allMoves[allMoves.length-1].toRow===4) ||
         (pieceColour===0 && selPiece==="P" && selRow===4 && allMoves[allMoves.length-1].piece==="p" && newRow===5 && newCol===allMoves[allMoves.length-1].toCol && allMoves[allMoves.length-1].toRow===4) ||
         (pieceColour===0 && selPiece==="p" && selRow===3 && allMoves[allMoves.length-1].piece==="P" && newRow===2 && newCol===allMoves[allMoves.length-1].toCol && allMoves[allMoves.length-1].toRow===3)){
-            setAllMoves((prev)=>{return [...prev,{piece:selPiece,fromRow:selRow,fromCol:selCol,toRow:newRow,toCol:newCol,enpass:true}]})
-            if(user && opponent) socket.emit("newMove",user?.id.split(":")[2],opponent?.oppoUid,{piece:selPiece,fromRow:7-selRow,fromCol:7-selCol,toRow:7-newRow,toCol:7-newCol,enpass:true},null,null)
+            setAllMoves((prev)=>{return [...prev,{piece:selPiece,fromRow:selRow,fromCol:selCol,toRow:newRow,toCol:newCol,enpass:true,halfMoveCount:halfMoveCount,whiteKingCastlePossible:whiteKingCastlePossible,blackKingCastlePossible:blackKingCastlePossible,whiteRookCastlePossible:whiteRookCastlePossible,blackRookCastlePossible:blackRookCastlePossible}]})
+            if(user && opponent) socket.emit("newMove",user?.id.split(":")[2],opponent?.oppoUid,{piece:selPiece,fromRow:7-selRow,fromCol:7-selCol,toRow:7-newRow,toCol:7-newCol,enpass:true,halfMoveCount:halfMoveCount,whiteKingCastlePossible:whiteKingCastlePossible,blackKingCastlePossible:blackKingCastlePossible,whiteRookCastlePossible:whiteRookCastlePossible,blackRookCastlePossible:blackRookCastlePossible},null,null)
         }
         //lastSquare move is set in handlePawnToLastSquare func
 
         //normal move
         else{
-            setAllMoves((prev)=>{return [...prev,{piece:selPiece,fromRow:selRow,fromCol:selCol,toRow:newRow,toCol:newCol}]})
-            if(user && opponent) socket.emit("newMove",user?.id.split(":")[2],opponent?.oppoUid,{piece:selPiece,fromRow:7-selRow,fromCol:7-selCol,toRow:7-newRow,toCol:7-newCol},null,null)
+            setAllMoves((prev)=>{return [...prev,{piece:selPiece,fromRow:selRow,fromCol:selCol,toRow:newRow,toCol:newCol,halfMoveCount:halfMoveCount,whiteKingCastlePossible:whiteKingCastlePossible,blackKingCastlePossible:blackKingCastlePossible,whiteRookCastlePossible:whiteRookCastlePossible,blackRookCastlePossible:blackRookCastlePossible}]})
+            if(user && opponent) socket.emit("newMove",user?.id.split(":")[2],opponent?.oppoUid,{piece:selPiece,fromRow:7-selRow,fromCol:7-selCol,toRow:7-newRow,toCol:7-newCol,halfMoveCount:halfMoveCount,whiteKingCastlePossible:whiteKingCastlePossible,blackKingCastlePossible:blackKingCastlePossible,whiteRookCastlePossible:whiteRookCastlePossible,blackRookCastlePossible:blackRookCastlePossible},null,null)
         }
 
         //update the selected piece position only when it is not pawn to last square

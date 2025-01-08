@@ -19,6 +19,11 @@ type moveType = {
     enpass? : boolean
     lastSquareUpdatedPiece?: string
     lastSquarePreviousPiece?: string
+    halfMoveCount: number
+    whiteKingCastlePossible: boolean
+    blackKingCastlePossible: boolean
+    whiteRookCastlePossible: {left:boolean, right:boolean}
+    blackRookCastlePossible: {left:boolean, right:boolean}
 }
 
 const GameDetails = () => {
@@ -52,6 +57,13 @@ const GameDetails = () => {
         [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']
       ])
     const [isMovesPlaying, setIsMovesPlaying] = useState(false)
+    const [evaluation, setEvaluation] = useState<number | null>(0)
+    const [whiteChance, setWhiteChance] = useState(50)
+    const [blackChance, setBlackChance] = useState(50)
+    const [capturedPieces, setCapturedPieces] = useState([])
+
+    const whitePieces = ["R","N","B","Q","K","P"]
+    const blackPieces = ["r","n","b","q","k","p"]
 
     const getSize = () =>{
         return windowSize<680 ? 30 : windowSize<768 ? 32 : windowSize<1024 ? 34 : windowSize<1128 ? 36 : windowSize<1440 ? 38 : windowSize<1800 ? 40 : 40
@@ -60,6 +72,127 @@ const GameDetails = () => {
     const getSizeArrow = () =>{
         return windowSize<680 ? 22 : windowSize<768 ? 24 : windowSize<1024 ? 26 : windowSize<1128 ? 28 : windowSize<1440 ? 30 : windowSize<1800 ? 30 : 32
     }
+
+    useEffect(()=>{
+        if(boardData && moveNumber<boardData.length){
+            const fetchData = async () => {
+                let boardString = ""
+                if(pieceColour===1){
+                    for(let i=0;i<8;i++){
+                        let count=0
+                        for(let j=0;j<8;j++){
+                            if(board[i][j]===" ") count++
+                            else if(board[i][j]!==" "){
+                                if(count>0) boardString+=(String(count))
+                                boardString+=(board[i][j])
+                                count=0
+                            }
+                            if(j===7 && count>0) boardString+=(String(count))
+                        }
+                        if(i!==7) boardString+=("/")
+                    }
+                }
+                else{
+                    for(let i=7;i>=0;i--){
+                        let count=0
+                        for(let j=7;j>=0;j--){
+                            if(board[i][j]===" ") count++
+                            else if(board[i][j]!==" "){
+                                if(count>0) boardString+=(String(count))
+                                boardString+=(board[i][j])
+                                count=0
+                            }
+                            if(j===0 && count>0) boardString+=(String(count))
+                        }
+                        if(i!==0) boardString+=("/")
+                    }
+                }
+                boardString+=" "
+                if(pieceColour===1) boardString+="b"
+                else boardString+="w"
+                boardString+=" "
+                if(pieceColour===1){
+                    if(boardData[moveNumber].whiteKingCastlePossible && boardData[moveNumber].whiteRookCastlePossible.right) boardString+="K"
+                    if(boardData[moveNumber].whiteKingCastlePossible && boardData[moveNumber].whiteRookCastlePossible.left) boardString+="Q"
+                    if(boardData[moveNumber].blackKingCastlePossible && boardData[moveNumber].blackRookCastlePossible.right) boardString+="k"
+                    if(boardData[moveNumber].blackKingCastlePossible && boardData[moveNumber].blackRookCastlePossible.left) boardString+="q"
+                }
+                else{
+                    if(boardData[moveNumber].whiteKingCastlePossible && boardData[moveNumber].whiteRookCastlePossible.left) boardString+="K"
+                    if(boardData[moveNumber].whiteKingCastlePossible && boardData[moveNumber].whiteRookCastlePossible.right) boardString+="Q"
+                    if(boardData[moveNumber].blackKingCastlePossible && boardData[moveNumber].blackRookCastlePossible.left) boardString+="k"
+                    if(boardData[moveNumber].blackKingCastlePossible && boardData[moveNumber].blackRookCastlePossible.right) boardString+="q"
+                }
+                if(!boardData[moveNumber].whiteKingCastlePossible && !boardData[moveNumber].blackKingCastlePossible) boardString+="-"
+                boardString+=" "
+                if(pieceColour===1){
+                    if(moveNumber>0 && boardData.length>0 && boardData[moveNumber-1].piece==="P" && boardData[moveNumber-1].fromRow===6 && boardData[moveNumber-1].toRow===4){
+                        boardString+=String.fromCharCode(97 + boardData[moveNumber-1].fromCol)
+                        boardString+=boardData[moveNumber-1].toRow-1
+                    }
+                    else boardString+="-"
+                }
+                else{
+                    if(moveNumber>0 && boardData.length>0 && boardData[moveNumber-1].piece==="p" && boardData[moveNumber-1].fromRow===6 && boardData[moveNumber-1].toRow===4){
+                        boardString+=String.fromCharCode(104 - boardData[moveNumber-1].fromCol)
+                        boardString+=boardData[moveNumber-1].toRow-1
+                    }
+                    else boardString+="-"
+                }
+                boardString+=" "
+                boardString+=boardData[moveNumber].halfMoveCount
+                boardString+=" "
+                boardString+=(Math.floor(boardData.length/2)+1)
+                const url = new URL("https://stockfish.online/api/s/v2.php")
+                url.searchParams.append("fen", boardString)
+                url.searchParams.append("depth", "15")
+                try {
+                    const response = await fetch(url)
+                    if (!response.ok) {
+                        throw new Error("Failed to fetch analysis.")
+                    }
+                    const data = await response.json()
+                    const evaluation = data.evaluation
+                    console.log(evaluation)
+                    setEvaluation(evaluation)
+                } catch (err) {
+                    console.log(err)
+                }
+            }
+            fetchData()
+        }
+    },[moveNumber])
+
+    useEffect(() => {
+        // Normalize evaluation value from -10 to 10 into winning chances
+        if(evaluation){
+            if (evaluation<=0) {
+            // White is winning or draw
+            const blackPercent = 50 + (-evaluation)
+            const whitePercent = 100 - blackPercent
+            setWhiteChance(whitePercent)
+            setBlackChance(blackPercent)
+            } else {
+            // Black is winning
+            const whitePercent = 50 + (evaluation)
+            const blackPercent = 100 - whitePercent
+            setWhiteChance(whitePercent)
+            setBlackChance(blackPercent)
+            }
+        }
+        else{
+            if(moveNumber>0 && boardData){
+                if(whitePieces.includes(boardData[moveNumber-1].piece)){
+                    setWhiteChance(100)
+                    setBlackChance(0)
+                }
+                else if(blackPieces.includes(boardData[moveNumber-1].piece)){
+                    setWhiteChance(0)
+                    setBlackChance(100)
+                }
+            }
+        }
+      }, [evaluation])
 
     useEffect(()=>{
         if (typeof window !== 'undefined') {
@@ -111,6 +244,18 @@ const GameDetails = () => {
             //enpassant move
             if(boardData[moveNumber].enpass){
                 setBoard((prevBoard)=>{
+                    if(board[boardData[moveNumber].toRow][boardData[moveNumber].toCol]===" "){
+                        if(audioRefMove.current){
+                            audioRefMove.current.volume=1
+                            audioRefMove.current.play()
+                        }
+                    }
+                    else{
+                        if(audioRefCapture.current){
+                            audioRefCapture.current.volume=1
+                            audioRefCapture.current.play()
+                        }
+                    }
                     const newBoard = [...prevBoard]
                     newBoard[boardData[moveNumber].fromRow] = [...prevBoard[boardData[moveNumber].fromRow]]
                     newBoard[boardData[moveNumber].toRow] = [...prevBoard[boardData[moveNumber].toRow]]
@@ -119,22 +264,22 @@ const GameDetails = () => {
                     newBoard[boardData[moveNumber].toRow][boardData[moveNumber].toCol] = boardData[moveNumber].piece
                     return newBoard
                 })
-                if(board[boardData[moveNumber].toRow][boardData[moveNumber].toCol]===" "){
-                    if(audioRefMove.current){
-                        audioRefMove.current.volume=1
-                        audioRefMove.current.play()
-                    }
-                }
-                else{
-                    if(audioRefCapture.current){
-                        audioRefCapture.current.volume=1
-                        audioRefCapture.current.play()
-                    }
-                }
             }
             //pawn to last square
             else if(boardData[moveNumber].lastSquareUpdatedPiece){
                 setBoard((prevBoard)=>{
+                    if(board[boardData[moveNumber].toRow][boardData[moveNumber].toCol]===" "){
+                        if(audioRefMove.current){
+                            audioRefMove.current.volume=1
+                            audioRefMove.current.play()
+                        }
+                    }
+                    else{
+                        if(audioRefCapture.current){
+                            audioRefCapture.current.volume=1
+                            audioRefCapture.current.play()
+                        }
+                    }
                     const newBoard = [...prevBoard]
                     newBoard[boardData[moveNumber].fromRow] = [...prevBoard[boardData[moveNumber].fromRow]]
                     newBoard[boardData[moveNumber].toRow] = [...prevBoard[boardData[moveNumber].toRow]]
@@ -142,18 +287,6 @@ const GameDetails = () => {
                     if(boardData[moveNumber].lastSquareUpdatedPiece) newBoard[boardData[moveNumber].toRow][boardData[moveNumber].toCol] = boardData[moveNumber].lastSquareUpdatedPiece
                     return newBoard
                 })
-                if(board[boardData[moveNumber].toRow][boardData[moveNumber].toCol]===" "){
-                    if(audioRefMove.current){
-                        audioRefMove.current.volume=1
-                        audioRefMove.current.play()
-                    }
-                }
-                else{
-                    if(audioRefCapture.current){
-                        audioRefCapture.current.volume=1
-                        audioRefCapture.current.play()
-                    }
-                }
             }
             //castling move
             else if((boardData[moveNumber].piece==="K" || boardData[moveNumber].piece==="k") && Math.abs(boardData[moveNumber].fromCol-boardData[moveNumber].toCol)===2){
@@ -249,6 +382,18 @@ const GameDetails = () => {
             //normal move
             else{
                 setBoard((prevBoard)=>{
+                    if(board[boardData[moveNumber].toRow][boardData[moveNumber].toCol]===" "){
+                        if(audioRefMove.current){
+                            audioRefMove.current.volume=1
+                            audioRefMove.current.play()
+                        }
+                    }
+                    else{
+                        if(audioRefCapture.current){
+                            audioRefCapture.current.volume=1
+                            audioRefCapture.current.play()
+                        }
+                    }
                     const newBoard = [...prevBoard]
                     newBoard[boardData[moveNumber].fromRow] = [...prevBoard[boardData[moveNumber].fromRow]]
                     newBoard[boardData[moveNumber].toRow] = [...prevBoard[boardData[moveNumber].toRow]]
@@ -256,18 +401,6 @@ const GameDetails = () => {
                     newBoard[boardData[moveNumber].toRow][boardData[moveNumber].toCol] = boardData[moveNumber].piece
                     return newBoard
                 })
-                if(board[boardData[moveNumber].toRow][boardData[moveNumber].toCol]===" "){
-                    if(audioRefMove.current){
-                        audioRefMove.current.volume=1
-                        audioRefMove.current.play()
-                    }
-                }
-                else{
-                    if(audioRefCapture.current){
-                        audioRefCapture.current.volume=1
-                        audioRefCapture.current.play()
-                    }
-                }
             }
             if(moveNumber===boardData.length-1){
                 if(audioRefGameOverCheckMate.current){
@@ -443,48 +576,59 @@ const GameDetails = () => {
             <audio ref={audioRefMove} src="/sounds/move.mp3" />
             <audio ref={audioRefGameOverCheckMate} src="/sounds/gameovercheckmate.mp3" />
             <button onClick={()=>router.push('/AnalysisPage')} className="flex items-center w-screen m-2 md:m-4"><IoMdArrowRoundBack size={getSizeArrow()}/></button>
-            <div className="flex flex-col items-center">
-                <div className="rounded-md" style={{border:`${windowSize >= 768 ? "12px" : "6px"} solid ${themeArray[theme].s}`}}>
-                    {board.map((row,i)=>(
-                        <div key={i} className="flex justify-center items-center">
-                            {row.map((col,j)=>(
-                                <div key={i+""+j} style={{background:(i+j)%2==0 ? themeArray[theme].l : themeArray[theme].d}}>
-                                <div key={i+""+j} className="relative flex h-12 w-12 sm:h-9 sm:w-9 md:h-11 md:w-11 lg:h-12 lg:w-12 xl:h-14 xl:w-14 xxl:h-16 xxl:w-16 justify-center items-center" 
-                                style={{
-                                    backgroundColor:
-                                    (moveNumber>0 && boardData && ((i===boardData[moveNumber-1].fromRow && j===boardData[moveNumber-1].fromCol) ||
-                                    (i===boardData[moveNumber-1].toRow && j===boardData[moveNumber-1].toCol))) ?
-                                    "#fcd34d" :
-                                    (i + j) % 2 === 0
-                                        ? themeArray[theme].l
-                                        : themeArray[theme].d,
-                                    border:"none",
-                                    borderRadius: "0px",
-                                    boxSizing: "border-box",
-                                    display: "flex",
-                                    justifyContent: "center",
-                                    alignItems: "center",
-                                }}
-                                >
-                                    {j===0 && (
-                                        <div className="absolute top-0 left-0.5 lg:left-1 text-xxs lg:text-xs" style={{color:(i+j)%2===0 ? `${themeArray[theme].d}` : `${themeArray[theme].l}`}}>{pieceColour===1 ? 8 - i : i + 1}</div>
-                                    )}
-                                    <ChessPiece col={col} />
-                                    {i===7 && (
-                                        <div className="absolute bottom-0 right-0.5 lg:right-1 text-xxs lg:text-xs" style={{color:(i+j)%2===0 ? `${themeArray[theme].d}` : `${themeArray[theme].l}`}}>{pieceColour===1 ? String.fromCharCode(97 + j) : String.fromCharCode(104 - j)}</div>
-                                    )}
-                                </div>
+            <div className="flex justify-center items-center">
+                <div className="flex flex-col items-center h-full">
+                    <div className="flex h-full gap-2">
+                        <div className="h-[100%] w-[25px] lg:w-[35px] border-2 border-pink-800 rounded-sm">
+                            <div className={`${pieceColour===1 ? "bg-black" : "bg-white"}`} style={{height:`${pieceColour===1 ? blackChance : whiteChance}%`}}></div>
+                            <div className={`${pieceColour===1 ? "bg-white" : "bg-black"}`} style={{height:`${pieceColour===1 ? whiteChance : blackChance}%`}}></div>
+                        </div>
+                        <div className="rounded-md" style={{border:`${windowSize >= 768 ? "12px" : "6px"} solid ${themeArray[theme].s}`}}>
+                            {board.map((row,i)=>(
+                                <div key={i} className="flex justify-center items-center">
+                                    {row.map((col,j)=>(
+                                        <div key={i+""+j} style={{background:(i+j)%2==0 ? themeArray[theme].l : themeArray[theme].d}}>
+                                        <div key={i+""+j} className="relative flex h-12 w-12 sm:h-9 sm:w-9 md:h-11 md:w-11 lg:h-12 lg:w-12 xl:h-14 xl:w-14 xxl:h-16 xxl:w-16 justify-center items-center" 
+                                        style={{
+                                            backgroundColor:
+                                            (moveNumber>0 && boardData && ((i===boardData[moveNumber-1].fromRow && j===boardData[moveNumber-1].fromCol) ||
+                                            (i===boardData[moveNumber-1].toRow && j===boardData[moveNumber-1].toCol))) ?
+                                            "#fcd34d" :
+                                            (i + j) % 2 === 0
+                                                ? themeArray[theme].l
+                                                : themeArray[theme].d,
+                                            border:"none",
+                                            borderRadius: "0px",
+                                            boxSizing: "border-box",
+                                            display: "flex",
+                                            justifyContent: "center",
+                                            alignItems: "center",
+                                        }}
+                                        >
+                                            {j===0 && (
+                                                <div className="absolute top-0 left-0.5 lg:left-1 text-xxs lg:text-xs" style={{color:(i+j)%2===0 ? `${themeArray[theme].d}` : `${themeArray[theme].l}`}}>{pieceColour===1 ? 8 - i : i + 1}</div>
+                                            )}
+                                            <ChessPiece col={col} />
+                                            {i===7 && (
+                                                <div className="absolute bottom-0 right-0.5 lg:right-1 text-xxs lg:text-xs" style={{color:(i+j)%2===0 ? `${themeArray[theme].d}` : `${themeArray[theme].l}`}}>{pieceColour===1 ? String.fromCharCode(97 + j) : String.fromCharCode(104 - j)}</div>
+                                            )}
+                                        </div>
+                                        </div>
+                                    ))}
                                 </div>
                             ))}
                         </div>
-                    ))}
-                </div>
-                <div className="flex gap-1 md:gap-2 mt-2">
-                    <div><MdOutlineSkipPrevious size={getSize()} color={`${themeArray[theme].s}`} className="border-2 border-black rounded-md" onClick={()=>handleStartingBoard()} /></div>
-                    <div><IoCaretBackOutline size={getSize()} color={`${themeArray[theme].s}`} className="border-2 border-black rounded-md" onClick={()=>previousMove()}/></div>
-                    {isMovesPlaying ? <IoPause size={getSize()} color={`${themeArray[theme].s}`} className="border-2 border-black rounded-md" onClick={()=>setIsMovesPlaying(false)}/> : <IoPlay size={getSize()} color={`${themeArray[theme].s}`} className="border-2 border-black rounded-md" onClick={()=>setIsMovesPlaying(true)}/>}
-                    <div><IoCaretForwardOutline size={getSize()} color={`${themeArray[theme].s}`} className="border-2 border-black rounded-md" onClick={()=>forwardMove()} /></div>
-                    <div><MdOutlineSkipNext size={getSize()} color={`${themeArray[theme].s}`} className="border-2 border-black rounded-md" onClick={()=>handleLastBoard()} /></div>
+                    </div>
+                    <div className="flex gap-2">
+                        <div className="h-[100%] w-[25px] lg:w-[35px]"></div>
+                        <div className="flex gap-1 md:gap-2 mt-2">
+                            <div><MdOutlineSkipPrevious size={getSize()} color={`${themeArray[theme].s}`} className="border-2 border-black rounded-md" onClick={()=>handleStartingBoard()} /></div>
+                            <div><IoCaretBackOutline size={getSize()} color={`${themeArray[theme].s}`} className="border-2 border-black rounded-md" /*onClick={()=>previousMove()}*//></div>
+                            {isMovesPlaying ? <IoPause size={getSize()} color={`${themeArray[theme].s}`} className="border-2 border-black rounded-md" onClick={()=>setIsMovesPlaying(false)}/> : <IoPlay size={getSize()} color={`${themeArray[theme].s}`} className="border-2 border-black rounded-md" onClick={()=>setIsMovesPlaying(true)}/>}
+                            <div><IoCaretForwardOutline size={getSize()} color={`${themeArray[theme].s}`} className="border-2 border-black rounded-md" onClick={()=>forwardMove()} /></div>
+                            <div><MdOutlineSkipNext size={getSize()} color={`${themeArray[theme].s}`} className="border-2 border-black rounded-md" onClick={()=>handleLastBoard()} /></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

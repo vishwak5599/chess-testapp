@@ -51,15 +51,15 @@ const HomePage=()=>{
 
     const depthEloArr = [
         {depth:1,elo:1000},
-        {depth:2,elo:1200},
-        {depth:4,elo:1400},
-        {depth:8,elo:1600},
-        {depth:10,elo:1900},
-        {depth:11,elo:2000},
-        {depth:12,elo:2100},
-        {depth:13,elo:2200},
-        {depth:14,elo:2300},
-        {depth:15,elo:2400}
+        {depth:2,elo:1250},
+        {depth:4,elo:1450},
+        {depth:8,elo:1950},
+        {depth:10,elo:2150},
+        {depth:11,elo:2250},
+        {depth:12,elo:2350},
+        {depth:13,elo:2450},
+        {depth:14,elo:2500},
+        {depth:15,elo:2550}
     ]
 
     useEffect(()=>{

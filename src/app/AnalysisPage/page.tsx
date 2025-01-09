@@ -72,6 +72,18 @@ const AnalysisPage = () => {
     }
     },[])
 
+    const handleClear = () => {
+        for (let i=0;i<localStorage.length;i++){
+            if (typeof window !== 'undefined') {
+                const itemKey = localStorage.key(i)
+                if(itemKey && itemKey.split("-")[0]===user?.id.split(":")[2]){
+                    localStorage.removeItem(itemKey)
+                }
+            }
+        }
+        setBoardData([])
+    }
+
     const themeArray = [
         { l: "#A3B18C", d: "#4A4A4A", s: "#1C1C1C"},   // My Choice
         { l: "#E1B6F4", d: "#8A2BE2", s: "#9C4A94" },  // Light Lavender and Deep Purple
@@ -86,7 +98,8 @@ const AnalysisPage = () => {
         <div className="flex flex-col mb-2 md:mb-4">
             <header className="sticky top-0 left-0 right-0 flex shadow-md bg-white z-50">
                 <button onClick={()=>router.push('/HomePage')} className="flex items-center m-2 md:m-4 cursor-pointer z-50"><IoMdArrowRoundBack size={getSizeArrow()}/></button>
-                <div className="flex-grow mt-2 md:mt-4 -ml-10 md:-ml-14 lg:-ml-16 text-black font-extrabold text-xl md:text-3xl font-anticDidone flex justify-center mb-2 md:mb-4">ANALYSIS</div>
+                <div className="flex-grow mt-2 md:mt-4 ml-6 md:ml-6 lg:ml-4 text-black font-extrabold text-xl md:text-3xl font-anticDidone flex justify-center mb-2 md:mb-4">ANALYSIS</div>
+                <div className="flex justify-center items-center h-full"><button onClick={()=>handleClear()} className="mt-2 md:mt-4 mr-2 md:mr-4 px-2 h-[50%] text-red-600 font-extrabold text-xs sm:text-sm md:text-base font-anticDidone flex justify-center mb-2 md:mb-4 border-2 border-red-600 rounded-md hover:shadow-sm hover:shadow-red-600">CLEAR</button></div>
             </header>
             <div className="flex flex-wrap justify-center items-center px-3 gap-3 mt-[80px]">
                 {boardData && boardData.length>0 && boardData.map((item,index)=>(

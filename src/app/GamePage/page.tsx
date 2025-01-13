@@ -656,7 +656,7 @@ const HomePageContent=()=>{
                     }
                 }
                 else{
-                    const blackKingPiece = allPossibleMovesForWhite.find((piece) => piece.piece === "k")
+                    const blackKingPiece = allPossibleMovesForBlack.find((piece) => piece.piece === "k")
                     let flag = false
                     if (blackKingPiece && blackKingPiece.moves.length === 0) {
                         outerLoop: for (const piece of allPossibleMovesForBlack) {
@@ -882,8 +882,8 @@ const HomePageContent=()=>{
         }
         if(pieceColour===1){
             //remove the enpassant pawns if enpassant move happens
-            if(selPiece==="P" && selRow===3 && allMoves[allMoves.length-1].piece==="p" && newRow===2 && newCol===allMoves[allMoves.length-1].toCol && allMoves[allMoves.length-1].toRow===3) removeEnpassedPawns("p",allMoves[allMoves.length-1].toRow,allMoves[allMoves.length-1].toCol)
-            if(selPiece==="p" && selRow===4 && allMoves[allMoves.length-1].piece==="P" && newRow===5 && newCol===allMoves[allMoves.length-1].toCol && allMoves[allMoves.length-1].toRow===4) removeEnpassedPawns("P",allMoves[allMoves.length-1].toRow,allMoves[allMoves.length-1].toCol)
+            if(selPiece==="P" && selRow===3 && allMoves.length>0 && allMoves[allMoves.length-1].piece==="p" && newRow===2 && newCol===allMoves[allMoves.length-1].toCol && allMoves[allMoves.length-1].toRow===3) removeEnpassedPawns("p",allMoves[allMoves.length-1].toRow,allMoves[allMoves.length-1].toCol)
+            if(selPiece==="p" && selRow===4 && allMoves.length>0 && allMoves[allMoves.length-1].piece==="P" && newRow===5 && newCol===allMoves[allMoves.length-1].toCol && allMoves[allMoves.length-1].toRow===4) removeEnpassedPawns("P",allMoves[allMoves.length-1].toRow,allMoves[allMoves.length-1].toCol)
             //if pawns moves to last square
             if(selPiece==="P" && newRow===0) setPawnToLastSquarePosi({piece:"P",selRow:selRow,selCol:selCol,newRow:newRow,newCol:newCol})
             if(selPiece==="p" && newRow===7) setPawnToLastSquarePosi({piece:"p",selRow:selRow,selCol:selCol,newRow:newRow,newCol:newCol})
@@ -964,10 +964,10 @@ const HomePageContent=()=>{
 
         //**set all the previous moves**
         //enpass move
-        if((pieceColour===1 && selPiece==="P" && selRow===3 && allMoves[allMoves.length-1].piece==="p" && newRow===2 && newCol===allMoves[allMoves.length-1].toCol && allMoves[allMoves.length-1].toRow===3) || 
-        (pieceColour===1 && selPiece==="p" && selRow===4 && allMoves[allMoves.length-1].piece==="P" && newRow===5 && newCol===allMoves[allMoves.length-1].toCol && allMoves[allMoves.length-1].toRow===4) ||
-        (pieceColour===0 && selPiece==="P" && selRow===4 && allMoves[allMoves.length-1].piece==="p" && newRow===5 && newCol===allMoves[allMoves.length-1].toCol && allMoves[allMoves.length-1].toRow===4) ||
-        (pieceColour===0 && selPiece==="p" && selRow===3 && allMoves[allMoves.length-1].piece==="P" && newRow===2 && newCol===allMoves[allMoves.length-1].toCol && allMoves[allMoves.length-1].toRow===3)){
+        if((pieceColour===1 && selPiece==="P" && selRow===3 && allMoves.length>0 && allMoves[allMoves.length-1].piece==="p" && newRow===2 && newCol===allMoves[allMoves.length-1].toCol && allMoves[allMoves.length-1].toRow===3) || 
+        (pieceColour===1 && selPiece==="p" && selRow===4 && allMoves.length>0 && allMoves[allMoves.length-1].piece==="P" && newRow===5 && newCol===allMoves[allMoves.length-1].toCol && allMoves[allMoves.length-1].toRow===4) ||
+        (pieceColour===0 && selPiece==="P" && selRow===4 && allMoves.length>0 && allMoves[allMoves.length-1].piece==="p" && newRow===5 && newCol===allMoves[allMoves.length-1].toCol && allMoves[allMoves.length-1].toRow===4) ||
+        (pieceColour===0 && selPiece==="p" && selRow===3 && allMoves.length>0 && allMoves[allMoves.length-1].piece==="P" && newRow===2 && newCol===allMoves[allMoves.length-1].toCol && allMoves[allMoves.length-1].toRow===3)){
             setAllMoves((prev)=>{return [...prev,{piece:selPiece,fromRow:selRow,fromCol:selCol,toRow:newRow,toCol:newCol,enpass:true,halfMoveCount:halfMoveCount,whiteKingCastlePossible:whiteKingCastlePossible,blackKingCastlePossible:blackKingCastlePossible,whiteRookCastlePossible:whiteRookCastlePossible,blackRookCastlePossible:blackRookCastlePossible}]})
             if(user && opponent) socket.emit("newMove",user?.id.split(":")[2],opponent?.oppoUid,{piece:selPiece,fromRow:7-selRow,fromCol:7-selCol,toRow:7-newRow,toCol:7-newCol,enpass:true,halfMoveCount:halfMoveCount,whiteKingCastlePossible:whiteKingCastlePossible,blackKingCastlePossible:blackKingCastlePossible,whiteRookCastlePossible:whiteRookCastlePossible,blackRookCastlePossible:blackRookCastlePossible},null,null)
         }
@@ -1037,10 +1037,10 @@ const HomePageContent=()=>{
             updatedBoard[i][j] = selectedPiece.piece
 
             //if it is enpassant move
-            if((pieceColour===1 && selectedPiece.piece==="P" && selectedPiece.row===3 && allMoves[allMoves.length-1].piece==="p" && i===2 && j===allMoves[allMoves.length-1].toCol && allMoves[allMoves.length-1].toRow===3)
-            || (pieceColour===1 && selectedPiece.piece==="p" && selectedPiece.row===4 && allMoves[allMoves.length-1].piece==="P" && i===5 && j===allMoves[allMoves.length-1].toCol && allMoves[allMoves.length-1].toRow===4)
-            || (pieceColour===0 && selectedPiece.piece==="P" && selectedPiece.row===4 && allMoves[allMoves.length-1].piece==="p" && i===5 && j===allMoves[allMoves.length-1].toCol && allMoves[allMoves.length-1].toRow===4) 
-            || (pieceColour===0 && selectedPiece.piece==="p" && selectedPiece.row===3 && allMoves[allMoves.length-1].piece==="P" && i===2 && j===allMoves[allMoves.length-1].toCol && allMoves[allMoves.length-1].toRow===3))
+            if((pieceColour===1 && selectedPiece.piece==="P" && selectedPiece.row===3 && allMoves.length>0 && allMoves[allMoves.length-1].piece==="p" && i===2 && j===allMoves[allMoves.length-1].toCol && allMoves[allMoves.length-1].toRow===3)
+            || (pieceColour===1 && selectedPiece.piece==="p" && selectedPiece.row===4 && allMoves.length>0 && allMoves[allMoves.length-1].piece==="P" && i===5 && j===allMoves[allMoves.length-1].toCol && allMoves[allMoves.length-1].toRow===4)
+            || (pieceColour===0 && selectedPiece.piece==="P" && selectedPiece.row===4 && allMoves.length>0 && allMoves[allMoves.length-1].piece==="p" && i===5 && j===allMoves[allMoves.length-1].toCol && allMoves[allMoves.length-1].toRow===4) 
+            || (pieceColour===0 && selectedPiece.piece==="p" && selectedPiece.row===3 && allMoves.length>0 && allMoves[allMoves.length-1].piece==="P" && i===2 && j===allMoves[allMoves.length-1].toCol && allMoves[allMoves.length-1].toRow===3))
             {
                 updatedBoard[allMoves[allMoves.length-1].toRow][allMoves[allMoves.length-1].toCol] = " "
             }
